@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 OPÉRATION AFFELNET – Escape Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --panel: #0f1629;
+    --panel2: #131d35;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --green: #00ff88;
+    --red: #ff3366;
+    --yellow: #ffd700;
+    --text: #c8d8f0;
+    --dim: #4a6080;
+    --glow: 0 0 20px rgba(0,212,255,0.4);
+    --glow-g: 0 0 20px rgba(0,255,136,0.4);
+    --glow-r: 0 0 20px rgba(255,51,102,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(0,50,100,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,100,200,0.2) 0%, transparent 40%),
+      radial-gradient(ellipse at 60% 80%, rgba(0,80,160,0.2) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; }
+
+  /* === SCREEN MANAGEMENT === */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* === HEADER === */
+  .header {
+    background: linear-gradient(135deg, #0d1830 0%, #0f2040 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.2);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: var(--glow);
+  }
+
+  .score-board {
+    display: flex;
+    gap: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .score-item { 
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .score-label { color: var(--dim); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; }
+  .score-value { color: var(--accent); font-size: 1.1rem; font-weight: bold; }
+  .score-value.green { color: var(--green); }
+  .score-value.red { color: var(--red); }
+  .score-value.yellow { color: var(--yellow); }
+
+  .timer-urgent { animation: pulse-red 0.5s infinite; }
+  @keyframes pulse-red {
+    0%,100% { color: var(--red); }
+    50% { color: #ff9999; }
+  }
+
+  /* === PROGRESS BAR === */
+  .progress-container {
+    background: var(--panel);
+    padding: 8px 24px;
+    border-bottom: 1px solid rgba(0,212,255,0.1);
+  }
+  .progress-bar {
+    height: 6px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    box-shadow: var(--glow);
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.65rem;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  /* === INTRO SCREEN === */
+  #screen-intro {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .intro-box {
+    max-width: 800px;
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 50px 40px;
+    box-shadow: var(--glow), inset 0 0 40px rgba(0,212,255,0.05);
+  }
+
+  .intro-icon { font-size: 4rem; margin-bottom: 20px; }
+
+  .intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+  }
+
+  .intro-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent2);
+    font-size: 1rem;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+  }
+
+  .mission-brief {
+    background: rgba(0,212,255,0.05);
+    border-left: 3px solid var(--accent);
+    padding: 20px;
+    border-radius: 0 8px 8px 0;
+    text-align: left;
+    margin: 25px 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .mission-brief strong { color: var(--accent); }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+  }
+
+  .rule-card {
+    background: var(--panel2);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .rule-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .rule-title { font-family: 'Orbitron', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; margin-bottom: 5px; }
+  .rule-desc { font-size: 0.8rem; color: var(--dim); }
+
+  /* === TEAM INPUT === */
+  .team-input-area {
+    margin: 25px 0;
+  }
+
+  .team-input-area label {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .team-input-area input {
+    width: 100%;
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.3);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 2px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .team-input-area input:focus { border-color: var(--accent); box-shadow: var(--glow); }
+
+  /* === BTN === */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0080ff);
+    color: #0a0e1a;
+    box-shadow: var(--glow);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,212,255,0.6); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--green), #00aa55);
+    color: #0a0e1a;
+    box-shadow: var(--glow-g);
+  }
+  .btn-success:hover { transform: translateY(-2px); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--red), #aa0033);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+  }
+  .btn-secondary:hover { border-color: var(--accent); background: rgba(0,212,255,0.1); }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  /* === QUESTION SCREEN === */
+  #screen-question { padding: 0; }
+
+  .question-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 24px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .enigma-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .enigma-num {
+    background: linear-gradient(135deg, var(--accent), #0080ff);
+    color: #0a0e1a;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--glow);
+  }
+
+  .enigma-meta { flex: 1; }
+
+  .enigma-category {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent2);
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .enigma-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .points-badge {
+    background: rgba(255,215,0,0.15);
+    border: 1px solid var(--yellow);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+
+  .enigma-body {
+    background: var(--panel);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    flex: 1;
+  }
+
+  .hint-box {
+    background: rgba(255,107,53,0.08);
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 8px;
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .hint-box .hint-label {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent2);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .question-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 25px;
+    color: var(--text);
+  }
+
+  .question-text strong { color: var(--accent); }
+  .question-text em { color: var(--yellow); font-style: normal; font-weight: 600; }
+
+  /* MCQ */
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.15);
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    width: 100%;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .choice-btn.correct {
+    border-color: var(--green);
+    background: rgba(0,255,136,0.1);
+    box-shadow: var(--glow-g);
+    animation: flash-correct 0.6s ease;
+  }
+  .choice-btn.wrong {
+    border-color: var(--red);
+    background: rgba(255,51,102,0.1);
+    box-shadow: var(--glow-r);
+    animation: shake 0.5s ease;
+  }
+
+  @keyframes flash-correct { 0%,100% { transform: translateX(0); } 20% { transform: translateX(6px); } 40% { transform: translateX(-3px); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+
+  .choice-letter {
+    background: rgba(0,212,255,0.15);
+    color: var(--accent);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Text input */
+  .text-input-area {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .text-input-area input {
+    flex: 1;
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.3);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .text-input-area input:focus { border-color: var(--accent); box-shadow: var(--glow); }
+  .text-input-area input.correct { border-color: var(--green); background: rgba(0,255,136,0.08); }
+  .text-input-area input.wrong { border-color: var(--red); animation: shake 0.5s ease; }
+
+  /* Feedback */
+  .feedback {
+    background: var(--panel2);
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 15px;
+    display: none;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { border-left: 4px solid var(--green); }
+  .feedback.wrong { border-left: 4px solid var(--red); }
+
+  .feedback .fb-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .feedback.correct .fb-title { color: var(--green); }
+  .feedback.wrong .fb-title { color: var(--red); }
+
+  .next-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .lifelines {
+    display: flex;
+    gap: 8px;
+  }
+
+  .lifeline-btn {
+    background: var(--panel2);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .lifeline-btn:hover:not(:disabled) { border-color: var(--yellow); color: var(--yellow); }
+  .lifeline-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* === INTERLUDE SCREEN === */
+  #screen-interlude {
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .interlude-box {
+    max-width: 600px;
+    background: var(--panel);
+    border: 2px solid var(--green);
+    border-radius: 12px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: var(--glow-g);
+  }
+
+  .interlude-icon { font-size: 4rem; margin-bottom: 20px; }
+  .interlude-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    color: var(--green);
+    text-shadow: var(--glow-g);
+    margin-bottom: 12px;
+  }
+  .interlude-subtitle { color: var(--dim); margin-bottom: 25px; font-size: 0.9rem; }
+
+  .debrief-points {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .debrief-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .debrief-row.total { border-top: 1px solid rgba(0,255,136,0.3); margin-top: 8px; padding-top: 10px; color: var(--green); font-weight: bold; }
+
+  /* === FINAL SCREEN === */
+  #screen-final {
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+  }
+
+  .final-box {
+    max-width: 700px;
+    width: 100%;
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: var(--glow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .final-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .final-rank {
+    font-family: 'Orbitron', monospace;
+    font-size: 4rem;
+    margin-bottom: 15px;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+  .final-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    margin-bottom: 8px;
+  }
+
+  .final-score-display {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 3rem;
+    color: var(--yellow);
+    text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    margin: 20px 0;
+  }
+
+  .score-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+  }
+
+  .score-detail-card {
+    background: var(--panel2);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 8px;
+    padding: 15px;
+  }
+  .sdc-label { font-size: 0.65rem; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+  .sdc-value { font-family: 'Orbitron', monospace; font-size: 1.4rem; color: var(--accent); }
+
+  .trophy-message {
+    background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,107,53,0.1));
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* === GAME MASTER SCREEN === */
+  #screen-gm {
+    padding: 30px;
+  }
+
+  .gm-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    color: var(--accent2);
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 3px;
+  }
+
+  .gm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .gm-card {
+    background: var(--panel);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .gm-card-q {
+    font-size: 0.85rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .gm-card-a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .gm-card-expl {
+    font-size: 0.75rem;
+    color: var(--text);
+    line-height: 1.5;
+    border-top: 1px solid rgba(0,212,255,0.1);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+
+  /* === NOTIFICATIONS === */
+  .toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    z-index: 1000;
+    transform: translateX(120%);
+    transition: transform 0.4s ease;
+    max-width: 280px;
+    box-shadow: var(--glow);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.green { border-color: var(--green); box-shadow: var(--glow-g); }
+  .toast.red { border-color: var(--red); box-shadow: var(--glow-r); }
+  .toast.yellow { border-color: var(--yellow); }
+
+  /* === UTILITIES === */
+  .tag {
+    display: inline-block;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .highlight {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  /* Confetti particles */
+  .confetti-particle {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .rules-grid { grid-template-columns: 1fr; }
+    .score-details { grid-template-columns: 1fr; }
+    .intro-title { font-size: 1.5rem; }
+    .final-score-display { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<div id="app">
+
+<!-- ===== SCREEN: INTRO ===== -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-box">
+    <div class="intro-icon">🔐</div>
+    <div class="intro-title">OPÉRATION AFFELNET</div>
+    <div class="intro-subtitle">// ESCAPE GAME RECTORAT DE BORDEAUX – SRAIOLDS //</div>
+
+    <div class="mission-brief">
+      <strong>📋 MISSION BRIEFING :</strong><br><br>
+      Vous venez d'entrer dans le centre de traitement des affectations lycée du rectorat de Bordeaux.
+      Le système <strong>AFFELNET LYCÉE 2026</strong> a été verrouillé par un agent malveillant
+      qui souhaite bloquer l'affectation de 3 000 élèves de 3e !<br><br>
+      Pour déverrouiller le système, vous devez résoudre <strong>9 énigmes</strong> basées sur la
+      vraie procédure AFFELNET. Chaque bonne réponse déverrouille une partie du système.<br><br>
+      <strong>Vous avez 60 minutes.</strong> Bonne chance, agents !
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-icon">⏱️</div>
+        <div class="rule-title">Durée</div>
+        <div class="rule-desc">60 minutes pour déverrouiller le système</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">🧩</div>
+        <div class="rule-title">Énigmes</div>
+        <div class="rule-desc">9 énigmes sur la procédure AFFELNET</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-icon">💡</div>
+        <div class="rule-title">Indices</div>
+        <div class="rule-desc">3 indices disponibles (−50 pts chacun)</div>
+      </div>
+    </div>
+
+    <div class="team-input-area">
+      <label>Nom de votre équipe (3-5 élèves)</label>
+      <input type="text" id="team-name" placeholder="EX: ÉQUIPE DELTA" maxlength="30">
+    </div>
+
+    <br>
+    <button class="btn btn-primary" onclick="startGame()">
+      🚀 LANCER LA MISSION
+    </button>
+    <br><br>
+    <button class="btn btn-secondary" onclick="showGM()" style="font-size:0.7rem; padding:8px 16px;">
+      🔑 MODE ANIMATEUR
+    </button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: QUESTION ===== -->
+<div class="screen" id="screen-question">
+  <div class="header">
+    <div class="logo">⚡ AFFELNET</div>
+    <div class="score-board">
+      <div class="score-item">
+        <div class="score-label">Équipe</div>
+        <div class="score-value" id="hdr-team">—</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value yellow" id="hdr-score">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Temps</div>
+        <div class="score-value green" id="hdr-timer">60:00</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Indices</div>
+        <div class="score-value" id="hdr-hints">3</div>
+      </div>
+    </div>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-labels">
+      <span id="prog-label">ÉNIGME 1/10</span>
+      <span id="prog-pct">0% déverrouillé</span>
+    </div>
+  </div>
+
+  <div class="question-wrapper">
+    <div class="enigma-header">
+      <div class="enigma-num" id="q-num">1</div>
+      <div class="enigma-meta">
+        <div class="enigma-category" id="q-cat">CATÉGORIE</div>
+        <div class="enigma-title" id="q-title">TITRE DE L'ÉNIGME</div>
+      </div>
+      <div class="points-badge" id="q-pts">100 PTS</div>
+    </div>
+
+    <div class="enigma-body">
+      <div class="hint-box" id="q-hint-box" style="display:none">
+        <div class="hint-label">📡 Contexte</div>
+        <div id="q-hint-text"></div>
+      </div>
+      <div class="question-text" id="q-text"></div>
+      <div id="q-choices"></div>
+      <div class="feedback" id="q-feedback">
+        <div class="fb-title" id="fb-title"></div>
+        <div id="fb-text"></div>
+      </div>
+    </div>
+
+    <div class="next-area">
+      <div class="lifelines">
+        <button class="lifeline-btn" id="btn-hint" onclick="useHint()">
+          💡 <span>Indice (−50 pts)</span>
+        </button>
+      </div>
+      <button class="btn btn-success" id="btn-next" onclick="nextQuestion()" style="display:none">
+        SUIVANT ▶
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: INTERLUDE ===== -->
+<div class="screen" id="screen-interlude">
+  <div class="interlude-box">
+    <div class="interlude-icon" id="intl-icon">🔓</div>
+    <div class="interlude-title" id="intl-title">MODULE DÉVERROUILLÉ</div>
+    <div class="interlude-subtitle" id="intl-sub"></div>
+    <div class="debrief-points" id="intl-debrief"></div>
+    <button class="btn btn-primary" id="intl-btn" onclick="continueGame()">
+      CONTINUER ▶
+    </button>
+  </div>
+</div>
+
+<!-- ===== SCREEN: FINAL ===== -->
+<div class="screen" id="screen-final">
+  <div class="final-box">
+    <div class="final-rank" id="final-rank">🏆</div>
+    <div class="final-title" id="final-title">MISSION ACCOMPLIE</div>
+    <div class="final-score-display" id="final-score">0 pts</div>
+    
+    <div class="score-details">
+      <div class="score-detail-card">
+        <div class="sdc-label">Bonnes réponses</div>
+        <div class="sdc-value" id="final-correct">0/10</div>
+      </div>
+      <div class="score-detail-card">
+        <div class="sdc-label">Indices utilisés</div>
+        <div class="sdc-value" id="final-hints">0</div>
+      </div>
+      <div class="score-detail-card">
+        <div class="sdc-label">Temps restant</div>
+        <div class="sdc-value" id="final-time">—</div>
+      </div>
+    </div>
+
+    <div class="trophy-message" id="final-message"></div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+      <button class="btn btn-primary" id="btn-part2" onclick="startPart2()">🎮 PARTIE 2 — MISSION TERRAIN ▶</button>
+      <button class="btn btn-secondary" onclick="restartGame()">🔄 RECOMMENCER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PART2 INTRO ===== -->
+<div class="screen" id="screen-part2-intro">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:30px">
+  <div class="intro-box" style="max-width:820px">
+    <div class="intro-icon">🎮</div>
+    <div class="intro-title" style="font-size:1.6rem">PARTIE 2 — MISSION TERRAIN</div>
+    <div class="intro-subtitle">// SIMULATEUR D'AFFECTATION AFFELNET //</div>
+
+    <div class="mission-brief">
+      <strong>📋 NOUVELLE MISSION :</strong><br><br>
+      Le système est partiellement restauré, mais l'agent malveillant a tout mélangé !
+      Vous devez maintenant <strong>résoudre 3 défis interactifs</strong> pour finaliser la remise en route :<br><br>
+      🗂️ <strong>Défi 1 — Reconstituer le parcours :</strong> remettez les étapes d'AFFELNET dans le bon ordre (glisser-déposer)<br>
+      🔢 <strong>Défi 2 — Le code secret :</strong> déchiffrez le code d'accès final à partir des dates-clés<br>
+      🧩 <strong>Défi 3 — Cas pratique :</strong> aidez un élève fictif à construire son dossier AFFELNET<br><br>
+      <strong>+500 points bonus</strong> si vous complétez les 3 défis !
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card"><div class="rule-icon">🗂️</div><div class="rule-title">Défi 1</div><div class="rule-desc">Trier les étapes dans le bon ordre</div></div>
+      <div class="rule-card"><div class="rule-icon">🔢</div><div class="rule-title">Défi 2</div><div class="rule-desc">Déchiffrer le code secret</div></div>
+      <div class="rule-card"><div class="rule-icon">🧩</div><div class="rule-title">Défi 3</div><div class="rule-desc">Résoudre un cas pratique complet</div></div>
+    </div>
+
+    <br>
+    <button class="btn btn-primary" onclick="startDefi1()">🚀 DÉMARRER LA PARTIE 2</button>
+  </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: DEFI 1 — DRAG & DROP ===== -->
+<div class="screen" id="screen-defi1">
+  <div class="header">
+    <div class="logo">🗂️ DÉFI 1/3</div>
+    <div class="score-board">
+      <div class="score-item"><div class="score-label">Équipe</div><div class="score-value" id="d1-team">—</div></div>
+      <div class="score-item"><div class="score-label">Score total</div><div class="score-value yellow" id="d1-score">0</div></div>
+    </div>
+  </div>
+  <div style="max-width:800px;margin:0 auto;padding:30px 20px">
+    <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--accent);margin-bottom:6px;letter-spacing:2px">RECONSTITUER LE PARCOURS AFFELNET</div>
+    <div style="color:var(--dim);font-size:0.85rem;margin-bottom:25px">Glissez-déposez les étapes pour les remettre dans le bon ordre chronologique ↓</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- Pool -->
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--accent2);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase">📦 Étapes à placer</div>
+        <div id="pool" style="min-height:200px;display:flex;flex-direction:column;gap:8px;padding:10px;background:rgba(0,212,255,0.03);border:2px dashed rgba(0,212,255,0.15);border-radius:10px"></div>
+      </div>
+      <!-- Target -->
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--green);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase">✅ Votre chronologie</div>
+        <div id="timeline" style="min-height:200px;display:flex;flex-direction:column;gap:8px;padding:10px;background:rgba(0,255,136,0.03);border:2px dashed rgba(0,255,136,0.15);border-radius:10px"></div>
+      </div>
+    </div>
+
+    <div id="d1-feedback" style="display:none;margin-top:20px"></div>
+
+    <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+      <button class="btn btn-secondary" onclick="resetDefi1()" id="d1-reset">↺ Recommencer</button>
+      <button class="btn btn-success" onclick="validerDefi1()" id="d1-valider">✅ VALIDER L'ORDRE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: DEFI 2 — CODE SECRET ===== -->
+<div class="screen" id="screen-defi2">
+  <div class="header">
+    <div class="logo">🔢 DÉFI 2/3</div>
+    <div class="score-board">
+      <div class="score-item"><div class="score-label">Équipe</div><div class="score-value" id="d2-team">—</div></div>
+      <div class="score-item"><div class="score-label">Score total</div><div class="score-value yellow" id="d2-score">0</div></div>
+      <div class="score-item"><div class="score-label">Essais restants</div><div class="score-value red" id="d2-tries">5</div></div>
+    </div>
+  </div>
+  <div style="max-width:700px;margin:0 auto;padding:30px 20px">
+    <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--accent);margin-bottom:6px;letter-spacing:2px">LE CODE D'ACCÈS SECRET</div>
+    <div style="color:var(--dim);font-size:0.85rem;margin-bottom:25px">Pour relancer le serveur AFFELNET, saisissez le code à 4 chiffres. Résolvez les indices !</div>
+
+    <div style="background:var(--panel);border:1px solid rgba(0,212,255,0.2);border-radius:10px;padding:25px;margin-bottom:20px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--accent2);letter-spacing:3px;margin-bottom:16px">📡 INDICES POUR TROUVER LE CODE :</div>
+
+      <div id="clues-list" style="display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+
+    <div style="background:var(--panel2);border:2px solid rgba(0,212,255,0.3);border-radius:10px;padding:20px;text-align:center">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--dim);letter-spacing:2px;margin-bottom:12px">SAISIR LE CODE À 4 CHIFFRES</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
+        <input type="text" id="code-d1" maxlength="1" class="code-digit" oninput="focusNext(this,'code-d2')" onkeydown="handleCodeKey(event,null,'code-d1')">
+        <input type="text" id="code-d2" maxlength="1" class="code-digit" oninput="focusNext(this,'code-d3')" onkeydown="handleCodeKey(event,'code-d1','code-d3')">
+        <input type="text" id="code-d3" maxlength="1" class="code-digit" oninput="focusNext(this,'code-d4')" onkeydown="handleCodeKey(event,'code-d2','code-d4')">
+        <input type="text" id="code-d4" maxlength="1" class="code-digit" oninput="focusNext(this,null)" onkeydown="handleCodeKey(event,'code-d3',null)">
+      </div>
+      <button class="btn btn-primary" onclick="validerCode()" style="width:100%">🔓 DÉVERROUILLER</button>
+    </div>
+
+    <div id="d2-feedback" style="margin-top:15px;display:none"></div>
+
+    <div style="margin-top:20px">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--dim);letter-spacing:2px;margin-bottom:8px">HISTORIQUE DES TENTATIVES :</div>
+      <div id="d2-history" style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;min-height:30px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: DEFI 3 — CAS PRATIQUE ===== -->
+<div class="screen" id="screen-defi3">
+  <div class="header">
+    <div class="logo">🧩 DÉFI 3/3</div>
+    <div class="score-board">
+      <div class="score-item"><div class="score-label">Équipe</div><div class="score-value" id="d3-team">—</div></div>
+      <div class="score-item"><div class="score-label">Score total</div><div class="score-value yellow" id="d3-score">0</div></div>
+    </div>
+  </div>
+  <div style="max-width:850px;margin:0 auto;padding:30px 20px">
+    <div style="font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--accent);margin-bottom:6px;letter-spacing:2px">CAS PRATIQUE — LE DOSSIER DE YANIS</div>
+    <div style="color:var(--dim);font-size:0.85rem;margin-bottom:20px">Lisez le profil de Yanis et aidez-le à construire son dossier AFFELNET parfait.</div>
+
+    <!-- Profil -->
+    <div style="background:var(--panel);border:2px solid var(--accent2);border-radius:10px;padding:20px;margin-bottom:20px">
+      <div style="font-family:'Orbitron',monospace;font-size:0.8rem;color:var(--accent2);letter-spacing:2px;margin-bottom:12px">👤 PROFIL DE YANIS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.9rem;line-height:1.7">
+        <div>• Actuellement en <strong style="color:var(--accent)">3e générale</strong> au collège Jean Moulin (Bordeaux)</div>
+        <div>• Décision d'orientation : <strong style="color:var(--accent)">2de GT accordée</strong></div>
+        <div>• Son lycée de secteur : <strong style="color:var(--accent)">Lycée A</strong></div>
+        <div>• Veut aller : <strong style="color:var(--accent)">Lycée B</strong> (hors secteur, option Latin)</div>
+        <div>• A un frère au Lycée B</div>
+        <div>• Sa famille a un compte EduConnect</div>
+      </div>
+    </div>
+
+    <!-- Mini-steps -->
+    <div id="d3-steps" style="display:flex;flex-direction:column;gap:15px"></div>
+
+    <div id="d3-feedback" style="display:none;margin-top:20px"></div>
+
+    <div style="margin-top:20px;display:flex;justify-content:flex-end">
+      <button class="btn btn-success" id="d3-valider" onclick="validerDefi3()" disabled>✅ VALIDER LE DOSSIER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PART2 FINAL ===== -->
+<div class="screen" id="screen-part2-final">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:30px">
+  <div class="final-box" style="max-width:700px">
+    <div class="final-rank" style="font-size:5rem">🎉</div>
+    <div class="final-title">SYSTÈME AFFELNET RESTAURÉ !</div>
+    <div style="font-family:'Share Tech Mono',monospace;color:var(--dim);margin:10px 0 20px;font-size:0.85rem">// 3 000 ÉLÈVES AFFECTÉS AVEC SUCCÈS //</div>
+
+    <div class="final-score-display" id="p2final-score">0 pts</div>
+
+    <div class="score-details">
+      <div class="score-detail-card"><div class="sdc-label">Partie 1</div><div class="sdc-value" id="p2f-p1">—</div></div>
+      <div class="score-detail-card"><div class="sdc-label">Partie 2</div><div class="sdc-value" id="p2f-p2">—</div></div>
+      <div class="score-detail-card"><div class="sdc-label">Défis validés</div><div class="sdc-value" id="p2f-defis">0/3</div></div>
+    </div>
+
+    <div class="trophy-message" id="p2final-message" style="margin:20px 0"></div>
+
+    <div style="background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.2);border-radius:8px;padding:20px;text-align:left;font-size:0.85rem;line-height:1.8;margin-bottom:20px">
+      <div style="font-family:'Orbitron',monospace;font-size:0.75rem;color:var(--accent);letter-spacing:2px;margin-bottom:10px">📚 CE QUE VOUS AVEZ APPRIS AUJOURD'HUI :</div>
+      • AFFELNET LYCÉE gère la 2de GT, 2de Pro, CAP, 1re Pro, 1re Technologique (pas la 1re générale)<br>
+      • Les élèves de 3e peuvent formuler jusqu'à 10 vœux académie + 5 hors académie<br>
+      • La saisie des vœux : du 4 mai au 26 mai 2026<br>
+      • Formuler le vœu générique 2de GT dans son lycée de secteur est fortement conseillé : c'est l'assurance d'obtenir une affectation<br>
+      • Les résultats : disponibles pour les familles le 30 juin 2026 à 14h30<br>
+      • En 2026 : le barème utilise uniquement les notes sur 20 (fin du socle et de la conversion)<br>
+      • Bonus région académique : 20 000 pts pour tout élève de Nouvelle-Aquitaine
+    </div>
+
+    <button class="btn btn-primary" onclick="location.reload()">🔄 NOUVELLE PARTIE</button>
+  </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: GAME MASTER ===== -->
+<div class="screen" id="screen-gm">
+  <div class="gm-title">🔑 FICHE ANIMATEUR — RÉPONSES & EXPLICATIONS</div>
+  <div class="gm-grid" id="gm-grid"></div>
+  <br>
+  <div style="text-align:center">
+    <button class="btn btn-secondary" onclick="showScreen('screen-intro')">← RETOUR</button>
+  </div>
+  <br>
+</div>
+
+</div>
+
+<script>
+// ========== DATA ==========
+const QUESTIONS = [
+  {
+    id: 1,
+    cat: "GRANDS PRINCIPES",
+    title: "L'Application AFFELNET LYCÉE",
+    context: "AFFELNET LYCÉE est l'application nationale qui gère l'affectation des élèves dans les lycées.",
+    text: "Un élève veut s'inscrire en <strong>1re générale</strong> pour la rentrée 2026. Son établissement enregistre sa demande dans AFFELNET LYCÉE. Qu'en pensez-vous ?",
+    type: "mcq",
+    choices: [
+      "✅ C'est correct, AFFELNET LYCÉE gère toutes les affectations",
+      "❌ C'est une erreur : les affectations en 1re générale ne sont PAS gérées par AFFELNET LYCÉE dans l'académie de Bordeaux",
+      "🤔 C'est possible seulement si l'élève est boursier",
+      "📋 C'est correct uniquement pour les établissements publics"
+    ],
+    answer: 1,
+    points: 100,
+    feedback_ok: "Exact ! Les affectations en classe de 1re générale ne sont PAS gérées par AFFELNET LYCÉE dans l'académie de Bordeaux. AFFELNET gère la 2de GT, la 2de Pro, le CAP, la 1re Pro et la 1re Technologique.",
+    feedback_ko: "Non ! Les affectations en 1re générale ne sont PAS du tout gérées par AFFELNET LYCÉE dans l'académie de Bordeaux. C'est une exception importante à retenir !"
+  },
+  {
+    id: 2,
+    cat: "NOMBRE DE VŒUX",
+    title: "Combien de vœux ?",
+    context: "Chaque candidat peut formuler des vœux dans l'application selon des règles précises.",
+    text: "Léa est en 3e et utilise le service en ligne (SLA). Elle veut postuler dans des lycées à Bordeaux et aussi dans un lycée à Paris. <strong>Combien de vœux au total peut-elle formuler ?</strong>",
+    type: "mcq",
+    choices: [
+      "5 vœux au total",
+      "10 vœux, uniquement dans son académie",
+      "15 vœux : jusqu'à 10 dans son académie + 5 dans d'autres académies",
+      "20 vœux maximum toutes académies confondues"
+    ],
+    answer: 2,
+    points: 100,
+    feedback_ok: "Parfait ! Les élèves de 3e utilisant le service en ligne peuvent formuler jusqu'à 10 vœux dans leur académie d'origine, plus 5 autres vœux dans d'autres académies, soit 15 au total.",
+    feedback_ko: "Raté ! Les élèves de 3e via le service en ligne ont droit à 10 vœux dans leur académie + 5 hors académie = 15 vœux au total. Pour tous les autres candidats : 10 vœux dans AFFELNET."
+  },
+  {
+    id: 3,
+    cat: "CALENDRIER 2026",
+    title: "Les Dates Clés",
+    context: "La procédure AFFELNET LYCÉE 2026 suit un calendrier précis que les familles et établissements doivent respecter.",
+    text: "Les familles des élèves de 3e souhaitent saisir leurs vœux d'affectation dans le service en ligne. <strong>Quelle est la période de saisie des vœux ?</strong>",
+    type: "mcq",
+    choices: [
+      "Du 3 avril au 4 mai 2026",
+      "Du 4 mai 2026 (14h) au 26 mai 2026 (23h59)",
+      "Du 1er mars au 30 avril 2026",
+      "Du 9 juin au 26 juin 2026"
+    ],
+    answer: 1,
+    points: 150,
+    feedback_ok: "Bravo ! La saisie des vœux par les familles dans le service en ligne est ouverte du lundi 4 mai 2026 (14h) au mardi 26 mai 2026 (23h59). Avant (3 avril - 4 mai), les familles peuvent consulter l'offre mais pas encore saisir.",
+    feedback_ko: "Incorrect. La consultation de l'offre commence le 3 avril, mais la SAISIE des vœux n'est possible qu'à partir du 4 mai 2026 (14h) jusqu'au 26 mai 2026 (23h59)."
+  },
+  {
+    id: 4,
+    cat: "RÉSULTATS",
+    title: "Quand connaît-on son affectation ?",
+    context: "Les résultats d'affectation ne sont pas communiqués en même temps aux établissements et aux familles.",
+    text: "Maxime, élève de 3e, est impatient de connaître son affectation. Son père, professeur dans son collège, a accès aux résultats dans AFFELNET LYCÉE le vendredi 26 juin. <strong>Peut-il dire à son fils quel lycée il a obtenu ?</strong>",
+    type: "mcq",
+    choices: [
+      "Oui, les résultats sont publics dès le vendredi 26 juin à 8h",
+      "Oui, mais uniquement aux parents directement concernés",
+      "Non ! Les résultats ne doivent pas être communiqués aux familles avant le mardi 30 juin 2026 à 14h30",
+      "Oui, car le père est un agent de l'Éducation Nationale"
+    ],
+    answer: 2,
+    points: 150,
+    feedback_ok: "Exact ! Même si les établissements voient les résultats le 26 juin, il est interdit de les communiquer aux familles avant le mardi 30 juin 2026. Les familles consultent elles-mêmes dans leur service en ligne.",
+    feedback_ko: "Non ! Les établissements les voient le 26 juin à 8h, mais les résultats ne doivent PAS être communiqués aux familles avant le 30 juin 2026 à 14h30."
+  },
+  {
+    id: 5,
+    cat: "DÉROGATION DE SECTEUR",
+    title: "La Sectorisation",
+    context: "En 2de GT dans les lycées publics, les élèves sont affectés en priorité dans l'établissement de leur secteur de résidence. Pour aller ailleurs, il faut demander une dérogation.",
+    text: "Sofia habite dans le secteur du lycée A. Elle veut aller au lycée B (hors secteur) à côté du centre de soin où elle est suivie pour son handicap, ou bien au lycée C (hors secteur) où étudie son frère. <strong>Quel est le motif de dérogation prioritaire ?</strong>",
+    type: "mcq",
+    choices: [
+      "Parcours Scolaire Particulier (sport)",
+      "Frère/sœur déjà scolarisé(e) dans l'établissement",
+      "Élève boursier",
+      "Élève en situation de handicap"
+    ],
+    answer: 3,
+    points: 150,
+    feedback_ok: "Parfait ! Le barème des motifs de dérogation est : handicap (200 pts) > prise en charge médicale (160 pts) > boursier (80 pts) > frère/sœur (50 pts) > limite de secteur (40 pts) > PSP (30 pts) > autre (20 pts). Le handicap est le motif le plus fort.",
+    feedback_ko: "Incorrect. Le classement des motifs de dérogation par ordre décroissant est : handicap (200 pts), prise en charge médicale (160 pts), boursier (80 pts), frère/sœur (50 pts), limite secteur (40 pts), PSP (30 pts), autre (20 pts)."
+  },
+  {
+    id: 6,
+    cat: "TYPES DE FORMATIONS",
+    title: "Contingentées ou Non ?",
+    context: "AFFELNET LYCÉE distingue plusieurs types d'offres de formations selon leurs modalités d'affectation.",
+    text: "Tom veut aller au lycée de son secteur en <strong>2de GT classique</strong> (sans option particulière). Quel type de formation est-ce dans AFFELNET LYCÉE ?",
+    type: "mcq",
+    choices: [
+      "Contingentée : les places sont limitées et l'affectation repose sur un barème",
+      "Commission : la décision est prise par un jury pédagogique",
+      "Non contingentée : l'affectation est gérée selon la sectorisation lycée",
+      "Recensement : le vœu est à simple caractère informatif"
+    ],
+    answer: 2,
+    points: 100,
+    feedback_ok: "Exact ! La 2de GT dans les lycées publics (hors formations spécifiques) est une formation NON CONTINGENTÉE : les élèves du secteur sont prioritaires et affectés selon leur zone géographique de résidence.",
+    feedback_ko: "Non ! La 2de GT classique dans les lycées publics est une formation NON CONTINGENTÉE. Les formations contingentées ont des places limitées avec barème de notes. Les non-contingentées sont régies par la sectorisation."
+  },
+  {
+    id: 7,
+    cat: "BONUS RÉGION ACADÉMIQUE",
+    title: "La Priorité Nouvelle-Aquitaine",
+    context: "Pour les formations professionnelles post-3e, un système de bonus favorise les élèves de la région académique Nouvelle-Aquitaine (académies de Bordeaux, Limoges et Poitiers).",
+    text: "Un élève scolarisé à Poitiers (académie de Poitiers, région académique Nouvelle-Aquitaine) postule en 2de Pro à Bordeaux. Un élève de Bordeaux postule sur la même formation. <strong>Quel bonus s'applique ?</strong>",
+    type: "mcq",
+    choices: [
+      "L'élève de Bordeaux a un bonus de 20 000 pts, celui de Poitiers n'en a pas",
+      "Les deux élèves ont le même bonus de 20 000 pts car ils sont tous deux en Nouvelle-Aquitaine",
+      "L'élève de Poitiers a un bonus de 10 000 pts, celui de Bordeaux de 20 000 pts",
+      "Aucun bonus ne s'applique pour les formations professionnelles"
+    ],
+    answer: 1,
+    points: 200,
+    feedback_ok: "Bravo ! C'est une nouveauté 2026 : tous les élèves scolarisés en Nouvelle-Aquitaine (Bordeaux, Limoges, Poitiers) bénéficient du MÊME bonus de 20 000 points pour les formations pro post-3e publiques de la région académique.",
+    feedback_ko: "Incorrect. En 2026, la nouveauté est que TOUS les élèves de la région académique Nouvelle-Aquitaine (Bordeaux + Limoges + Poitiers) bénéficient du même bonus de 20 000 points. Plus de distinction entre les académies !"
+  },
+  {
+    id: 8,
+    cat: "TOURS SUIVANTS",
+    title: "Les Tours d'Affectation Post-3e",
+    context: "Après le tour principal de juin, des tours supplémentaires permettent aux élèves non affectés de trouver une place dans la voie professionnelle.",
+    text: "Inès n'a obtenu aucune affectation en voie professionnelle à l'issue du tour principal (résultats le 30 juin 2026). Elle veut tout de même trouver une place. <strong>Quels sont les recours possibles via AFFELNET LYCÉE ?</strong>",
+    type: "mcq",
+    choices: [
+      "Elle doit attendre septembre et contacter directement les établissements",
+      "Elle peut participer à un 2e tour (7-8 juillet) et éventuellement un 3e tour (3-4 septembre) en reformulant jusqu'à 10 vœux sur les places vacantes",
+      "Elle peut demander une affectation d'office par le rectorat sans reformuler de vœux",
+      "Elle doit redoubler en 3e : aucun recours n'existe après le tour principal"
+    ],
+    answer: 1,
+    points: 150,
+    feedback_ok: "Parfait ! Deux tours supplémentaires existent pour les élèves non affectés en voie professionnelle post-3e : le 2e tour (7-8 juillet 2026) et le 3e tour (3-4 septembre 2026). À chaque tour, Inès peut reformuler jusqu'à 10 vœux sur les places encore disponibles.",
+    feedback_ko: "Non ! Il existe deux recours via AFFELNET LYCÉE : un 2e tour les 7-8 juillet 2026 et un 3e tour les 3-4 septembre 2026. Les élèves peuvent reformuler jusqu'à 10 vœux sur les places vacantes en voie professionnelle."
+  },
+  {
+    id: 9,
+    cat: "NOUVEAUTÉS 2026",
+    title: "Changements du Barème",
+    context: "La campagne AFFELNET LYCÉE 2026 apporte d'importants changements dans le calcul du barème, notamment pour les élèves de 3e.",
+    text: "<strong>Quel barème est pris en compte pour un élève de 3e qui demande la voie professionnelle ?</strong>",
+    type: "mcq",
+    choices: [
+      "Les notes ne sont pas prises en compte du tout",
+      "Seules les compétences sont prises en compte",
+      "Seules les notes sur 20 par discipline sont utilisées",
+      "Le barème est remplacé par un tirage au sort"
+    ],
+    answer: 2,
+    points: 200,
+    feedback_ok: "Excellent ! En 2026, seules les évaluations disciplinaires sous forme de notes moyennes annuelles sur 20 sont désormais prises en compte.",
+    feedback_ko: "Incorrect. La grande nouveauté 2026 : seules les moyennes annuelles sur 20 par discipline comptent dans le barème."
+  }
+];
+
+// Modules to unlock between groups of questions
+const MODULES = [
+  { after: 3, icon: "🔓", title: "MODULE 1 DÉVERROUILLÉ", sub: "Principes généraux & Vœux" },
+  { after: 5, icon: "📅", title: "MODULE 2 DÉVERROUILLÉ", sub: "Calendrier & Sectorisation" },
+  { after: 7, icon: "🎯", title: "MODULE 3 DÉVERROUILLÉ", sub: "Barèmes & Priorités" },
+  { after: 9, icon: "✅", title: "SYSTÈME DÉVERROUILLÉ !", sub: "Affectation opérationnelle !", final: true }
+];
+
+// ========== STATE ==========
+let state = {
+  teamName: "ÉQUIPE",
+  currentQ: 0,
+  score: 0,
+  correct: 0,
+  hintsLeft: 3,
+  hintsUsed: 0,
+  answered: false,
+  timer: 3600,
+  timerInterval: null,
+  hintShownForCurrent: false,
+  startTime: null
+};
+
+// ========== HELPERS ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function pad(n) { return n.toString().padStart(2, '0'); }
+
+function formatTime(s) { return `${pad(Math.floor(s/60))}:${pad(s%60)}`; }
+
+// ========== TIMER ==========
+function startTimer() {
+  state.timerInterval = setInterval(() => {
+    state.timer--;
+    const el = document.getElementById('hdr-timer');
+    el.textContent = formatTime(state.timer);
+    if (state.timer <= 60) {
+      el.classList.add('timer-urgent');
+    }
+    if (state.timer <= 0) {
+      clearInterval(state.timerInterval);
+      endGame(true);
+    }
+  }, 1000);
+}
+
+// ========== GAME FLOW ==========
+function startGame() {
+  const name = document.getElementById('team-name').value.trim() || "ÉQUIPE ALPHA";
+  state.teamName = name.toUpperCase();
+  state.currentQ = 0;
+  state.score = 0;
+  state.correct = 0;
+  state.hintsLeft = 3;
+  state.hintsUsed = 0;
+  state.timer = 3600;
+  state.startTime = Date.now();
+  
+  document.getElementById('hdr-team').textContent = state.teamName;
+  
+  showScreen('screen-question');
+  startTimer();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[state.currentQ];
+  state.answered = false;
+  state.hintShownForCurrent = false;
+
+  // Update header
+  document.getElementById('hdr-score').textContent = state.score;
+  document.getElementById('hdr-hints').textContent = state.hintsLeft;
+
+  // Progress
+  const pct = Math.round((state.currentQ / QUESTIONS.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `ÉNIGME ${state.currentQ+1}/${QUESTIONS.length}`;
+  document.getElementById('prog-pct').textContent = pct + '% déverrouillé';
+
+  // Question meta
+  document.getElementById('q-num').textContent = q.id;
+  document.getElementById('q-cat').textContent = q.cat;
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-pts').textContent = q.points + ' PTS';
+
+  // Context hint
+  const hintBox = document.getElementById('q-hint-box');
+  if (q.context) {
+    hintBox.style.display = 'block';
+    document.getElementById('q-hint-text').innerHTML = q.context;
+  } else {
+    hintBox.style.display = 'none';
+  }
+
+  // Question text
+  document.getElementById('q-text').innerHTML = q.text;
+
+  // Choices
+  const choicesEl = document.getElementById('q-choices');
+  const letters = ['A','B','C','D'];
+  choicesEl.innerHTML = q.choices.map((c, i) => `
+    <button class="choice-btn" onclick="answer(${i})" id="choice-${i}">
+      <span class="choice-letter">${letters[i]}</span>
+      <span>${c}</span>
+    </button>
+  `).join('');
+
+  // Feedback
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback';
+  fb.style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-hint').disabled = state.hintsLeft <= 0;
+}
+
+function answer(idx) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const q = QUESTIONS[state.currentQ];
+  const correct = idx === q.answer;
+
+  // Visual feedback on buttons
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  document.getElementById('choice-' + idx).classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    document.getElementById('choice-' + q.answer).classList.add('correct');
+  }
+
+  // Score
+  if (correct) {
+    let pts = q.points;
+    if (state.hintShownForCurrent) pts = Math.max(0, pts - 50);
+    state.score += pts;
+    state.correct++;
+    document.getElementById('hdr-score').textContent = state.score;
+    toast(`+${pts} points ! 🎯`, 'green');
+    if (Math.random() > 0.5) launchConfetti();
+  } else {
+    toast('Mauvaise réponse ! −0 pts ❌', 'red');
+  }
+
+  // Feedback
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+  fb.style.display = 'block';
+  document.getElementById('fb-title').textContent = correct ? '✅ CORRECT !' : '❌ INCORRECT';
+  document.getElementById('fb-text').innerHTML = correct ? q.feedback_ok : q.feedback_ko;
+
+  document.getElementById('btn-next').style.display = 'inline-flex';
+}
+
+function useHint() {
+  if (state.hintsLeft <= 0 || state.answered) return;
+  state.hintsLeft--;
+  state.hintsUsed++;
+  state.hintShownForCurrent = true;
+  document.getElementById('hdr-hints').textContent = state.hintsLeft;
+  document.getElementById('btn-hint').disabled = state.hintsLeft <= 0;
+
+  // Show extra hint based on current question
+  const q = QUESTIONS[state.currentQ];
+  const hints = [
+    "💡 Attention à la distinction entre 1re générale et les autres niveaux gérés par AFFELNET.",
+    "💡 Il y a une différence entre le nombre de vœux dans l'académie et hors académie.",
+    "💡 Distinguez la période de consultation (3 avril) et la période de saisie (4 mai).",
+    "💡 Il y a un embargo sur les résultats entre les établissements et les familles.",
+    "💡 Regardez le tableau des critères de dérogation et leurs points respectifs.",
+    "💡 Les 2de GT classiques sont liées à la sectorisation, pas au barème de notes.",
+    "💡 En 2026, le bonus de région académique est UNIFIÉ pour toute la Nouvelle-Aquitaine.",
+    "💡 Il y a plusieurs tours d'affectation possibles après le tour principal. Cherchez combien et à quelles dates.",
+    "💡 En 2026, deux choses disparaissent du calcul du barème des 3e."
+  ];
+  
+  toast(`💡 Indice utilisé (−50 pts sur ce score) : ${hints[state.currentQ]}`, 'yellow');
+}
+
+function nextQuestion() {
+  state.currentQ++;
+  
+  // Check if we hit an interlude milestone
+  const milestone = MODULES.find(m => m.after === state.currentQ);
+  if (milestone) {
+    if (milestone.final) {
+      clearInterval(state.timerInterval);
+      endGame(false);
+    } else {
+      showInterlude(milestone);
+    }
+    return;
+  }
+  
+  if (state.currentQ >= QUESTIONS.length) {
+    clearInterval(state.timerInterval);
+    endGame(false);
+    return;
+  }
+  
+  renderQuestion();
+}
+
+function showInterlude(milestone) {
+  document.getElementById('intl-icon').textContent = milestone.icon;
+  document.getElementById('intl-title').textContent = milestone.title;
+  document.getElementById('intl-sub').textContent = milestone.sub;
+  
+  const nextQ = state.currentQ < QUESTIONS.length ? `Prochaine énigme : "${QUESTIONS[state.currentQ].title}"` : '';
+  document.getElementById('intl-debrief').innerHTML = `
+    <div class="debrief-row"><span>Score actuel</span><span>${state.score} pts</span></div>
+    <div class="debrief-row"><span>Bonnes réponses</span><span>${state.correct}/${state.currentQ}</span></div>
+    <div class="debrief-row"><span>Indices restants</span><span>${state.hintsLeft}/3</span></div>
+    <div class="debrief-row"><span>Temps restant</span><span>${formatTime(state.timer)}</span></div>
+    ${nextQ ? `<div class="debrief-row" style="color:var(--dim);font-size:0.8rem;margin-top:8px"><span>${nextQ}</span></div>` : ''}
+  `;
+  
+  launchConfetti(30);
+  showScreen('screen-interlude');
+}
+
+function continueGame() {
+  showScreen('screen-question');
+  renderQuestion();
+}
+
+function endGame(timeout) {
+  const timeBonus = Math.floor(state.timer / 60) * 10; // 10 pts per minute remaining
+  if (!timeout) state.score += timeBonus;
+  
+  const totalCorrect = state.correct;
+  const pct = Math.round((totalCorrect / QUESTIONS.length) * 100);
+  
+  let rank, rankMsg;
+  if (pct >= 90) { rank = "🏆"; rankMsg = "EXPERTS AFFELNET ! Vous maîtrisez parfaitement la procédure d'affectation. Le rectorat peut compter sur vous !"; }
+  else if (pct >= 70) { rank = "🥇"; rankMsg = "TRÈS BIEN ! Vous avez une bonne compréhension de la procédure AFFELNET LYCÉE 2026. Quelques points à consolider."; }
+  else if (pct >= 50) { rank = "🥈"; rankMsg = "BIEN ! Vous connaissez les grandes lignes d'AFFELNET. Relisez les réponses pour maîtriser les détails importants."; }
+  else { rank = "📚"; rankMsg = "IL FAUT CONTINUER À APPRENDRE ! La procédure AFFELNET a des subtilités importantes. N'hésitez pas à rejouer !"; }
+  
+  document.getElementById('final-rank').textContent = timeout ? "⏰" : rank;
+  document.getElementById('final-title').textContent = timeout ? "TEMPS ÉCOULÉ !" : "MISSION ACCOMPLIE !";
+  document.getElementById('final-score').textContent = state.score + " pts";
+  document.getElementById('final-correct').textContent = `${totalCorrect}/${QUESTIONS.length}`;
+  document.getElementById('final-hints').textContent = state.hintsUsed + " utilisé(s)";
+  document.getElementById('final-time').textContent = formatTime(state.timer);
+  document.getElementById('final-message').innerHTML = timeout 
+    ? "⏰ Le temps est écoulé ! Mais vous avez quand même appris des choses sur la procédure AFFELNET LYCÉE !" 
+    : rankMsg + (timeBonus > 0 ? `<br><br>⏱️ Bonus temps restant : <strong>+${timeBonus} pts</strong>` : "");
+  
+  showScreen('screen-final');
+  if (!timeout) launchConfetti(50);
+}
+
+function restartGame() {
+  showScreen('screen-intro');
+}
+
+// ========== GAME MASTER VIEW ==========
+function showGM() {
+  const grid = document.getElementById('gm-grid');
+  grid.innerHTML = QUESTIONS.map((q, i) => `
+    <div class="gm-card">
+      <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent);margin-bottom:6px;letter-spacing:1px">
+        ${i+1}. ${q.cat} — ${q.points} pts
+      </div>
+      <div class="gm-card-q">${q.text.replace(/<[^>]+>/g,' ')}</div>
+      <div class="gm-card-a">✅ ${q.choices[q.answer]}</div>
+      <div class="gm-card-expl">${q.feedback_ok}</div>
+    </div>
+  `).join('');
+  showScreen('screen-gm');
+}
+
+// ========== CONFETTI ==========
+function launchConfetti(n = 20) {
+  const colors = ['#00d4ff','#00ff88','#ffd700','#ff6b35','#ff3366'];
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = '-20px';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (6 + Math.random() * 8) + 'px';
+    p.style.height = (6 + Math.random() * 8) + 'px';
+    p.style.animationDuration = (2 + Math.random() * 3) + 's';
+    p.style.animationDelay = Math.random() * 0.5 + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 5500);
+  }
+}
+</script>
+</body>
+</html>
+<style>
+  /* === PART 2 — DRAG & DROP === */
+  .step-card {
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 11px 14px;
+    cursor: grab;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .step-card:hover { border-color: var(--accent); background: rgba(0,212,255,0.08); transform: translateX(3px); }
+  .step-card.dragging { opacity: 0.35; cursor: grabbing; }
+  .step-card.correct-pos { border-color: var(--green); background: rgba(0,255,136,0.08); }
+  .step-card.wrong-pos { border-color: var(--red); background: rgba(255,51,102,0.08); }
+  .step-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .code-digit {
+    width: 58px; height: 68px;
+    background: var(--panel2);
+    border: 2px solid rgba(0,212,255,0.3);
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    outline: none;
+    caret-color: transparent;
+    transition: all 0.2s;
+  }
+  .code-digit:focus { border-color: var(--accent); box-shadow: var(--glow); }
+  .code-digit.shaking { animation: shake 0.5s ease; border-color: var(--red); }
+  .code-digit.digit-ok { border-color: var(--green); color: var(--green); }
+  .drop-zone-slot {
+    min-height: 56px;
+    background: rgba(0,255,136,0.03);
+    border: 2px dashed rgba(0,255,136,0.2);
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+  }
+  .drop-zone-slot.drag-over { border-color: var(--green); background: rgba(0,255,136,0.08); }
+  .clue-card {
+    background: var(--panel2);
+    border: 1px solid rgba(255,107,53,0.25);
+    border-radius: 8px;
+    padding: 13px 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .clue-num {
+    background: rgba(255,107,53,0.2);
+    color: var(--accent2);
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .clue-text { font-size: 0.87rem; line-height: 1.6; }
+  .clue-answer { font-family: 'Share Tech Mono', monospace; color: var(--yellow); font-size: 0.9rem; margin-top: 5px; display: none; }
+  .clue-answer.revealed { display: block; }
+  .clue-reveal-btn {
+    background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 0.7rem;
+    color: var(--yellow); font-family: 'Share Tech Mono', monospace; margin-top: 6px; transition: all 0.2s;
+  }
+  .clue-reveal-btn:hover { background: rgba(255,215,0,0.2); }
+  .d3-step {
+    background: var(--panel); border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 10px; padding: 18px 20px; transition: border-color 0.3s;
+  }
+  .d3-step.validated { border-color: var(--green); background: rgba(0,255,136,0.04); }
+  .d3-step-title { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 10px; }
+  .d3-step-body { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
+  .d3-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+  .d3-choice {
+    background: var(--panel2); border: 2px solid rgba(0,212,255,0.2); border-radius: 6px;
+    padding: 8px 14px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; color: var(--text);
+  }
+  .d3-choice:hover:not([disabled]) { border-color: var(--accent); color: var(--accent); }
+  .d3-choice.ok { border-color: var(--green); background: rgba(0,255,136,0.1); color: var(--green); }
+  .d3-choice.ko { border-color: var(--red); background: rgba(255,51,102,0.1); color: var(--red); }
+</style>
+
+<script>
+// ============ PART 2 DATA ============
+
+// DEFI 1 — Étapes à remettre dans l'ordre
+const STEPS_CORRECT = [
+  { icon: "🏠", label: "La famille consulte l'offre de formation sur le site national" },
+  { icon: "💻", label: "La famille saisit les vœux dans le service en ligne EduConnect" },
+  { icon: "✏️", label: "L'établissement saisit les notes, vœux et décision d'orientation dans AFFELNET" },
+  { icon: "⚙️", label: "AFFELNET calcule les barèmes et propose une affectation sur le vœu le mieux classé" },
+  { icon: "🔐", label: "Les résultats sont visibles pour les établissements" },
+  { icon: "📱", label: "La famille consulte son affectation dans le service en ligne" },
+];
+
+// DEFI 2 — Code secret : 2605 (= jour saisie résultats familles : 26/05 non, c'est 30/06... on fait 3-0-0-6 ? Non, utilisons une logique pédagogique simple)
+// Code = 1 0 1 5 (10 vœux + 15 total pour élève 3e service en ligne)
+// Clues plus fun :
+const CODE_SECRET = "1015"; // = 10 vœux académie, 15 vœux total pour élèves 3e SLA
+const CLUES = [
+  {
+    q: "🔢 Indice A — Les deux premiers chiffres :",
+    text: "Tous les candidats AFFELNET peuvent formuler jusqu'à combien de vœux maximum dans leur académie d'origine ?",
+    answer: "→ Les deux premiers chiffres du code sont : <strong>1</strong> et <strong>0</strong> (= 10 vœux dans l'académie)"
+  },
+  {
+    q: "🔢 Indice B — Les deux derniers chiffres :",
+    text: "Un élève de 3e utilisant le service en ligne peut formuler des vœux dans son académie ET hors académie. Quel est le TOTAL maximum de vœux qu'il peut formuler toutes académies confondues ?",
+    answer: "→ Les deux derniers chiffres du code sont : <strong>1</strong> et <strong>5</strong> (= 15 vœux au total)"
+  },
+  {
+    q: "💡 Indice bonus (si vous bloquez) :",
+    text: "Le code = [nombre de vœux max dans l'académie] suivi de [nombre total de vœux pour un élève de 3e avec le service en ligne]",
+    answer: "→ 10 vœux académie + 5 vœux hors académie = <strong>15</strong> vœux. Code = <strong>1015</strong>"
+  }
+];
+
+// DEFI 3 — Cas pratique Yanis
+const D3_STEPS = [
+  {
+    title: "ÉTAPE 1 — Quel palier pour Yanis ?",
+    body: "Yanis veut aller en 2de GT. À quel « palier » appartient-il dans AFFELNET LYCÉE ?",
+    choices: ["Palier 3e : il peut postuler en 2de GT, 2de Pro et 1re CAP", "Palier 2de : il peut postuler sur toutes les formations", "Aucun palier, il doit passer par l'établissement uniquement"],
+    correct: 0,
+    expl: "✅ Yanis est au palier 3e. Les élèves de 3e ne peuvent postuler QUE sur les formations post-3e (2de GT, 2de Pro, 1re CAP). Ils ne peuvent pas postuler en 1re Pro ou 1re Techno."
+  },
+  {
+    title: "ÉTAPE 2 — Peut-il utiliser le service en ligne ?",
+    body: "La famille de Yanis peut-elle saisir ses vœux directement en ligne ?",
+    choices: ["Oui, car il est en 3e et la famille a un compte EduConnect", "Non, seul l'établissement peut saisir les vœux", "Oui, mais uniquement pour les vœux hors académie"],
+    correct: 0,
+    expl: "✅ Oui ! Les familles des élèves de 3e ayant un compte EduConnect peuvent saisir elles-mêmes leurs vœux dans le service en ligne (SLA), du 4 mai au 26 mai 2026."
+  },
+  {
+    title: "ÉTAPE 3 — Vœu pour le Lycée B (hors secteur)",
+    body: "Yanis veut le <strong>Lycée B</strong> (hors secteur) pour suivre l'option Latin. Il a un frère qui y est scolarisé. Quel motif de dérogation utiliser ?",
+    choices: ["Parcours Scolaire Particulier (PSP)", "Frère/sœur scolarisé(e) dans l'établissement", "Élève boursier (à inventer pour avoir plus de chances)"],
+    correct: 1,
+    expl: "✅ Le motif exact est « frère/sœur déjà scolarisé(e) dans l'établissement ». Le PSP peut s'appliquer pour un projet pédagogique particulier, mais le motif frère/sœur est directement applicable ici. On ne doit jamais mentir sur un motif de dérogation !"
+  },
+  {
+    title: "ÉTAPE 4 — Le dernier vœu conseillé",
+    body: "Yanis a une <strong>décision d'orientation 2de GT</strong>. Il formule plusieurs vœux dont le Lycée B. Que lui conseilleriez-vous de mettre en <em>dernier vœu</em> pour s'assurer d'obtenir une affectation ?",
+    choices: ["Un vœu pour une 2de Pro, pour avoir une solution de secours", "Le vœu générique 2de GT dans son lycée de SECTEUR (Lycée A)", "Un vœu dans un établissement privé sous contrat"],
+    correct: 1,
+    expl: "✅ Il est fortement recommandé que le dernier vœu soit le vœu générique 2de GT dans son lycée de secteur. Ce n'est pas une obligation, mais c'est la seule façon de s'assurer qu'il obtiendra bien une affectation : un élève de secteur ne peut pas se voir refuser une place dans son lycée de secteur."
+  }
+];
+
+// ============ PART 2 STATE ============
+let p2state = {
+  part1Score: 0,
+  part2Score: 0,
+  defisValidated: 0,
+  d1Done: false,
+  d2Done: false,
+  d2Tries: 5,
+  d2History: [],
+  d3Answers: {},
+  d3Done: false,
+  draggedCard: null,
+  poolItems: [],
+  timelineItems: []
+};
+
+// ============ START PART 2 ============
+function startPart2() {
+  p2state.part1Score = state.score;
+  p2state.part2Score = 0;
+  document.getElementById('btn-part2') && (document.getElementById('btn-part2').style.display = 'none');
+  showScreen('screen-part2-intro');
+}
+
+// ============ DEFI 1 — DRAG & DROP ============
+function startDefi1() {
+  document.getElementById('d1-team').textContent = state.teamName;
+  document.getElementById('d1-score').textContent = p2state.part1Score + p2state.part2Score;
+
+  // Shuffle steps
+  const shuffled = [...STEPS_CORRECT].sort(() => Math.random() - 0.5);
+  p2state.poolItems = shuffled.map((s, i) => ({ ...s, id: 'step-' + i }));
+  p2state.timelineItems = [];
+
+  renderDefi1();
+  showScreen('screen-defi1');
+}
+
+function renderDefi1() {
+  const pool = document.getElementById('pool');
+  const timeline = document.getElementById('timeline');
+
+  pool.innerHTML = '';
+  p2state.poolItems.forEach(item => {
+    pool.appendChild(makeStepCard(item, 'pool'));
+  });
+
+  timeline.innerHTML = '';
+  if (p2state.timelineItems.length === 0) {
+    timeline.innerHTML = '<div style="color:var(--dim);font-size:0.8rem;text-align:center;padding:20px">Glissez les étapes ici ↓</div>';
+  } else {
+    p2state.timelineItems.forEach((item, i) => {
+      const card = makeStepCard(item, 'timeline');
+      const numEl = document.createElement('span');
+      numEl.style.cssText = 'background:rgba(0,212,255,0.15);color:var(--accent);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;font-size:0.65rem;font-weight:700;flex-shrink:0;margin-right:-4px';
+      numEl.textContent = i + 1;
+      card.insertBefore(numEl, card.firstChild);
+      timeline.appendChild(card);
+    });
+  }
+
+  // Setup drop zones
+  setupDropZone(pool, 'pool');
+  setupDropZone(timeline, 'timeline');
+
+  document.getElementById('d1-feedback').style.display = 'none';
+}
+
+function makeStepCard(item, zone) {
+  const card = document.createElement('div');
+  card.className = 'step-card';
+  card.draggable = true;
+  card.dataset.id = item.id;
+  card.dataset.zone = zone;
+  card.innerHTML = `<span class="step-icon">${item.icon}</span><span>${item.label}</span>`;
+
+  card.addEventListener('dragstart', e => {
+    p2state.draggedCard = item;
+    p2state.draggedFrom = zone;
+    setTimeout(() => card.classList.add('dragging'), 0);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+  // Touch support
+  let touchStartY;
+  card.addEventListener('touchstart', e => {
+    p2state.draggedCard = item;
+    p2state.draggedFrom = zone;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  card.addEventListener('touchend', e => {
+    const touch = e.changedTouches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const dest = target ? target.closest('#pool,#timeline') : null;
+    if (dest) moveCard(dest.id === 'pool' ? 'pool' : 'timeline');
+  });
+
+  return card;
+}
+
+function setupDropZone(el, zoneName) {
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    moveCard(zoneName);
+  });
+}
+
+function moveCard(destZone) {
+  if (!p2state.draggedCard) return;
+  const card = p2state.draggedCard;
+  const from = p2state.draggedFrom;
+  if (from === destZone) return;
+
+  if (destZone === 'timeline') {
+    p2state.poolItems = p2state.poolItems.filter(i => i.id !== card.id);
+    if (!p2state.timelineItems.find(i => i.id === card.id)) p2state.timelineItems.push(card);
+  } else {
+    p2state.timelineItems = p2state.timelineItems.filter(i => i.id !== card.id);
+    if (!p2state.poolItems.find(i => i.id === card.id)) p2state.poolItems.push(card);
+  }
+  p2state.draggedCard = null;
+  renderDefi1();
+  document.getElementById('d1-valider').disabled = p2state.timelineItems.length < STEPS_CORRECT.length;
+}
+
+function resetDefi1() {
+  const allItems = [...p2state.poolItems, ...p2state.timelineItems];
+  p2state.poolItems = allItems.sort(() => Math.random() - 0.5);
+  p2state.timelineItems = [];
+  renderDefi1();
+}
+
+function validerDefi1() {
+  let score = 0;
+  const result = p2state.timelineItems.map((item, i) => {
+    const correct = STEPS_CORRECT[i] && item.label === STEPS_CORRECT[i].label;
+    if (correct) score++;
+    return { item, correct };
+  });
+
+  const pts = Math.round((score / STEPS_CORRECT.length) * 200);
+  p2state.part2Score += pts;
+  p2state.d1Done = true;
+  p2state.defisValidated++;
+
+  const fb = document.getElementById('d1-feedback');
+  fb.style.display = 'block';
+  const allCorrect = score === STEPS_CORRECT.length;
+  fb.innerHTML = `
+    <div style="background:${allCorrect ? 'rgba(0,255,136,0.08)' : 'rgba(0,212,255,0.06)'};border:2px solid ${allCorrect ? 'var(--green)' : 'var(--accent)'};border-radius:8px;padding:16px">
+      <div style="font-family:'Orbitron',monospace;font-size:0.9rem;color:${allCorrect ? 'var(--green)' : 'var(--accent)'};margin-bottom:8px">
+        ${allCorrect ? '✅ PARFAIT ! Ordre 100% correct !' : `📊 ${score}/${STEPS_CORRECT.length} étapes bien placées — +${pts} pts`}
+      </div>
+      <div style="font-size:0.82rem;line-height:1.8;color:var(--text)">
+        <strong>Ordre correct :</strong><br>
+        ${STEPS_CORRECT.map((s, i) => `${i+1}. ${s.icon} ${s.label}`).join('<br>')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('d1-valider').disabled = true;
+  document.getElementById('d1-reset').style.display = 'none';
+  document.getElementById('d1-score').textContent = p2state.part1Score + p2state.part2Score;
+  if (allCorrect) launchConfetti(30);
+  toast(allCorrect ? `✅ Ordre parfait ! +${pts} pts` : `+${pts} pts (${score}/${STEPS_CORRECT.length} correctes)`, allCorrect ? 'green' : '');
+
+  setTimeout(() => {
+    startDefi2();
+  }, 3500);
+}
+
+// ============ DEFI 2 — CODE SECRET ============
+function startDefi2() {
+  p2state.d2Tries = 5;
+  p2state.d2History = [];
+  document.getElementById('d2-team').textContent = state.teamName;
+  document.getElementById('d2-score').textContent = p2state.part1Score + p2state.part2Score;
+  document.getElementById('d2-tries').textContent = p2state.d2Tries;
+  document.getElementById('d2-feedback').style.display = 'none';
+  document.getElementById('d2-history').innerHTML = '';
+  ['code-d1','code-d2','code-d3','code-d4'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.className = 'code-digit';
+    el.disabled = false;
+  });
+
+  const cluesList = document.getElementById('clues-list');
+  cluesList.innerHTML = CLUES.map((c, i) => `
+    <div class="clue-card">
+      <div class="clue-num">${i+1}</div>
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;color:var(--accent2);font-size:0.7rem;letter-spacing:2px;margin-bottom:5px">${c.q}</div>
+        <div class="clue-text">${c.text}</div>
+        <button class="clue-reveal-btn" onclick="revealClue(${i})">👁️ Révéler la réponse (−20 pts)</button>
+        <div class="clue-answer" id="clue-ans-${i}">${c.answer}</div>
+      </div>
+    </div>
+  `).join('');
+
+  showScreen('screen-defi2');
+  setTimeout(() => document.getElementById('code-d1').focus(), 300);
+}
+
+function revealClue(i) {
+  const el = document.getElementById('clue-ans-' + i);
+  el.classList.add('revealed');
+  p2state.part2Score = Math.max(0, p2state.part2Score - 20);
+  document.getElementById('d2-score').textContent = p2state.part1Score + p2state.part2Score;
+  toast('Indice révélé −20 pts', 'yellow');
+}
+
+function focusNext(current, nextId) {
+  if (current.value && nextId) {
+    document.getElementById(nextId).focus();
+  }
+}
+
+function handleCodeKey(event, prevId, nextId) {
+  if (event.key === 'Backspace' && !event.target.value && prevId) {
+    document.getElementById(prevId).focus();
+  }
+  if (event.key === 'Enter') validerCode();
+  // Only allow digits
+  if (!/[0-9]/.test(event.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Enter'].includes(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function validerCode() {
+  if (p2state.d2Done) return;
+  const code = ['code-d1','code-d2','code-d3','code-d4'].map(id => document.getElementById(id).value).join('');
+  if (code.length < 4) { toast('Entrez les 4 chiffres !', 'yellow'); return; }
+
+  p2state.d2Tries--;
+  document.getElementById('d2-tries').textContent = Math.max(0, p2state.d2Tries);
+
+  const correct = code === CODE_SECRET;
+  p2state.d2History.unshift(correct ? `✅ ${code} — CORRECT !` : `❌ ${code} — Incorrect`);
+  document.getElementById('d2-history').innerHTML = p2state.d2History.map(h => `<div style="padding:2px 0;color:${h.startsWith('✅') ? 'var(--green)' : 'var(--red)'}">${h}</div>`).join('');
+
+  const fb = document.getElementById('d2-feedback');
+  fb.style.display = 'block';
+
+  if (correct) {
+    const pts = 150 + p2state.d2Tries * 20;
+    p2state.part2Score += pts;
+    p2state.d2Done = true;
+    p2state.defisValidated++;
+    ['code-d1','code-d2','code-d3','code-d4'].forEach(id => document.getElementById(id).classList.add('digit-ok'));
+    fb.innerHTML = `<div style="background:rgba(0,255,136,0.08);border:2px solid var(--green);border-radius:8px;padding:14px;color:var(--green);font-family:'Orbitron',monospace;font-size:0.9rem">✅ CODE CORRECT ! +${pts} points<br><span style="font-size:0.75rem;color:var(--text)">10 vœux max dans l'académie + 15 total pour les élèves de 3e SLA</span></div>`;
+    document.getElementById('d2-score').textContent = p2state.part1Score + p2state.part2Score;
+    launchConfetti(25);
+    toast(`🔓 Code déverrouillé ! +${pts} pts`, 'green');
+    setTimeout(startDefi3, 2800);
+  } else if (p2state.d2Tries <= 0) {
+    fb.innerHTML = `<div style="background:rgba(255,51,102,0.08);border:2px solid var(--red);border-radius:8px;padding:14px;color:var(--red);font-family:'Orbitron',monospace;font-size:0.9rem">⏰ Plus d'essais ! Le code était : <strong>${CODE_SECRET}</strong><br><span style="font-size:0.75rem;color:var(--text)">10 vœux dans l'académie + 15 au total pour les élèves de 3e</span></div>`;
+    ['code-d1','code-d2','code-d3','code-d4'].forEach(id => document.getElementById(id).disabled = true);
+    p2state.d2Done = true;
+    setTimeout(startDefi3, 3000);
+  } else {
+    ['code-d1','code-d2','code-d3','code-d4'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.add('shaking');
+      el.value = '';
+      setTimeout(() => el.classList.remove('shaking'), 600);
+    });
+    document.getElementById('code-d1').focus();
+    fb.innerHTML = `<div style="background:rgba(255,51,102,0.08);border:1px solid rgba(255,51,102,0.3);border-radius:8px;padding:10px;color:var(--red);font-size:0.85rem">❌ Code incorrect. Encore ${p2state.d2Tries} essai(s).</div>`;
+    toast(`Code incorrect — ${p2state.d2Tries} essais restants`, 'red');
+  }
+}
+
+// ============ DEFI 3 — CAS PRATIQUE ============
+function startDefi3() {
+  p2state.d3Answers = {};
+  document.getElementById('d3-team').textContent = state.teamName;
+  document.getElementById('d3-score').textContent = p2state.part1Score + p2state.part2Score;
+
+  const container = document.getElementById('d3-steps');
+  container.innerHTML = D3_STEPS.map((step, si) => `
+    <div class="d3-step" id="d3-step-${si}">
+      <div class="d3-step-title">ÉTAPE ${si+1} — ${step.title}</div>
+      <div class="d3-step-body">${step.body}</div>
+      <div class="d3-choices" id="d3-choices-${si}">
+        ${step.choices.map((c, ci) => `
+          <button class="d3-choice" onclick="pickD3(${si},${ci})" id="d3-c-${si}-${ci}">${c}</button>
+        `).join('')}
+      </div>
+      <div id="d3-expl-${si}" style="display:none;margin-top:10px;font-size:0.82rem;line-height:1.6;background:rgba(0,212,255,0.05);border-left:3px solid var(--green);padding:10px 12px;border-radius:0 6px 6px 0;color:var(--text)"></div>
+    </div>
+  `).join('');
+
+  document.getElementById('d3-feedback').style.display = 'none';
+  document.getElementById('d3-valider').disabled = true;
+  showScreen('screen-defi3');
+}
+
+function pickD3(stepIdx, choiceIdx) {
+  const step = D3_STEPS[stepIdx];
+  const correct = choiceIdx === step.correct;
+  p2state.d3Answers[stepIdx] = { choice: choiceIdx, correct };
+
+  // Disable all choices for this step
+  step.choices.forEach((_, ci) => {
+    const btn = document.getElementById(`d3-c-${stepIdx}-${ci}`);
+    btn.disabled = true;
+    if (ci === step.correct) btn.classList.add('ok');
+    else if (ci === choiceIdx && !correct) btn.classList.add('ko');
+  });
+
+  // Show explanation
+  const expl = document.getElementById(`d3-expl-${stepIdx}`);
+  expl.textContent = step.expl;
+  expl.style.display = 'block';
+
+  if (correct) {
+    document.getElementById(`d3-step-${stepIdx}`).classList.add('validated');
+  }
+
+  // Check if all answered
+  const allAnswered = Object.keys(p2state.d3Answers).length === D3_STEPS.length;
+  if (allAnswered) {
+    document.getElementById('d3-valider').disabled = false;
+  }
+}
+
+function validerDefi3() {
+  const correctCount = Object.values(p2state.d3Answers).filter(a => a.correct).length;
+  const pts = Math.round((correctCount / D3_STEPS.length) * 200);
+  p2state.part2Score += pts;
+  p2state.d3Done = true;
+  p2state.defisValidated++;
+
+  const allOk = correctCount === D3_STEPS.length;
+  if (allOk) { p2state.part2Score += 100; launchConfetti(40); } // bonus
+
+  const fb = document.getElementById('d3-feedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="background:${allOk ? 'rgba(0,255,136,0.08)' : 'rgba(0,212,255,0.06)'};border:2px solid ${allOk ? 'var(--green)' : 'var(--accent)'};border-radius:8px;padding:16px;text-align:center">
+      <div style="font-family:'Orbitron',monospace;font-size:1rem;color:${allOk ? 'var(--green)' : 'var(--accent)'};margin-bottom:6px">
+        ${allOk ? '🎉 DOSSIER PARFAIT ! +100 pts bonus !' : `📋 ${correctCount}/${D3_STEPS.length} bonnes réponses`}
+      </div>
+      <div style="color:var(--text);font-size:0.85rem">+${pts} points${allOk ? ' + 100 pts bonus' : ''} ajoutés au score</div>
+    </div>
+  `;
+
+  document.getElementById('d3-score').textContent = p2state.part1Score + p2state.part2Score;
+  document.getElementById('d3-valider').disabled = true;
+  toast(`Défi 3 terminé ! +${pts + (allOk ? 100 : 0)} pts`, allOk ? 'green' : '');
+
+  setTimeout(showPart2Final, 3000);
+}
+
+// ============ PART 2 FINAL ============
+function showPart2Final() {
+  const total = p2state.part1Score + p2state.part2Score;
+  document.getElementById('p2final-score').textContent = total + ' pts';
+  document.getElementById('p2f-p1').textContent = p2state.part1Score + ' pts';
+  document.getElementById('p2f-p2').textContent = p2state.part2Score + ' pts';
+  document.getElementById('p2f-defis').textContent = p2state.defisValidated + '/3';
+
+  let msg;
+  if (total >= 1500) msg = "🏆 Performance exceptionnelle ! Vous êtes prêts à accompagner n'importe quelle famille dans la procédure AFFELNET. Le rectorat vous recrute !";
+  else if (total >= 1000) msg = "🥇 Très bon travail ! Vous maîtrisez les grands principes d'AFFELNET LYCÉE 2026.";
+  else if (total >= 600) msg = "🥈 Bien joué ! Vous avez acquis les bases de la procédure. À vous de compléter vos connaissances !";
+  else msg = "📚 C'est un bon début ! La procédure AFFELNET a beaucoup de subtilités. Relisez les explications pour tout retenir.";
+
+  document.getElementById('p2final-message').textContent = msg;
+  showScreen('screen-part2-final');
+  launchConfetti(60);
+}
+</script>
