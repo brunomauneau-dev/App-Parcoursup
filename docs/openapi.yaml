@@ -186,7 +186,10 @@ components:
         ville: { type: string }
         statut:
           type: string
-          enum: [proposition, proposition_acceptee, en_attente, refuse]
+          enum: [proposition, proposition_acceptee, en_attente, refuse, refusee_par_candidat]
+          description: |
+            `refuse` : réponse négative de l'établissement.
+            `refusee_par_candidat` : proposition refusée par le candidat.
         rang:
           type: integer
           description: Rang actuel en liste d'attente (statut en_attente)

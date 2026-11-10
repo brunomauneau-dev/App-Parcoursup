@@ -32,7 +32,8 @@ const LIBELLES: Record<StatutVoeu, string> = {
   proposition: 'Réponse attendue',
   proposition_acceptee: 'Proposition acceptée',
   en_attente: "En liste d'attente",
-  refuse: 'Non retenu',
+  refuse: 'Refus de l’établissement',
+  refusee_par_candidat: 'Refusée par vous',
 };
 
 export function StatutBadge({ statut }: { statut: StatutVoeu }) {
@@ -42,6 +43,7 @@ export function StatutBadge({ statut }: { statut: StatutVoeu }) {
     proposition_acceptee: [t.success, t.successBg],
     en_attente: [t.waiting, t.waitingBg],
     refuse: [t.textMuted, t.surfaceAlt],
+    refusee_par_candidat: [t.textMuted, t.surfaceAlt],
   }[statut];
   return (
     <View style={{ alignSelf: 'flex-start', backgroundColor: c[1], borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>

@@ -1,5 +1,3 @@
-import { useColorScheme } from 'react-native';
-
 const light = {
   bg: '#F4F5F7',
   surface: '#FFFFFF',
@@ -44,6 +42,13 @@ const dark: typeof light = {
 
 export type Theme = typeof light;
 
+/**
+ * Mode clair forcé pendant la phase de test, pour que tous les testeurs voient
+ * la même chose. La palette sombre reste prête : il suffira de revenir à
+ * `useColorScheme() === 'dark' ? dark : light`.
+ */
+export const PALETTE_SOMBRE = dark;
+
 export function useTheme(): Theme {
-  return useColorScheme() === 'dark' ? dark : light;
+  return light;
 }

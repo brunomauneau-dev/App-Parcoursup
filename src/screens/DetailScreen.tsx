@@ -80,9 +80,8 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
               <Text style={{ color: t.textMuted, lineHeight: 20 }}>
                 L’an dernier, le dernier candidat ayant reçu une proposition pour cette formation était classé{' '}
                 <Text style={{ fontWeight: '700', color: t.text }}>{nombre(voeu.rangDernierAppeleAnneePrecedente)}</Text>.{' '}
-                {voeu.rang <= voeu.rangDernierAppeleAnneePrecedente
-                  ? 'Votre rang actuel est meilleur.'
-                  : `Il vous reste ${nombre(voeu.rang - voeu.rangDernierAppeleAnneePrecedente)} places pour atteindre ce rang.`}{' '}
+                {voeu.rang > voeu.rangDernierAppeleAnneePrecedente &&
+                  `Il vous reste ${nombre(voeu.rang - voeu.rangDernierAppeleAnneePrecedente)} places pour atteindre ce rang. `}
                 Cette indication ne garantit pas une proposition cette année.
               </Text>
             </Card>

@@ -39,7 +39,7 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
     .sort((a, b) => a.dateLimiteReponse!.localeCompare(b.dateLimiteReponse!));
   const acceptees = dossier.voeux.filter((v) => v.statut === 'proposition_acceptee');
   const attente = dossier.voeux.filter((v) => v.statut === 'en_attente').sort((a, b) => (a.rang ?? 0) - (b.rang ?? 0));
-  const refuses = dossier.voeux.filter((v) => v.statut === 'refuse');
+  const refuses = dossier.voeux.filter((v) => v.statut === 'refuse' || v.statut === 'refusee_par_candidat');
 
   return (
     <ScrollView
@@ -139,9 +139,10 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
 
       {refuses.length > 0 && (
         <>
-          <Titre n={refuses.length}>Non retenus</Titre>
+          <Titre n={refuses.length}>Candidatures refusées</Titre>
           {refuses.map((v) => (
-            <Card key={v.id} style={{ gap: 4, opacity: 0.7 }}>
+            <Card key={v.id} style={{ gap: 6, opacity: 0.75 }}>
+              <StatutBadge statut={v.statut} />
               <Text style={{ fontSize: 15, fontWeight: '600', color: t.text }}>{v.formation}</Text>
               <Text style={{ color: t.textMuted, fontSize: 13 }}>
                 {v.etablissement} · {v.ville}

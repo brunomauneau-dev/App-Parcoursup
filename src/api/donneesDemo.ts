@@ -32,6 +32,8 @@ interface VoeuSource {
   /** Délai de réponse en jours (date limite à 23h59) */
   delaiReponse?: number;
   accepteeLeJour?: number;
+  /** Jour où le candidat a refusé la proposition */
+  refuseeLeJour?: number;
   refuse?: boolean;
 }
 
@@ -39,7 +41,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: { id: 'v1', formation: 'CPGE MPSI', etablissement: 'Lycée Jules Ferry', ville: 'Nantes' },
     jourProposition: 3,
-    delaiReponse: 3,
+    delaiReponse: 4,
   },
   {
     base: { id: 'v2', formation: 'Licence Mathématiques', etablissement: 'Université de Nantes', ville: 'Nantes' },
@@ -57,7 +59,7 @@ const SOURCES: VoeuSource[] = [
       places: 104,
       rangDernierAppeleAnneePrecedente: 420,
     },
-    rangs: [612, 540, 498, 455, 431, 402, 377, 351],
+    rangs: [612, 560, 521, 489, 468, 452, 437, 426],
   },
   {
     base: {
@@ -69,7 +71,7 @@ const SOURCES: VoeuSource[] = [
       places: 56,
       rangDernierAppeleAnneePrecedente: 112,
     },
-    rangs: [140, 121, 109, 95, 87, null, null, null],
+    rangs: [180, 161, 146, 131, 119, null, null, null],
     jourProposition: 5,
     delaiReponse: 2,
   },
@@ -83,7 +85,7 @@ const SOURCES: VoeuSource[] = [
       places: 240,
       rangDernierAppeleAnneePrecedente: 610,
     },
-    rangs: [402, 380, 371, 352, 340, 331, 320, 309],
+    rangs: [902, 861, 830, 797, 771, 748, 722, 701],
   },
   {
     base: {
@@ -96,6 +98,12 @@ const SOURCES: VoeuSource[] = [
       rangDernierAppeleAnneePrecedente: 1510,
     },
     rangs: [2104, 2040, 1998, 1962, 1930, 1911, 1880, 1855],
+  },
+  {
+    base: { id: 'v8', formation: 'BTS SIO', etablissement: 'Lycée (fictif) de Saint-Nazaire', ville: 'Saint-Nazaire' },
+    jourProposition: 0,
+    delaiReponse: 3,
+    refuseeLeJour: 1,
   },
   {
     base: {
@@ -123,7 +131,12 @@ function construireVoeu(src: VoeuSource, jour: number): Voeu {
     if (r != null) v.rang = r;
   }
   if (src.jourProposition != null && jour >= src.jourProposition) {
-    v.statut = src.accepteeLeJour != null && jour >= src.accepteeLeJour ? 'proposition_acceptee' : 'proposition';
+    v.statut =
+      src.accepteeLeJour != null && jour >= src.accepteeLeJour
+        ? 'proposition_acceptee'
+        : src.refuseeLeJour != null && jour >= src.refuseeLeJour
+          ? 'refusee_par_candidat'
+          : 'proposition';
     v.dateProposition = dateDuJour(src.jourProposition, HEURE_MAJ.h, HEURE_MAJ.m).toISOString();
     v.dateLimiteReponse = dateDuJour(src.jourProposition + (src.delaiReponse ?? 2), 23, 59).toISOString();
   }

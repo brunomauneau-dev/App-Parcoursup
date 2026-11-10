@@ -8,7 +8,8 @@ export type StatutVoeu =
   | 'proposition' // proposition d'admission reçue, réponse attendue
   | 'proposition_acceptee' // proposition acceptée (vœux en attente éventuellement conservés)
   | 'en_attente' // en liste d'attente
-  | 'refuse'; // formation sélective : non
+  | 'refuse' // refus de l'établissement (formation sélective : non)
+  | 'refusee_par_candidat'; // proposition refusée par le candidat
 
 export interface PointHistorique {
   /** Date ISO de la mise à jour nocturne */
