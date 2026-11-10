@@ -1,6 +1,7 @@
 /**
  * Modèle de données exposé par la future API de consultation (lecture seule).
  * Ce contrat est une proposition à valider avec le SCN Parcoursup.
+ * La version formelle est dans docs/openapi.yaml.
  */
 
 export type StatutVoeu =
@@ -10,7 +11,7 @@ export type StatutVoeu =
   | 'refuse'; // formation sélective : non
 
 export interface PointHistorique {
-  /** Date ISO (jour de la mise à jour nocturne) */
+  /** Date ISO de la mise à jour nocturne */
   date: string;
   /** Rang en liste d'attente ce jour-là, null si le vœu n'était plus en attente */
   rang: number | null;
@@ -37,17 +38,24 @@ export interface Voeu {
 export interface Dossier {
   prenom: string;
   numeroDossier: string;
+  /** Date ISO de la dernière mise à jour du dossier */
   derniereMiseAJour: string;
+  /**
+   * Heure du serveur au moment de la réponse (ISO). L'application s'en sert
+   * pour les comptes à rebours, afin de ne pas dépendre de l'horloge du téléphone.
+   */
+  dateServeur: string;
   voeux: Voeu[];
 }
 
-/**
- * Interface que l'application consomme. La version de démonstration
- * est implémentée par MockApi ; la version réelle appellera l'API du SCN
- * avec un jeton limité à la consultation.
- */
+/** Interface consommée par l'application. */
 export interface DossierApi {
+  /** Connexion avec les identifiants Parcoursup. Le mot de passe n'est jamais conservé. */
   connexion(numeroDossier: string, motDePasse: string): Promise<void>;
+  /** Reprend une session existante au démarrage. Renvoie false s'il n'y en a pas. */
+  restaurer(): Promise<boolean>;
   deconnexion(): Promise<void>;
   getDossier(): Promise<Dossier>;
+  /** Démonstration uniquement : simule la mise à jour de la nuit suivante. */
+  simulerNuit?(): Promise<boolean>;
 }

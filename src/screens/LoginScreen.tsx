@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { modeDemo } from '../api';
+import { messageErreur } from '../api/erreurs';
 import { Button } from '../components/ui';
 import { useTheme } from '../theme';
 
@@ -8,6 +10,7 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
   const [numero, setNumero] = useState('');
   const [mdp, setMdp] = useState('');
   const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   const input = {
     backgroundColor: t.surface,
@@ -22,9 +25,11 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
 
   const valider = async () => {
     setChargement(true);
+    setErreur(null);
     try {
       await onLogin(numero, mdp);
-    } finally {
+    } catch (e) {
+      setErreur(messageErreur(e));
       setChargement(false);
     }
   };
@@ -64,17 +69,25 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
               placeholderTextColor={t.textMuted}
               secureTextEntry
               autoComplete="password"
+              onSubmitEditing={valider}
               style={input}
             />
           </View>
+          {erreur && (
+            <Text accessibilityRole="alert" style={{ color: t.danger, backgroundColor: t.dangerBg, borderRadius: 10, padding: 12 }}>
+              {erreur}
+            </Text>
+          )}
           {chargement ? (
             <ActivityIndicator color={t.primary} style={{ paddingVertical: 14 }} />
           ) : (
             <Button label="Se connecter" onPress={valider} />
           )}
-          <Text style={{ color: t.textMuted, fontSize: 13, textAlign: 'center' }}>
-            Démo : n'importe quel identifiant fonctionne. Ne saisissez pas vos vrais identifiants.
-          </Text>
+          {modeDemo && (
+            <Text style={{ color: t.textMuted, fontSize: 13, textAlign: 'center' }}>
+              Démo : n'importe quel identifiant fonctionne. Ne saisissez pas vos vrais identifiants.
+            </Text>
+          )}
         </View>
 
         <View style={{ backgroundColor: t.surfaceAlt, borderRadius: 14, padding: 16, gap: 6 }}>

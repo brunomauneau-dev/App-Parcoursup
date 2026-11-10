@@ -1,0 +1,211 @@
+openapi: 3.1.0
+info:
+  title: API de consultation du dossier candidat (proposition)
+  version: 0.1.0
+  description: |
+    Proposition de contrat pour l'application mobile de consultation Parcoursup,
+    à discuter avec le SCN Parcoursup.
+
+    Principes :
+    - **Lecture seule.** L'API n'expose que des opérations GET. Toute autre méthode
+      sur `/v1/*` répond 405. Aucune action sur le dossier n'est possible.
+    - **Jeton limité.** Les jetons d'accès portent le seul périmètre `dossier.read`
+      et ne donnent accès qu'au dossier de leur titulaire.
+    - **Données minimales.** Ni notes, ni bulletins, ni données de santé, de handicap
+      ou de bourse.
+
+    Un serveur de démonstration conforme à ce contrat est fourni dans `server/`.
+servers:
+  - url: http://localhost:4000
+    description: Serveur de démonstration (données fictives)
+
+tags:
+  - name: Authentification
+  - name: Consultation
+
+paths:
+  /oauth/token:
+    post:
+      tags: [Authentification]
+      summary: Obtenir ou renouveler un jeton
+      description: |
+        - `grant_type=password` : connexion avec le numéro de dossier et le mot de passe
+          Parcoursup. Le mot de passe n'est jamais conservé par l'application.
+        - `grant_type=refresh_token` : renouvellement. Chaque jeton de renouvellement
+          est à usage unique ; sa réutilisation révoque toute la session.
+
+        **Point ouvert avec le SCN** : le flux `password` est déconseillé par OAuth 2.1.
+        Il n'est envisageable que pour une application officielle (« first-party »).
+        Alternative : flux `authorization_code` + PKCE, la page de connexion du SCN
+        s'ouvrant dans le navigateur système.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DemandeMotDePasse'
+                - $ref: '#/components/schemas/DemandeRenouvellement'
+      responses:
+        '200':
+          description: Jeton émis
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReponseJeton' }
+        '400':
+          description: Identifiants incorrects, jeton de renouvellement invalide ou périmètre refusé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErreurOAuth' }
+        '401':
+          description: Client inconnu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErreurOAuth' }
+        '429':
+          description: Trop de tentatives de connexion (limite par adresse IP)
+          headers:
+            Retry-After: { schema: { type: integer }, description: Délai en secondes }
+
+  /oauth/revoke:
+    post:
+      tags: [Authentification]
+      summary: Révoquer une session (déconnexion)
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [token, client_id]
+              properties:
+                token: { type: string, description: Jeton de renouvellement }
+                token_type_hint: { type: string, enum: [refresh_token] }
+                client_id: { type: string }
+      responses:
+        '200': { description: Session révoquée (réponse identique si le jeton est inconnu) }
+
+  /v1/dossier:
+    get:
+      tags: [Consultation]
+      summary: Consulter son dossier
+      description: |
+        Renvoie les vœux du candidat titulaire du jeton, avec leur statut, le rang en
+        liste d'attente, son historique et les dates limites de réponse.
+        Les données changent au plus une fois par nuit : la réponse peut être préparée
+        à l'avance et mise en cache côté serveur.
+      security: [{ jeton: [dossier.read] }]
+      responses:
+        '200':
+          description: Dossier du candidat
+          headers:
+            Cache-Control: { schema: { type: string, const: no-store } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dossier' }
+        '401':
+          description: Jeton absent, expiré ou révoqué
+          headers:
+            WWW-Authenticate: { schema: { type: string } }
+        '405': { description: Méthode refusée (API en lecture seule) }
+        '429': { description: Service saturé, réessayer plus tard }
+        '503': { description: Service indisponible (maintenance, recalcul nocturne) }
+
+components:
+  securitySchemes:
+    jeton:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: /oauth/token
+          refreshUrl: /oauth/token
+          scopes:
+            dossier.read: Consultation du dossier, sans aucune action possible
+
+  schemas:
+    DemandeMotDePasse:
+      type: object
+      required: [grant_type, client_id, username, password]
+      properties:
+        grant_type: { const: password }
+        client_id: { type: string, example: suivi-voeux-mobile }
+        scope: { const: dossier.read }
+        username: { type: string, description: Numéro de dossier Parcoursup, example: '1234567' }
+        password: { type: string, format: password }
+
+    DemandeRenouvellement:
+      type: object
+      required: [grant_type, client_id, refresh_token]
+      properties:
+        grant_type: { const: refresh_token }
+        client_id: { type: string }
+        refresh_token: { type: string }
+
+    ReponseJeton:
+      type: object
+      required: [access_token, token_type, expires_in, refresh_token, scope]
+      properties:
+        access_token: { type: string }
+        token_type: { const: Bearer }
+        expires_in: { type: integer, description: Durée de vie en secondes, example: 300 }
+        refresh_token: { type: string, description: À usage unique }
+        scope: { const: dossier.read }
+
+    ErreurOAuth:
+      type: object
+      properties:
+        error:
+          type: string
+          enum: [invalid_request, invalid_client, invalid_grant, invalid_scope, unsupported_grant_type]
+
+    Dossier:
+      type: object
+      required: [prenom, numeroDossier, derniereMiseAJour, dateServeur, voeux]
+      properties:
+        prenom: { type: string }
+        numeroDossier: { type: string }
+        derniereMiseAJour:
+          type: string
+          format: date-time
+          description: Date de la dernière mise à jour du dossier (recalcul nocturne)
+        dateServeur:
+          type: string
+          format: date-time
+          description: Heure du serveur. Sert aux comptes à rebours, indépendamment de l'horloge du téléphone.
+        voeux:
+          type: array
+          items: { $ref: '#/components/schemas/Voeu' }
+
+    Voeu:
+      type: object
+      required: [id, formation, etablissement, ville, statut]
+      properties:
+        id: { type: string }
+        formation: { type: string, example: BUT Informatique }
+        etablissement: { type: string, example: IUT de Nantes }
+        ville: { type: string }
+        statut:
+          type: string
+          enum: [proposition, proposition_acceptee, en_attente, refuse]
+        rang:
+          type: integer
+          description: Rang actuel en liste d'attente (statut en_attente)
+        totalEnAttente: { type: integer }
+        places: { type: integer }
+        rangDernierAppeleAnneePrecedente:
+          type: integer
+          description: Rang du dernier candidat ayant reçu une proposition l'an dernier
+        historique:
+          type: array
+          description: Rang à chaque mise à jour nocturne depuis le début de la phase
+          items:
+            type: object
+            required: [date, rang]
+            properties:
+              date: { type: string, format: date-time }
+              rang: { type: [integer, 'null'] }
+        dateProposition: { type: string, format: date-time }
+        dateLimiteReponse:
+          type: string
+          format: date-time
+          description: Date limite de réponse à la proposition (statut proposition)

@@ -9,6 +9,8 @@ interface Props {
   dossier: Dossier;
   maintenant: Date;
   rafraichissement: boolean;
+  /** Erreur du dernier rafraîchissement : le dossier affiché peut être ancien */
+  erreur?: string | null;
   onRefresh: () => void;
   onOuvrir: (v: Voeu) => void;
   onSimuler?: () => void;
@@ -21,7 +23,7 @@ function variation(v: Voeu): number | null {
   return (h[h.length - 2].rang as number) - (h[h.length - 1].rang as number);
 }
 
-export function HomeScreen({ dossier, maintenant, rafraichissement, onRefresh, onOuvrir, onSimuler, onDeconnexion }: Props) {
+export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRefresh, onOuvrir, onSimuler, onDeconnexion }: Props) {
   const t = useTheme();
   const aRepondre = dossier.voeux
     .filter((v) => v.statut === 'proposition')
@@ -52,6 +54,15 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, onRefresh, o
           <Text style={{ color: t.primary, fontWeight: '600', paddingTop: 6 }}>Déconnexion</Text>
         </Pressable>
       </View>
+
+      {erreur && (
+        <View accessibilityRole="alert" style={{ backgroundColor: t.dangerBg, borderRadius: 12, padding: 12, gap: 4 }}>
+          <Text style={{ color: t.danger, fontWeight: '700' }}>{erreur}</Text>
+          <Text style={{ color: t.textMuted, fontSize: 13 }}>
+            Les informations ci-dessous datent du {dateLongue(dossier.derniereMiseAJour)}. Tirez vers le bas pour réessayer.
+          </Text>
+        </View>
+      )}
 
       {aRepondre.length > 0 && (
         <>
