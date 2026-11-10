@@ -16,7 +16,7 @@ export default function DetailVoeu() {
   if (!voeu) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
-        <Text style={{ color: t.text, fontSize: 16 }}>Ce vœu n'existe pas ou plus dans votre dossier.</Text>
+        <Text style={{ color: t.text, fontSize: 16 }}>Ce vœu n’existe pas ou plus dans votre dossier.</Text>
         <Pressable onPress={retour} accessibilityRole="button">
           <Text style={{ color: t.primary, fontWeight: '700' }}>Retour à mes vœux</Text>
         </Pressable>

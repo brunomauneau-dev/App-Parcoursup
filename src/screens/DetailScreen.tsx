@@ -5,15 +5,18 @@ import { BoutonRepondre, Card, StatutBadge } from '../components/ui';
 import { compteARebours, dateLongue, heure, nombre } from '../format';
 import { useTheme } from '../theme';
 
-export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maintenant: Date; onRetour: () => void }) {
+function Stat({ label, valeur, couleur }: { label: string; valeur: string; couleur?: string }) {
   const t = useTheme();
-
-  const Stat = ({ label, valeur, couleur }: { label: string; valeur: string; couleur?: string }) => (
+  return (
     <View style={{ flex: 1, backgroundColor: t.surfaceAlt, borderRadius: 12, padding: 12, gap: 2 }}>
       <Text style={{ color: t.textMuted, fontSize: 12 }}>{label}</Text>
       <Text style={{ color: couleur ?? t.text, fontSize: 18, fontWeight: '800' }}>{valeur}</Text>
     </View>
   );
+}
+
+export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maintenant: Date; onRetour: () => void }) {
+  const t = useTheme();
 
   const historique = voeu.historique?.filter((p) => p.rang != null) ?? [];
   const premier = historique[0]?.rang;
@@ -42,7 +45,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
           <Text style={{ color: t.success, fontWeight: '700', fontSize: 16 }}>✓ Vous avez accepté cette proposition</Text>
           <Text style={{ color: t.textMuted, lineHeight: 20 }}>
             Si vous acceptez une autre proposition, celle-ci sera automatiquement libérée. Pensez à consulter les
-            modalités d'inscription administrative de l'établissement.
+            modalités d’inscription administrative de l’établissement.
           </Text>
         </Card>
       )}
@@ -75,7 +78,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
             <Card style={{ gap: 6 }}>
               <Text style={{ color: t.text, fontWeight: '700' }}>Pour vous situer</Text>
               <Text style={{ color: t.textMuted, lineHeight: 20 }}>
-                L'an dernier, le dernier candidat ayant reçu une proposition pour cette formation était classé{' '}
+                L’an dernier, le dernier candidat ayant reçu une proposition pour cette formation était classé{' '}
                 <Text style={{ fontWeight: '700', color: t.text }}>{nombre(voeu.rangDernierAppeleAnneePrecedente)}</Text>.{' '}
                 {voeu.rang <= voeu.rangDernierAppeleAnneePrecedente
                   ? 'Votre rang actuel est meilleur.'
@@ -109,7 +112,7 @@ function PropositionBloc({ limite, maintenant }: { limite: string; maintenant: D
       <Card style={{ gap: 6 }}>
         <Text style={{ color: t.text, fontWeight: '700' }}>À savoir</Text>
         <Text style={{ color: t.textMuted, lineHeight: 20 }}>
-          • Vous ne pouvez conserver qu'une seule proposition à la fois.{'\n'}• Sans réponse dans les délais, la
+          • Vous ne pouvez conserver qu’une seule proposition à la fois.{'\n'}• Sans réponse dans les délais, la
           proposition est perdue.{'\n'}• La réponse se fait uniquement sur le site officiel.
         </Text>
       </Card>

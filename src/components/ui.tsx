@@ -1,5 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { Animated, Linking, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Link } from 'expo-router';
+import { Animated, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { URL_AVIS } from '../config';
 import type { StatutVoeu } from '../api/types';
 import { useTheme } from '../theme';
 
@@ -82,8 +84,46 @@ export function Button({
   );
 }
 
+/**
+ * Lien vers un site externe. Rendu comme un vrai lien <a> sur le web (seule
+ * méthode fiable dans une page intégrée), ouvert dans le navigateur sur mobile.
+ */
+export function LienExterne({ url, label, variant = 'primary' }: { url: string; label: string; variant?: 'primary' | 'secondary' }) {
+  const t = useTheme();
+  const primary = variant === 'primary';
+  return (
+    <Link
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      accessibilityRole="link"
+      style={{
+        backgroundColor: primary ? t.primary : 'transparent',
+        borderWidth: primary ? 0 : 1.5,
+        borderColor: t.primary,
+        borderRadius: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        textAlign: 'center',
+        color: primary ? t.primaryText : t.primary,
+        fontSize: 16,
+        fontWeight: '700',
+        overflow: 'hidden',
+      }}
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function BoutonRepondre() {
-  return <Button label="Répondre sur Parcoursup ↗" onPress={() => Linking.openURL(URL_PARCOURSUP)} />;
+  return <LienExterne url={URL_PARCOURSUP} label="Répondre sur Parcoursup ↗" />;
+}
+
+/** Bouton vers le questionnaire d'avis, affiché seulement si un lien est configuré. */
+export function BoutonAvis() {
+  if (!URL_AVIS) return null;
+  return <LienExterne url={URL_AVIS} label="💬 Donner mon avis (2 min) ↗" variant="secondary" />;
 }
 
 export function BandeauPrototype() {
@@ -144,7 +184,7 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: t.text, fontWeight: '700', fontSize: 14 }}>Suivi Vœux · maintenant</Text>
-          <Text style={{ color: t.textMuted, fontSize: 14 }}>Votre dossier a été mis à jour. Ouvrez l'application pour le consulter.</Text>
+          <Text style={{ color: t.textMuted, fontSize: 14 }}>Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.</Text>
         </View>
       </Pressable>
     </Animated.View>

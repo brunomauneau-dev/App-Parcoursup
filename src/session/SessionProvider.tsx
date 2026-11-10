@@ -146,11 +146,10 @@ export function useSession(): Session {
 /** Heure courante corrigée par l'horloge du serveur, mise à jour chaque seconde. */
 export function useMaintenant(): Date {
   const { decalageHorloge } = useSession();
-  const [maintenant, setMaintenant] = useState(() => new Date(Date.now() + decalageHorloge));
+  const [instant, setInstant] = useState(() => Date.now());
   useEffect(() => {
-    setMaintenant(new Date(Date.now() + decalageHorloge));
-    const id = setInterval(() => setMaintenant(new Date(Date.now() + decalageHorloge)), 1000);
+    const id = setInterval(() => setInstant(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [decalageHorloge]);
-  return maintenant;
+  }, []);
+  return new Date(instant + decalageHorloge);
 }

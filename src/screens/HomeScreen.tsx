@@ -1,7 +1,7 @@
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import type { Dossier, Voeu } from '../api/types';
 import { Sparkline } from '../components/RankChart';
-import { Card, StatutBadge } from '../components/ui';
+import { BoutonAvis, Card, StatutBadge } from '../components/ui';
 import { compteARebours, dateLongue, heure, nombre } from '../format';
 import { useTheme } from '../theme';
 
@@ -23,6 +23,15 @@ function variation(v: Voeu): number | null {
   return (h[h.length - 2].rang as number) - (h[h.length - 1].rang as number);
 }
 
+function Titre({ children, n }: { children: string; n: number }) {
+  const t = useTheme();
+  return (
+    <Text style={{ fontSize: 13, fontWeight: '700', color: t.textMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 8 }}>
+      {children} · {n}
+    </Text>
+  );
+}
+
 export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRefresh, onOuvrir, onSimuler, onDeconnexion }: Props) {
   const t = useTheme();
   const aRepondre = dossier.voeux
@@ -31,12 +40,6 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
   const acceptees = dossier.voeux.filter((v) => v.statut === 'proposition_acceptee');
   const attente = dossier.voeux.filter((v) => v.statut === 'en_attente').sort((a, b) => (a.rang ?? 0) - (b.rang ?? 0));
   const refuses = dossier.voeux.filter((v) => v.statut === 'refuse');
-
-  const Titre = ({ children, n }: { children: string; n: number }) => (
-    <Text style={{ fontSize: 13, fontWeight: '700', color: t.textMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 8 }}>
-      {children} · {n}
-    </Text>
-  );
 
   return (
     <ScrollView
@@ -54,6 +57,8 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
           <Text style={{ color: t.primary, fontWeight: '600', paddingTop: 6 }}>Déconnexion</Text>
         </Pressable>
       </View>
+
+      <BoutonAvis />
 
       {erreur && (
         <View accessibilityRole="alert" style={{ backgroundColor: t.dangerBg, borderRadius: 12, padding: 12, gap: 4 }}>
@@ -107,7 +112,7 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
 
       {attente.length > 0 && (
         <>
-          <Titre n={attente.length}>En liste d'attente</Titre>
+          <Titre n={attente.length}>En liste d’attente</Titre>
           {attente.map((v) => {
             const d = variation(v);
             return (
@@ -145,6 +150,10 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
           ))}
         </>
       )}
+
+      <View style={{ marginTop: 8 }}>
+        <BoutonAvis />
+      </View>
 
       {onSimuler && (
         <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: t.border, paddingTop: 16, gap: 8 }}>
