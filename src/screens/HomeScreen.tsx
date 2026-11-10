@@ -2,6 +2,7 @@ import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
 import type { Dossier, Voeu } from '../api/types';
 import { Sparkline } from '../components/RankChart';
 import { BoutonAvis, Card, StatutBadge } from '../components/ui';
+import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { compteARebours, dateLongue, heure, nombre } from '../format';
 import { useTheme } from '../theme';
 
@@ -174,6 +175,11 @@ export function HomeScreen({ dossier, maintenant, rafraichissement, erreur, onRe
           >
             <Text style={{ color: t.text, fontWeight: '700' }}>🌙 Simuler la mise à jour de la nuit</Text>
           </Pressable>
+          {notificationsSysteme && (
+            <Text style={{ color: t.textMuted, fontSize: 13, textAlign: 'center' }}>
+              Une vraie notification arrive {DELAI_NOTIFICATION_S} secondes après : verrouillez l’écran pour la voir.
+            </Text>
+          )}
         </View>
       )}
     </ScrollView>

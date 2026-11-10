@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import { api, modeDemo } from '../api';
 import { ApiError, messageErreur } from '../api/erreurs';
 import type { Dossier } from '../api/types';
+import { programmerNotificationDemo } from '../notifications/notificationDemo';
 
 type Statut = 'demarrage' | 'deconnecte' | 'connecte';
 
@@ -108,8 +109,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const simulerNuit = useCallback(async () => {
     if (await api.simulerNuit?.()) {
+      // Sur téléphone : vraie notification système dans quelques secondes.
+      // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
+      const systeme = await programmerNotificationDemo().catch(() => false);
       await charger();
-      setNotification(true);
+      if (!systeme) setNotification(true);
     }
   }, [charger]);
 
