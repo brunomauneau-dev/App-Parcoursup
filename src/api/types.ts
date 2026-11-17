@@ -78,4 +78,6 @@ export interface DossierApi {
   getDossier(): Promise<Dossier>;
   /** Démonstration uniquement : simule la mise à jour de la nuit suivante. */
   simulerNuit?(): Promise<boolean>;
+  /** Démonstration uniquement : place le dossier à un jour donné de la phase simulée. */
+  definirJour?(jour: number): Promise<void>;
 }

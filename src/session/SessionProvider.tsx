@@ -27,6 +27,10 @@ interface Session {
    * notification imitée (utilisé par la démo automatique).
    */
   simulerNuit?: (options?: { notificationSysteme?: boolean }) => Promise<void>;
+  /** Démonstration uniquement : affiche le dossier à un jour donné. */
+  definirJour?: (jour: number) => Promise<void>;
+  /** Démonstration uniquement : affiche la notification imitée. */
+  montrerNotification: () => void;
 }
 
 const Contexte = createContext<Session | null>(null);
@@ -124,6 +128,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const fermerNotification = useCallback(() => setNotification(false), []);
+  const montrerNotification = useCallback(() => setNotification(true), []);
+  const definirJour = useCallback(
+    async (jour: number) => {
+      await api.definirJour?.(jour);
+      await charger();
+    },
+    [charger],
+  );
 
   return (
     <Contexte.Provider
@@ -136,6 +148,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         decalageHorloge,
         notification,
         fermerNotification,
+        montrerNotification,
+        definirJour: modeDemo && api.definirJour ? definirJour : undefined,
         connexion,
         deconnexion,
         rafraichir,

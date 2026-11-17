@@ -36,6 +36,10 @@ export class MockApi implements DossierApi {
     return construireDossier(this.jour, this.debut);
   }
 
+  async definirJour(jour: number): Promise<void> {
+    this.jour = Math.max(0, Math.min(JOUR_MAX, jour));
+  }
+
   async simulerNuit(): Promise<boolean> {
     if (this.jour >= JOUR_MAX) return false;
     this.jour += 1;

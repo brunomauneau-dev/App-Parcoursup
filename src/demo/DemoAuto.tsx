@@ -24,120 +24,134 @@ interface Ctx {
   session: ReturnType<typeof useSession>;
 }
 
+type Route = Parameters<ReturnType<typeof useRouter>['navigate']>[0];
+
+/**
+ * Chaque étape décrit l'état complet de l'application (connexion, jour simulé,
+ * écran affiché) : on peut donc y aller directement, en avant comme en arrière.
+ */
 interface Etape {
-  /** Action avant la mise en lumière (changer d'écran, simuler la nuit…) */
-  avant?: (ctx: Ctx) => Promise<void> | void;
+  /** Jour simulé de la phase d'admission ; absent = écran de connexion (déconnecté) */
+  jour?: number;
+  route: Route;
   cible?: IdCible;
   legende: string;
   duree: number;
-  /** Montrer un toucher sur la cible, puis exécuter `apres` */
+  /** En lecture : montrer un toucher sur la cible avant de passer à l'étape suivante */
   toucher?: boolean;
-  apres?: (ctx: Ctx) => Promise<void> | void;
+  /** Afficher la notification « dossier mis à jour » */
+  notification?: boolean;
 }
+
+const VOEUX_PROPOSITIONS: Route = { pathname: '/dossier/voeux', params: { filtre: 'propositions' } };
 
 const ETAPES: Etape[] = [
   {
-    avant: async ({ router, session }) => {
-      await session.deconnexion();
-      router.replace('/connexion');
-    },
+    route: '/connexion',
     cible: 'connexion-demo',
     legende: 'Suivi Vœux : consulter son dossier Parcoursup pendant la phase d’admission, sans stress.',
     duree: 3500,
     toucher: true,
-    apres: async ({ router, session }) => {
-      await session.connexion('0000000', 'demo');
-      router.replace('/dossier');
-    },
   },
   {
+    jour: 4,
+    route: '/dossier',
     cible: 'accueil-echeance',
     legende: 'Dès l’ouverture : la proposition reçue, la date limite et le temps qu’il reste pour répondre.',
     duree: 5000,
   },
   {
+    jour: 4,
+    route: '/dossier',
     cible: 'accueil-compteurs',
     legende: 'Tout le dossier en trois chiffres : propositions, listes d’attente, refus.',
     duree: 4000,
   },
   {
+    jour: 4,
+    route: '/dossier',
     cible: 'accueil-attente-0',
     legende: 'Chaque liste d’attente : la position du jour et les places gagnées depuis hier.',
     duree: 4500,
     toucher: true,
-    apres: ({ router }) => router.push({ pathname: '/dossier/[id]', params: { id: 'v4' } }),
   },
   {
+    jour: 4,
+    route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
     legende: 'La jauge situe la position. En vert : jusqu’où la formation a appelé l’an dernier.',
     duree: 5000,
   },
   {
+    jour: 4,
+    route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-aide',
     legende: 'Une aide explique chaque chiffre, en mots simples.',
     duree: 3500,
-    apres: ({ router }) => router.back(),
   },
   {
-    avant: async ({ router, session }) => {
-      router.navigate('/dossier');
-      await session.simulerNuit?.({ notificationSysteme: false });
-    },
+    jour: 5,
+    route: '/dossier',
     cible: 'notification',
+    notification: true,
     legende: 'Lundi, 6h12 : mise à jour de la nuit. Une notification prévient, sans rien dévoiler sur l’écran verrouillé.',
     duree: 4500,
   },
   {
-    avant: async ({ session }) => {
-      await session.simulerNuit?.({ notificationSysteme: false });
-    },
+    jour: 6,
+    route: '/dossier',
     cible: 'accueil-carte',
     legende: 'Mardi : une place se libère en BUT GEII. Nouvelle proposition, nouvelle date limite.',
     duree: 5000,
   },
   {
+    jour: 6,
+    route: '/dossier',
     cible: { onglet: 1 },
     legende: 'L’onglet « Mes vœux » réunit tous les vœux et leur statut.',
     duree: 3000,
     toucher: true,
-    apres: ({ router }) =>
-      router.navigate({
-        pathname: '/dossier/voeux',
-        params: { filtre: 'propositions' },
-      }),
   },
   {
+    jour: 6,
+    route: VOEUX_PROPOSITIONS,
     cible: 'voeux-filtres',
     legende: 'Des filtres pour retrouver d’un geste ses propositions, ses attentes ou ses refus.',
     duree: 3500,
   },
   {
+    jour: 6,
+    route: VOEUX_PROPOSITIONS,
     cible: 'voeu-v1',
     legende: 'Chaque proposition rappelle sa date limite.',
     duree: 3000,
     toucher: true,
-    apres: ({ router }) => router.push({ pathname: '/dossier/[id]', params: { id: 'v1' } }),
   },
   {
+    jour: 6,
+    route: { pathname: '/dossier/[id]', params: { id: 'v1' } },
     cible: 'detail-repondre',
     legende: 'Pour répondre, direction le site officiel : l’application ne fait que consulter.',
     duree: 5000,
   },
   {
-    avant: ({ router }) => router.back(),
+    jour: 6,
+    route: VOEUX_PROPOSITIONS,
     cible: { onglet: 2 },
     legende: 'Enfin, les messages du dossier, au même endroit.',
     duree: 3000,
     toucher: true,
-    apres: ({ router }) => router.navigate('/dossier/messages'),
   },
   {
+    jour: 6,
+    route: '/dossier/messages',
     cible: 'messages-0',
     legende: 'Les messages non lus sont signalés d’un point orange.',
     duree: 3500,
   },
   {
-    avant: ({ router }) => router.navigate({ pathname: '/dossier', params: {} }),
+    jour: 6,
+    route: '/dossier',
     legende: 'À vous de jouer : explorez librement, ou rejouez la démo.',
     duree: 0,
   },
@@ -163,6 +177,14 @@ interface EtatDemo {
   arreter: () => void;
   /** Termine la démo et ouvre le questionnaire */
   donnerAvis: () => void;
+  /** Va directement à une étape */
+  allerA: (i: number) => void;
+  precedent: () => void;
+  suivant: () => void;
+  enLecture: boolean;
+  basculerLecture: () => void;
+  vitesse: 1 | 2;
+  changerVitesse: () => void;
   etape: number | null;
   total: number;
   legende: string | null;
@@ -259,54 +281,123 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     return null;
   }, []);
 
+  const [enLecture, setEnLecture] = useState(true);
+  const enLectureRef = useRef(true);
+  const [vitesse, setVitesse] = useState<1 | 2>(1);
+  const vitesseRef = useRef<1 | 2>(1);
+  const etapeRef = useRef<number | null>(null);
+
   const arreter = useCallback(() => {
     jeton.current += 1;
+    etapeRef.current = null;
     setEtape(null);
     setRect(null);
     setToucher(false);
   }, []);
 
-  const lancer = useCallback(async () => {
-    const monJeton = ++jeton.current;
-    const actif = () => jeton.current === monJeton;
-    for (let i = 0; i < ETAPES.length; i++) {
-      const e = ETAPES[i];
-      if (e.avant) await e.avant(ctx.current);
-      await attendre(STABILISATION_MS);
-      if (!actif()) return;
-      setToucher(false);
-      setRect(await mesurer(e.cible));
-      if (!actif()) return;
-      setEtape(i);
-      if (e.duree === 0) return;
-      await attendre(e.duree);
-      if (!actif()) return;
-      if (e.toucher && e.cible) {
-        setToucher(true);
-        await attendre(TOUCHER_MS);
-        if (!actif()) return;
-      }
-      if (e.apres) await e.apres(ctx.current);
+  /** Met l'application dans l'état de l'étape i (connexion, jour, écran). */
+  const preparer = useCallback(async (e: Etape) => {
+    const { router: r, session: s } = ctx.current;
+    if (e.jour == null) {
+      await s.deconnexion();
+      r.replace('/connexion');
+      return;
     }
-  }, [mesurer]);
+    if (s.statut !== 'connecte') await s.connexion('0000000', 'demo');
+    await s.definirJour?.(e.jour);
+    r.navigate(e.route);
+    if (e.notification) s.montrerNotification();
+  }, []);
+
+  // Fonctions mutuellement dépendantes : passées par des refs pour rester stables
+  const allerARef = useRef<(i: number) => Promise<void>>(async () => {});
+
+  /** En lecture : attend la durée de l'étape, montre le toucher, puis enchaîne. */
+  const programmerSuite = useCallback(async (i: number, monJeton: number) => {
+    const actif = () => jeton.current === monJeton && enLectureRef.current;
+    const e = ETAPES[i];
+    if (e.duree === 0) return;
+    await attendre(e.duree / vitesseRef.current);
+    if (!actif()) return;
+    if (e.toucher && e.cible) {
+      setToucher(true);
+      await attendre(TOUCHER_MS / vitesseRef.current);
+      if (!actif()) return;
+    }
+    void allerARef.current(i + 1);
+  }, []);
+
+  const allerA = useCallback(
+    async (i: number) => {
+      if (i < 0 || i >= ETAPES.length) return;
+      const monJeton = ++jeton.current;
+      const e = ETAPES[i];
+      setToucher(false);
+      await preparer(e);
+      await attendre(STABILISATION_MS);
+      if (jeton.current !== monJeton) return;
+      const r = await mesurer(e.cible);
+      if (jeton.current !== monJeton) return;
+      setRect(r);
+      etapeRef.current = i;
+      setEtape(i);
+      if (enLectureRef.current) void programmerSuite(i, monJeton);
+    },
+    [preparer, mesurer, programmerSuite],
+  );
+  useEffect(() => {
+    allerARef.current = allerA;
+  }, [allerA]);
+
+  const lancer = useCallback(() => {
+    enLectureRef.current = true;
+    setEnLecture(true);
+    void allerA(0);
+  }, [allerA]);
+
+  const basculerLecture = useCallback(() => {
+    const lecture = !enLectureRef.current;
+    enLectureRef.current = lecture;
+    setEnLecture(lecture);
+    jeton.current += 1; // annule l'enchaînement en cours
+    setToucher(false);
+    const i = etapeRef.current;
+    if (lecture && i != null) {
+      if (i === ETAPES.length - 1) void allerA(0);
+      else void programmerSuite(i, jeton.current);
+    }
+  }, [allerA, programmerSuite]);
+
+  const changerVitesse = useCallback(() => {
+    const v = vitesseRef.current === 1 ? 2 : 1;
+    vitesseRef.current = v;
+    setVitesse(v);
+  }, []);
 
   // Lancement par l'adresse #demo, une fois la session initialisée
   const dejaLancee = useRef(false);
   useEffect(() => {
     if (!dejaLancee.current && apiSimulee && session.statut !== 'demarrage' && demandeeParAdresse()) {
       dejaLancee.current = true;
-      const id = setTimeout(() => void lancer(), 600);
+      const id = setTimeout(() => lancer(), 600);
       return () => clearTimeout(id);
     }
   }, [session.statut, lancer]);
 
   const valeur: EtatDemo = {
-    lancer: () => void lancer(),
+    lancer,
     arreter,
     donnerAvis: () => {
       arreter();
       ctx.current.router.push('/avis');
     },
+    allerA: (i) => void allerA(i),
+    precedent: () => etape != null && void allerA(etape - 1),
+    suivant: () => etape != null && void allerA(etape + 1),
+    enLecture,
+    basculerLecture,
+    vitesse,
+    changerVitesse,
     etape,
     total: ETAPES.length,
     legende: etape != null ? ETAPES[etape].legende : null,
@@ -462,17 +553,19 @@ function BulleLegende({ demo, H }: { demo: EtatDemo; H: number }) {
 /** Légende : progression, texte, boutons. Fond sombre. */
 function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boolean }) {
   const derniere = demo.etape === demo.total - 1;
+  const premiere = demo.etape === 0;
   const [apparition] = useState(() => new Animated.Value(0));
   useEffect(() => {
     apparition.setValue(0);
     Animated.timing(apparition, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
   }, [demo.etape, apparition]);
+  const taille = grand ? 17 : 15;
   return (
     <Animated.View
       style={{
         backgroundColor: 'rgba(24,31,46,0.96)',
         borderRadius: grand ? 24 : 20,
-        padding: grand ? 24 : 16,
+        padding: grand ? 22 : 14,
         gap: grand ? 16 : 10,
         opacity: apparition,
         transform: [{ translateY: apparition.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
@@ -484,17 +577,25 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
       }}
       accessibilityLiveRegion="polite"
     >
+      {/* Barre de progression : chaque segment mène à son étape */}
       <View style={{ flexDirection: 'row', gap: 3 }}>
         {Array.from({ length: demo.total }, (_, i) => (
-          <View
+          <Pressable
             key={i}
-            style={{
-              flex: 1,
-              height: grand ? 4 : 3,
-              borderRadius: 2,
-              backgroundColor: i <= (demo.etape ?? -1) ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
-            }}
-          />
+            onPress={() => demo.allerA(i)}
+            accessibilityRole="button"
+            accessibilityLabel={`Aller à l’étape ${i + 1}`}
+            hitSlop={{ top: 10, bottom: 10 }}
+            style={{ flex: 1, paddingVertical: 4 }}
+          >
+            <View
+              style={{
+                height: grand ? 4 : 3,
+                borderRadius: 2,
+                backgroundColor: i <= (demo.etape ?? -1) ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
+              }}
+            />
+          </Pressable>
         ))}
       </View>
       {grand && (
@@ -515,26 +616,74 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
             opacity: pressed ? 0.85 : 1,
           })}
         >
-          <Text style={{ color: '#181F2E', fontSize: grand ? 17 : 15, ...police('700') }}>Donner mon avis (2 min)</Text>
+          <Text style={{ color: '#181F2E', fontSize: taille, ...police('700') }}>Donner mon avis (2 min)</Text>
         </Pressable>
       )}
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 18 }}>
-        {derniere ? (
-          <>
-            <Pressable onPress={demo.lancer} accessibilityRole="button" hitSlop={8}>
-              <Text style={{ color: '#9FD3EC', fontSize: grand ? 17 : 15, ...police('700') }}>Rejouer</Text>
-            </Pressable>
-            <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
-              <Text style={{ color: '#FFFFFF', fontSize: grand ? 17 : 15, ...police('700') }}>Explorer</Text>
-            </Pressable>
-          </>
-        ) : (
-          <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
-            <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: grand ? 15 : 14, ...police('600') }}>Quitter la démo</Text>
-          </Pressable>
-        )}
+
+      {/* Commandes */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <BoutonCommande libelle="‹" description="Étape précédente" onPress={demo.precedent} desactive={premiere} grand={grand} />
+        <BoutonCommande
+          libelle={derniere ? '↺' : demo.enLecture ? '❚❚' : '▶'}
+          description={derniere ? 'Rejouer' : demo.enLecture ? 'Pause' : 'Lecture'}
+          onPress={derniere ? demo.lancer : demo.basculerLecture}
+          grand={grand}
+          principal
+        />
+        <BoutonCommande libelle="›" description="Étape suivante" onPress={demo.suivant} desactive={derniere} grand={grand} />
+        <BoutonCommande libelle={`×${demo.vitesse}`} description="Changer la vitesse" onPress={demo.changerVitesse} grand={grand} />
+        <View style={{ flex: 1 }} />
+        <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
+          <Text
+            style={{
+              color: derniere ? '#FFFFFF' : 'rgba(255,255,255,0.75)',
+              fontSize: grand ? 15 : 14,
+              ...police(derniere ? '700' : '600'),
+            }}
+          >
+            {derniere ? 'Explorer' : 'Quitter'}
+          </Text>
+        </Pressable>
       </View>
     </Animated.View>
+  );
+}
+
+function BoutonCommande({
+  libelle,
+  description,
+  onPress,
+  desactive = false,
+  principal = false,
+  grand,
+}: {
+  libelle: string;
+  description: string;
+  onPress: () => void;
+  desactive?: boolean;
+  principal?: boolean;
+  grand: boolean;
+}) {
+  const d = grand ? 44 : 38;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={desactive}
+      accessibilityRole="button"
+      accessibilityLabel={description}
+      style={({ pressed }) => ({
+        minWidth: d,
+        height: d,
+        paddingHorizontal: 8,
+        borderRadius: d / 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: principal ? '#FFFFFF' : 'rgba(255,255,255,0.14)',
+        opacity: desactive ? 0.35 : pressed ? 0.75 : 1,
+      })}
+    >
+      <Text style={{ color: principal ? '#181F2E' : '#FFFFFF', fontSize: grand ? 17 : 15, ...police('800') }}>{libelle}</Text>
+    </Pressable>
   );
 }
 
