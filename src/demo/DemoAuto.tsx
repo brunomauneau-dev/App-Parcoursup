@@ -1,9 +1,9 @@
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { type ComponentRef, createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, Text, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiSimulee } from '../api';
-import { URL_AVIS } from '../config';
+import { AVIS_ACTIF } from '../config';
 import { useSession } from '../session/SessionProvider';
 import { police } from '../theme';
 
@@ -161,6 +161,8 @@ type Ecran = { ox: number; oy: number; w: number; h: number };
 interface EtatDemo {
   lancer: () => void;
   arreter: () => void;
+  /** Termine la démo et ouvre le questionnaire */
+  donnerAvis: () => void;
   etape: number | null;
   total: number;
   legende: string | null;
@@ -301,6 +303,10 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
   const valeur: EtatDemo = {
     lancer: () => void lancer(),
     arreter,
+    donnerAvis: () => {
+      arreter();
+      ctx.current.router.push('/avis');
+    },
     etape,
     total: ETAPES.length,
     legende: etape != null ? ETAPES[etape].legende : null,
@@ -497,25 +503,20 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
         </Text>
       )}
       <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
-      {derniere && URL_AVIS !== '' && (
-        <Link
-          href={URL_AVIS}
-          target="_blank"
-          rel="noopener noreferrer"
-          accessibilityRole="link"
-          style={{
+      {derniere && AVIS_ACTIF && (
+        <Pressable
+          onPress={demo.donnerAvis}
+          accessibilityRole="button"
+          style={({ pressed }) => ({
             backgroundColor: '#FFFFFF',
-            color: '#181F2E',
             borderRadius: 14,
             paddingVertical: 12,
-            textAlign: 'center',
-            fontSize: grand ? 17 : 15,
-            overflow: 'hidden',
-            ...police('700'),
-          }}
+            alignItems: 'center',
+            opacity: pressed ? 0.85 : 1,
+          })}
         >
-          Donner mon avis (2 min) ↗
-        </Link>
+          <Text style={{ color: '#181F2E', fontSize: grand ? 17 : 15, ...police('700') }}>Donner mon avis (2 min)</Text>
+        </Pressable>
       )}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 18 }}>
         {derniere ? (

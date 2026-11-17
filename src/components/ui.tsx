@@ -1,9 +1,9 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ReactNode, useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 import type { StatutVoeu } from '../api/types';
-import { URL_AVIS } from '../config';
+import { AVIS_ACTIF } from '../config';
 import { Cible } from '../demo/DemoAuto';
 import { police, useTheme } from '../theme';
 
@@ -190,9 +190,17 @@ export function BoutonRepondre({ label = 'Répondre sur le site ↗' }: { label?
   return <LienExterne url={URL_PARCOURSUP} label={label} />;
 }
 
-export function BoutonAvis() {
-  if (!URL_AVIS) return null;
-  return <LienExterne url={URL_AVIS} label="Donner mon avis sur le prototype ↗" variant="secondary" />;
+/** Ouvre le questionnaire intégré. N'apparaît que si la collecte des avis est configurée. */
+export function BoutonAvis({
+  label = 'Donner mon avis sur le prototype',
+  variant = 'secondary',
+}: {
+  label?: string;
+  variant?: 'primary' | 'secondary';
+}) {
+  const router = useRouter();
+  if (!AVIS_ACTIF) return null;
+  return <Button label={label} variant={variant} onPress={() => router.push('/avis')} />;
 }
 
 export function BandeauPrototype() {

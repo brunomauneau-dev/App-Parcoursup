@@ -2,8 +2,8 @@ import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
 import type { Dossier, Voeu } from '../api/types';
 import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
-import { BoutonAvis, Card, IconeOnglet, LienExterne, Logo, TitreSection, Variation } from '../components/ui';
-import { URL_AVIS } from '../config';
+import { BoutonAvis, Card, IconeOnglet, Logo, TitreSection, Variation } from '../components/ui';
+import { AVIS_ACTIF } from '../config';
 import { dateCourte, echeance, heure, jourLong, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
@@ -259,13 +259,13 @@ export function AccueilScreen(p: Props) {
         </View>
       </Cible>
 
-      {URL_AVIS !== '' && (
+      {AVIS_ACTIF && (
         <View style={{ backgroundColor: t.info, borderRadius: 20, padding: 16, gap: 10 }}>
           <Text style={{ color: t.text, fontSize: 15.5, lineHeight: 21, ...police('700') }}>Ce prototype vous parle ?</Text>
           <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>
             Dites-nous ce que vous en pensez : 2 minutes, questionnaire anonyme.
           </Text>
-          <LienExterne url={URL_AVIS} label="Donner mon avis ↗" />
+          <BoutonAvis label="Donner mon avis" variant="primary" />
         </View>
       )}
 

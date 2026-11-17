@@ -1,6 +1,6 @@
 # Questionnaire testeurs (Google Forms)
 
-**Le plus simple : `creer-formulaire-google.gs` crée ce formulaire automatiquement** (mode d'emploi en tête du fichier). Sinon, à recopier dans un Google Forms. Durée : 2 à 3 minutes.
+**Le questionnaire est intégré à l'application** (`src/avis/questions.ts`) ; les réponses sont reçues par `collecte-avis.gs` dans un tableur Google. Ce document en garde le contenu de référence, et peut servir à créer un Google Forms si besoin. Durée : 2 à 3 minutes.
 Le formulaire a **trois sections** : un tronc commun, une section pour ceux qui ont déjà vécu la phase d'admission, une section pour les lycéens qui vont la vivre.
 
 ## Réglages du formulaire
