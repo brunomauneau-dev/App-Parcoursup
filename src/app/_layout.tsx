@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import type { ErrorBoundaryProps } from 'expo-router';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { modeDemo } from '../api';
 import { BandeauPrototype, Notification } from '../components/ui';
@@ -29,5 +30,24 @@ export default function RootLayout() {
         <Cadre />
       </SessionProvider>
     </SafeAreaProvider>
+  );
+}
+
+/** Affiche la cause d'une erreur au lieu d'un écran blanc, pour pouvoir la signaler. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return (
+    <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 64, gap: 12 }} style={{ backgroundColor: '#FFFFFF' }}>
+      <Text style={{ fontSize: 20, fontWeight: '800', color: '#C23B3B' }}>Une erreur est survenue</Text>
+      <Text style={{ fontSize: 15, color: '#16181D' }}>Faites une capture de cet écran et envoyez-la.</Text>
+      <Text selectable style={{ fontSize: 14, color: '#16181D', fontWeight: '700' }}>
+        {error.name} : {error.message}
+      </Text>
+      <Text selectable style={{ fontSize: 12, color: '#5B6170' }}>
+        {(error.stack ?? '').split('\n').slice(0, 12).join('\n')}
+      </Text>
+      <Text onPress={retry} style={{ fontSize: 16, color: '#2F4BD8', fontWeight: '700', paddingVertical: 12 }}>
+        Réessayer
+      </Text>
+    </ScrollView>
   );
 }

@@ -1,6 +1,6 @@
-import * as Notifications from 'expo-notifications';
-import { AndroidImportance } from 'expo-notifications';
-import { Platform } from 'react-native';
+import * as Notifications from "expo-notifications";
+import { AndroidImportance } from "expo-notifications";
+import { Platform } from "react-native";
 
 /**
  * Notification de démonstration, programmée par l'application elle-même
@@ -11,20 +11,25 @@ import { Platform } from 'react-native';
  * du dossier n'apparaît sur l'écran verrouillé.
  */
 
-const natif = Platform.OS === 'ios' || Platform.OS === 'android';
-const CANAL = 'mises-a-jour';
+const natif = Platform.OS === "ios" || Platform.OS === "android";
+const CANAL = "mises-a-jour";
 export const DELAI_NOTIFICATION_S = 5;
 
 if (natif) {
-  Notifications.setNotificationHandler({
-    // Affichée même quand l'application est ouverte
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
+  try {
+    Notifications.setNotificationHandler({
+      // Affichée même quand l'application est ouverte
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  } catch (e) {
+    // Jamais bloquant : sans gestionnaire, la démo retombe sur la notification imitée.
+    console.warn("Notifications indisponibles", e);
+  }
 }
 
 /** Vrai quand une vraie notification système peut être affichée (téléphone, pas le web). */
@@ -43,17 +48,17 @@ async function autorisation(): Promise<boolean> {
  */
 export async function programmerNotificationDemo(): Promise<boolean> {
   if (!natif) return false;
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync(CANAL, {
-      name: 'Mises à jour du dossier',
+      name: "Mises à jour du dossier",
       importance: AndroidImportance.HIGH,
     });
   }
   if (!(await autorisation())) return false;
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Suivi Vœux',
-      body: 'Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.',
+      title: "Suivi Vœux",
+      body: "Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.",
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
