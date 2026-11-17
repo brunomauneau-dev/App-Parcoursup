@@ -33,7 +33,8 @@
         }
       ],
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-status-bar"
     ],
     "scheme": "suivivoeux",
     "extra": {
