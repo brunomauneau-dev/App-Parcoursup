@@ -35,6 +35,21 @@
       "expo-secure-store",
       "expo-notifications"
     ],
-    "scheme": "suivivoeux"
+    "scheme": "suivivoeux",
+    "extra": {
+      "router": {
+        "asyncRoutes": false
+      },
+      "eas": {
+        "projectId": "cde44ae5-d3be-4d7e-bb37-0dda704a55e8"
+      }
+    },
+    "owner": "rivendel",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cde44ae5-d3be-4d7e-bb37-0dda704a55e8"
+    }
   }
 }
