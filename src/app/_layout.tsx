@@ -37,9 +37,7 @@ function Cadre() {
 export default function RootLayout() {
   // Sur le web, Figtree est servie par Google Fonts (balise <link> de la page).
   const [policesChargees] = useFonts(
-    Platform.OS === 'web'
-      ? {}
-      : { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold },
+    Platform.OS === 'web' ? {} : { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold },
   );
   if (!policesChargees && Platform.OS !== 'web') return null;
   return (

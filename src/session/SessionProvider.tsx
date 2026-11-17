@@ -110,16 +110,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setRafraichissement(false);
   }, [charger]);
 
-  const simulerNuit = useCallback(async (options?: { notificationSysteme?: boolean }) => {
-    if (await api.simulerNuit?.()) {
-      // Sur téléphone : vraie notification système dans quelques secondes.
-      // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
-      const systeme =
-        options?.notificationSysteme === false ? false : await programmerNotificationDemo().catch(() => false);
-      await charger();
-      if (!systeme) setNotification(true);
-    }
-  }, [charger]);
+  const simulerNuit = useCallback(
+    async (options?: { notificationSysteme?: boolean }) => {
+      if (await api.simulerNuit?.()) {
+        // Sur téléphone : vraie notification système dans quelques secondes.
+        // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
+        const systeme = options?.notificationSysteme === false ? false : await programmerNotificationDemo().catch(() => false);
+        await charger();
+        if (!systeme) setNotification(true);
+      }
+    },
+    [charger],
+  );
 
   const fermerNotification = useCallback(() => setNotification(false), []);
 

@@ -19,9 +19,16 @@ const formulaire = (champs: Record<string, string>) => ({
 });
 
 async function connexion(motDePasse = 'secret') {
-  return fetch(`${base}/oauth/token`, formulaire({
-    grant_type: 'password', client_id: 'suivi-voeux-mobile', scope: 'dossier.read', username: '1234567', password: motDePasse,
-  }));
+  return fetch(
+    `${base}/oauth/token`,
+    formulaire({
+      grant_type: 'password',
+      client_id: 'suivi-voeux-mobile',
+      scope: 'dossier.read',
+      username: '1234567',
+      password: motDePasse,
+    }),
+  );
 }
 
 test('la connexion délivre un jeton limité à dossier.read', async () => {
@@ -39,9 +46,16 @@ test('un mauvais mot de passe est refusé', async () => {
 });
 
 test('une portée plus large que la consultation est refusée', async () => {
-  const r = await fetch(`${base}/oauth/token`, formulaire({
-    grant_type: 'password', client_id: 'suivi-voeux-mobile', scope: 'dossier.write', username: '1234567', password: 'x',
-  }));
+  const r = await fetch(
+    `${base}/oauth/token`,
+    formulaire({
+      grant_type: 'password',
+      client_id: 'suivi-voeux-mobile',
+      scope: 'dossier.write',
+      username: '1234567',
+      password: 'x',
+    }),
+  );
   assert.equal(r.status, 400);
   assert.equal((await r.json()).error, 'invalid_scope');
 });
@@ -64,7 +78,7 @@ test("l'API est en lecture seule : toute écriture est refusée", async () => {
   }
 });
 
-test('le jeton d\'accès expire', async () => {
+test("le jeton d'accès expire", async () => {
   const { access_token } = await (await connexion()).json();
   await new Promise((r) => setTimeout(r, 1100));
   const r = await fetch(`${base}/v1/dossier`, { headers: { Authorization: `Bearer ${access_token}` } });
@@ -88,6 +102,9 @@ test('le jeton de renouvellement est à usage unique et sa réutilisation révoq
 test('la révocation ferme la session', async () => {
   const j = await (await connexion()).json();
   await fetch(`${base}/oauth/revoke`, formulaire({ token: j.refresh_token, client_id: 'suivi-voeux-mobile' }));
-  const r = await fetch(`${base}/oauth/token`, formulaire({ grant_type: 'refresh_token', client_id: 'suivi-voeux-mobile', refresh_token: j.refresh_token }));
+  const r = await fetch(
+    `${base}/oauth/token`,
+    formulaire({ grant_type: 'refresh_token', client_id: 'suivi-voeux-mobile', refresh_token: j.refresh_token }),
+  );
   assert.equal(r.status, 400);
 });

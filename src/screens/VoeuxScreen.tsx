@@ -1,11 +1,18 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { Dossier, Voeu } from '../api/types';
 import { Card, StatutBadge, Variation } from '../components/ui';
+import { Cible } from '../demo/DemoAuto';
 import { dateCourte, ordinal, resteAvant } from '../format';
 import { police, useTheme } from '../theme';
 import { type Filtre, variationVeille } from './AccueilScreen';
 
-const ORDRE = { proposition: 0, proposition_acceptee: 1, en_attente: 2, refuse: 3, refusee_par_candidat: 3 } as const;
+const ORDRE = {
+  proposition: 0,
+  proposition_acceptee: 1,
+  en_attente: 2,
+  refuse: 3,
+  refusee_par_candidat: 3,
+} as const;
 
 function correspond(v: Voeu, f: Filtre): boolean {
   if (f === 'tous') return true;
@@ -43,60 +50,121 @@ export function VoeuxScreen({
   const affiches = voeux.filter((v) => correspond(v, filtre));
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40, maxWidth: 560, width: '100%', alignSelf: 'center' }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 4 }}>
+    <ScrollView
+      contentContainerStyle={{
+        padding: 16,
+        gap: 12,
+        paddingBottom: 40,
+        maxWidth: 560,
+        width: '100%',
+        alignSelf: 'center',
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          marginTop: 4,
+        }}
+      >
         <Text style={{ color: t.text, fontSize: 30, ...police('800') }}>Mes vœux</Text>
         <Text style={{ color: t.textMuted, fontSize: 14, ...police('500') }}>{dossier.voeux.length} vœux</Text>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 16 }} style={{ marginHorizontal: -16, paddingLeft: 16, flexGrow: 0 }}>
-        {filtres.map((f) => {
-          const actif = f.cle === filtre;
-          const n = voeux.filter((v) => correspond(v, f.cle)).length;
-          return (
-            <Pressable
-              key={f.cle}
-              onPress={() => onFiltre(f.cle)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: actif }}
-              style={{ backgroundColor: actif ? t.text : t.surface, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 }}
-            >
-              <Text style={{ color: actif ? '#FFFFFF' : t.text, fontSize: 14.5, ...police('700') }}>
-                {f.libelle} · {n}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      <Cible id="voeux-filtres">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, paddingRight: 16 }}
+          style={{ marginHorizontal: -16, paddingLeft: 16, flexGrow: 0 }}
+        >
+          {filtres.map((f) => {
+            const actif = f.cle === filtre;
+            const n = voeux.filter((v) => correspond(v, f.cle)).length;
+            return (
+              <Pressable
+                key={f.cle}
+                onPress={() => onFiltre(f.cle)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: actif }}
+                style={{
+                  backgroundColor: actif ? t.text : t.surface,
+                  borderRadius: 999,
+                  paddingHorizontal: 16,
+                  paddingVertical: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    color: actif ? '#FFFFFF' : t.text,
+                    fontSize: 14.5,
+                    ...police('700'),
+                  }}
+                >
+                  {f.libelle} · {n}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </Cible>
 
       {affiches.map((v) => {
         const d = variationVeille(v);
         return (
-          <Card key={v.id} onPress={() => onOuvrir(v)} style={{ gap: 6 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <StatutBadge statut={v.statut} />
-              {v.statut === 'en_attente' && v.rang != null && (
-                <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>{ordinal(v.rang)}</Text>
-              )}
-            </View>
-            <Text style={{ color: t.text, fontSize: 17, marginTop: 4, ...police('700') }}>{v.formation}</Text>
-            <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
-              {v.etablissement} · {v.ville}
-            </Text>
-            {v.statut === 'proposition' && v.dateLimiteReponse && (
-              <Text style={{ color: t.danger, fontSize: 14, ...police('600') }}>
-                Réponse sur le site avant le {dateCourte(v.dateLimiteReponse)} · {resteAvant(new Date(v.dateLimiteReponse), maintenant)}
+          <Cible key={v.id} id={`voeu-${v.id}`}>
+            <Card onPress={() => onOuvrir(v)} style={{ gap: 6 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <StatutBadge statut={v.statut} />
+                {v.statut === 'en_attente' && v.rang != null && (
+                  <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>{ordinal(v.rang)}</Text>
+                )}
+              </View>
+              <Text
+                style={{
+                  color: t.text,
+                  fontSize: 17,
+                  marginTop: 4,
+                  ...police('700'),
+                }}
+              >
+                {v.formation}
               </Text>
-            )}
-            {v.statut === 'proposition_acceptee' && (
-              <Text style={{ color: t.success, fontSize: 14, ...police('600') }}>Vous avez accepté cette proposition</Text>
-            )}
-            {v.statut === 'en_attente' && d != null && <Variation valeur={d} suffixe="places depuis hier" fond={false} />}
-          </Card>
+              <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
+                {v.etablissement} · {v.ville}
+              </Text>
+              {v.statut === 'proposition' && v.dateLimiteReponse && (
+                <Text style={{ color: t.danger, fontSize: 14, ...police('600') }}>
+                  Réponse sur le site avant le {dateCourte(v.dateLimiteReponse)} · {resteAvant(new Date(v.dateLimiteReponse), maintenant)}
+                </Text>
+              )}
+              {v.statut === 'proposition_acceptee' && (
+                <Text style={{ color: t.success, fontSize: 14, ...police('600') }}>Vous avez accepté cette proposition</Text>
+              )}
+              {v.statut === 'en_attente' && d != null && <Variation valeur={d} suffixe="places depuis hier" fond={false} />}
+            </Card>
+          </Cible>
         );
       })}
       {affiches.length === 0 && (
-        <Text style={{ color: t.textMuted, fontSize: 15, textAlign: 'center', marginTop: 24, ...police('400') }}>Aucun vœu dans cette catégorie.</Text>
+        <Text
+          style={{
+            color: t.textMuted,
+            fontSize: 15,
+            textAlign: 'center',
+            marginTop: 24,
+            ...police('400'),
+          }}
+        >
+          Aucun vœu dans cette catégorie.
+        </Text>
       )}
     </ScrollView>
   );

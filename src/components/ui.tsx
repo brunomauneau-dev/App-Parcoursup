@@ -4,6 +4,7 @@ import { Animated, Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } fro
 import Svg, { Path, Rect } from 'react-native-svg';
 import type { StatutVoeu } from '../api/types';
 import { URL_AVIS } from '../config';
+import { Cible } from '../demo/DemoAuto';
 import { police, useTheme } from '../theme';
 
 export const URL_PARCOURSUP = 'https://www.parcoursup.gouv.fr';
@@ -62,10 +63,18 @@ const LIBELLES: Record<StatutVoeu, string> = {
 export function couleursStatut(t: ReturnType<typeof useTheme>, statut: StatutVoeu) {
   return {
     proposition: { texte: t.success, fond: t.successBg, point: t.successDot },
-    proposition_acceptee: { texte: t.success, fond: t.successBg, point: t.successDot },
+    proposition_acceptee: {
+      texte: t.success,
+      fond: t.successBg,
+      point: t.successDot,
+    },
     en_attente: { texte: t.warning, fond: t.warningBg, point: t.warningDot },
     refuse: { texte: t.textMuted, fond: t.neutralBg, point: t.neutralDot },
-    refusee_par_candidat: { texte: t.textMuted, fond: t.neutralBg, point: t.neutralDot },
+    refusee_par_candidat: {
+      texte: t.textMuted,
+      fond: t.neutralBg,
+      point: t.neutralDot,
+    },
   }[statut];
 }
 
@@ -73,7 +82,15 @@ export function StatutBadge({ statut }: { statut: StatutVoeu }) {
   const t = useTheme();
   const c = couleursStatut(t, statut);
   return (
-    <View style={{ alignSelf: 'flex-start', backgroundColor: c.fond, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+    <View
+      style={{
+        alignSelf: 'flex-start',
+        backgroundColor: c.fond,
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+      }}
+    >
       <Text style={{ color: c.texte, fontSize: 12.5, ...police('700') }}>{LIBELLES[statut]}</Text>
     </View>
   );
@@ -84,10 +101,24 @@ export function Variation({ valeur, suffixe = 'depuis hier', fond = true }: { va
   const t = useTheme();
   if (valeur <= 0) return null;
   const style: TextStyle = { color: t.success, fontSize: 13, ...police('700') };
-  if (!fond) return <Text style={style}>−{valeur.toLocaleString('fr-FR')} {suffixe}</Text>;
+  if (!fond)
+    return (
+      <Text style={style}>
+        −{valeur.toLocaleString('fr-FR')} {suffixe}
+      </Text>
+    );
   return (
-    <View style={{ backgroundColor: t.successBg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
-      <Text style={style}>−{valeur.toLocaleString('fr-FR')} {suffixe}</Text>
+    <View
+      style={{
+        backgroundColor: t.successBg,
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+      }}
+    >
+      <Text style={style}>
+        −{valeur.toLocaleString('fr-FR')} {suffixe}
+      </Text>
     </View>
   );
 }
@@ -144,7 +175,11 @@ export function LienExterne({ url, label, variant = 'primary' }: { url: string; 
       target="_blank"
       rel="noopener noreferrer"
       accessibilityRole="link"
-      style={{ ...styleBouton(t, variant), ...texteBouton(t, variant), overflow: 'hidden' }}
+      style={{
+        ...styleBouton(t, variant),
+        ...texteBouton(t, variant),
+        overflow: 'hidden',
+      }}
     >
       {label}
     </Link>
@@ -163,8 +198,23 @@ export function BoutonAvis() {
 export function BandeauPrototype() {
   const t = useTheme();
   return (
-    <View style={{ backgroundColor: t.primaryDark, paddingVertical: 5, paddingHorizontal: 16 }}>
-      <Text style={{ color: '#FFFFFF', fontSize: 11.5, textAlign: 'center', letterSpacing: 0.6, textTransform: 'uppercase', ...police('700') }}>
+    <View
+      style={{
+        backgroundColor: t.primaryDark,
+        paddingVertical: 5,
+        paddingHorizontal: 16,
+      }}
+    >
+      <Text
+        style={{
+          color: '#FFFFFF',
+          fontSize: 11.5,
+          textAlign: 'center',
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
+          ...police('700'),
+        }}
+      >
         Prototype · données fictives
       </Text>
     </View>
@@ -175,7 +225,15 @@ export function BandeauPrototype() {
 export function TitreSection({ titre, aDroite }: { titre: string; aDroite?: string }) {
   const t = useTheme();
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12, paddingHorizontal: 4 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginTop: 12,
+        paddingHorizontal: 4,
+      }}
+    >
       <Text style={{ color: t.text, fontSize: 19, ...police('800') }}>{titre}</Text>
       {aDroite && <Text style={{ color: t.textMuted, fontSize: 13, ...police('500') }}>{aDroite}</Text>}
     </View>
@@ -187,7 +245,11 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
   const t = useTheme();
   const [anim] = useState(() => new Animated.Value(0));
   useEffect(() => {
-    Animated.timing(anim, { toValue: visible ? 1 : 0, duration: 250, useNativeDriver: false }).start();
+    Animated.timing(anim, {
+      toValue: visible ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
     if (visible) {
       const id = setTimeout(onClose, 5000);
       return () => clearTimeout(id);
@@ -203,42 +265,57 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
         top,
         zIndex: 10,
         opacity: anim,
-        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-30, 0] }) }],
+        transform: [
+          {
+            translateY: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [-30, 0],
+            }),
+          },
+        ],
       }}
     >
-      <Pressable
-        onPress={onClose}
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.97)',
-          borderRadius: 20,
-          padding: 14,
-          flexDirection: 'row',
-          gap: 12,
-          alignItems: 'center',
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: t.border,
-          shadowColor: '#000',
-          shadowOpacity: 0.18,
-          shadowRadius: 16,
-          shadowOffset: { width: 0, height: 6 },
-          elevation: 8,
-        }}
-      >
-        <Logo taille={38} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Suivi Vœux · maintenant</Text>
-          <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
-            Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.
-          </Text>
-        </View>
-      </Pressable>
+      <Cible id="notification">
+        <Pressable
+          onPress={onClose}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.97)',
+            borderRadius: 20,
+            padding: 14,
+            flexDirection: 'row',
+            gap: 12,
+            alignItems: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: t.border,
+            shadowColor: '#000',
+            shadowOpacity: 0.18,
+            shadowRadius: 16,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 8,
+          }}
+        >
+          <Logo taille={38} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Suivi Vœux · maintenant</Text>
+            <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
+              Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.
+            </Text>
+          </View>
+        </Pressable>
+      </Cible>
     </Animated.View>
   );
 }
 
 /** Icônes des onglets, dessinées pour le prototype. */
 export function IconeOnglet({ nom, couleur, taille = 24 }: { nom: 'accueil' | 'voeux' | 'messages'; couleur: string; taille?: number }) {
-  const trait = { stroke: couleur, strokeWidth: 2, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  const trait = {
+    stroke: couleur,
+    strokeWidth: 2,
+    fill: 'none',
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
   return (
     <Svg width={taille} height={taille} viewBox="0 0 24 24">
       {nom === 'accueil' && <Path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" {...trait} />}

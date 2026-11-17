@@ -81,14 +81,7 @@ export function RankChart({ historique, reference, height = 200 }: Props) {
               strokeWidth={2}
             />
           ))}
-          <SvgText
-            x={pad.l + w + 6}
-            y={yDernier}
-            fontSize={12}
-            fontFamily={police}
-            fontWeight="700"
-            fill={t.chartLine}
-          >
+          <SvgText x={pad.l + w + 6} y={yDernier} fontSize={12} fontFamily={police} fontWeight="700" fill={t.chartLine}>
             {nombre(dernier.rang)}
           </SvgText>
           {points.map((p, i) =>
@@ -122,9 +115,7 @@ export function Sparkline({ historique, color }: { historique: PointHistorique[]
   const min = Math.min(...points);
   const max = Math.max(...points);
   const span = Math.max(1, max - min);
-  const pts = points
-    .map((r, i) => `${(i / (points.length - 1)) * (W - 4) + 2},${((r - min) / span) * (H - 4) + 2}`)
-    .join(' ');
+  const pts = points.map((r, i) => `${(i / (points.length - 1)) * (W - 4) + 2},${((r - min) / span) * (H - 4) + 2}`).join(' ');
   return (
     <Svg width={W} height={H}>
       <Polyline points={pts} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />

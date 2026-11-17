@@ -8,17 +8,7 @@ import { police, useTheme } from '../theme';
  * la zone verte s'arrête au rang du dernier candidat appelé l'an dernier,
  * le repère « Vous » marque la position actuelle.
  */
-export function Jauge({
-  rang,
-  total,
-  zone,
-  grande = false,
-}: {
-  rang: number;
-  total: number;
-  zone?: number;
-  grande?: boolean;
-}) {
+export function Jauge({ rang, total, zone, grande = false }: { rang: number; total: number; zone?: number; grande?: boolean }) {
   const t = useTheme();
   const [largeur, setLargeur] = useState(0);
   const fin = Math.max(total, rang, zone ?? 0);
@@ -38,8 +28,28 @@ export function Jauge({
         </View>
         {largeur > 0 && grande && (
           <>
-            <View style={{ position: 'absolute', left: x(rang) - 2, bottom: -4, width: repere, height: h + 8, borderRadius: 2, backgroundColor: t.primary }} />
-            <View style={{ position: 'absolute', left: Math.min(Math.max(x(rang) - 22, 0), largeur - 46), top: 0, backgroundColor: t.primary, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 }}>
+            <View
+              style={{
+                position: 'absolute',
+                left: x(rang) - 2,
+                bottom: -4,
+                width: repere,
+                height: h + 8,
+                borderRadius: 2,
+                backgroundColor: t.primary,
+              }}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                left: Math.min(Math.max(x(rang) - 22, 0), largeur - 46),
+                top: 0,
+                backgroundColor: t.primary,
+                borderRadius: 6,
+                paddingHorizontal: 7,
+                paddingVertical: 2,
+              }}
+            >
               <Text style={{ color: '#FFFFFF', fontSize: 11.5, ...police('700') }}>Vous</Text>
             </View>
           </>
