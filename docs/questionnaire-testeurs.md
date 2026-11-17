@@ -1,6 +1,6 @@
 # Questionnaire testeurs (Google Forms)
 
-À recopier dans un Google Forms. Durée : 2 à 3 minutes.
+**Le plus simple : `creer-formulaire-google.gs` crée ce formulaire automatiquement** (mode d'emploi en tête du fichier). Sinon, à recopier dans un Google Forms. Durée : 2 à 3 minutes.
 Le formulaire a **trois sections** : un tronc commun, une section pour ceux qui ont déjà vécu la phase d'admission, une section pour les lycéens qui vont la vivre.
 
 ## Réglages du formulaire
@@ -75,7 +75,10 @@ Ce questionnaire est anonyme. N'indiquez ni votre nom, ni votre numéro de dossi
 
 ## Section 4 : le prototype
 
-**7. Si cette application existait, l'utiliseriez-vous ?** *(échelle linéaire de 1 à 5, obligatoire)*
+**7. L'application est-elle facile à comprendre ?** *(échelle linéaire de 1 à 5, obligatoire)*
+- 1 = Pas du tout · 5 = Tout à fait
+
+**7 bis. Si cette application existait, l'utiliseriez-vous ?** *(échelle linéaire de 1 à 5, obligatoire)*
 - 1 = Certainement pas · 5 = Certainement
 
 **8. Qu'est-ce qui vous paraît le plus utile ?** *(cases à cocher)*

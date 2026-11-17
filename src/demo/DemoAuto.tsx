@@ -1,8 +1,9 @@
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { type ComponentRef, createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Platform, Pressable, Text, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiSimulee } from '../api';
+import { URL_AVIS } from '../config';
 import { useSession } from '../session/SessionProvider';
 import { police } from '../theme';
 
@@ -496,6 +497,26 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
         </Text>
       )}
       <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
+      {derniere && URL_AVIS !== '' && (
+        <Link
+          href={URL_AVIS}
+          target="_blank"
+          rel="noopener noreferrer"
+          accessibilityRole="link"
+          style={{
+            backgroundColor: '#FFFFFF',
+            color: '#181F2E',
+            borderRadius: 14,
+            paddingVertical: 12,
+            textAlign: 'center',
+            fontSize: grand ? 17 : 15,
+            overflow: 'hidden',
+            ...police('700'),
+          }}
+        >
+          Donner mon avis (2 min) ↗
+        </Link>
+      )}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 18 }}>
         {derniere ? (
           <>
