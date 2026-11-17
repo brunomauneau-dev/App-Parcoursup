@@ -3,6 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, Te
 import { apiSimulee, modeDemo } from '../api';
 import { messageErreur } from '../api/erreurs';
 import { Button, Logo } from '../components/ui';
+import { useDemoAuto } from '../demo/DemoAuto';
 import { police, useTheme } from '../theme';
 
 export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string) => Promise<void> }) {
@@ -11,6 +12,7 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
   const [mdp, setMdp] = useState('');
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const demoAuto = useDemoAuto();
 
   const champ = {
     backgroundColor: t.surface,
@@ -54,7 +56,10 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
             {chargement ? (
               <ActivityIndicator color={t.primary} style={{ paddingVertical: 14 }} />
             ) : (
-              <Button label="Découvrir la démo" onPress={() => void valider('0000000', 'demo')} />
+              <>
+                <Button label="Découvrir la démo" onPress={() => void valider('0000000', 'demo')} />
+                {demoAuto && <Button label="Voir la démo animée (1 min)" variant="secondary" onPress={demoAuto.lancer} />}
+              </>
             )}
             <Text style={{ color: t.textMuted, fontSize: 13.5, textAlign: 'center', lineHeight: 19, ...police('400') }}>
               Démonstration avec un dossier fictif : aucun identifiant n’est demandé.

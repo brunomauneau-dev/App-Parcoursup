@@ -17,7 +17,7 @@ export default function Accueil() {
       onOuvrir={(v) => router.push({ pathname: '/dossier/[id]', params: { id: v.id } })}
       onVoirVoeux={(filtre) => router.navigate({ pathname: '/dossier/voeux', params: { filtre } })}
       onMessages={() => router.navigate('/dossier/messages')}
-      onSimuler={s.simulerNuit}
+      onSimuler={s.simulerNuit ? () => void s.simulerNuit?.() : undefined}
       onDeconnexion={async () => {
         await s.deconnexion();
         router.replace('/connexion');

@@ -7,13 +7,16 @@ Faire essayer le prototype « Suivi Vœux » à des élèves de terminale, en 20
 1. **Accord du chef d'établissement.** Lui envoyer le message ci-dessous. Idéalement, la séance a lieu avec le professeur principal ou le psychologue de l'Éducation nationale, par exemple pendant une heure consacrée à l'orientation.
 2. **Information des familles** par l'établissement (ENT ou carnet), au moins une semaine avant, avec la note ci-dessous. Un élève dont la famille s'oppose ne participe pas, sans avoir à se justifier.
 3. **Vérifier le matériel** : le lien du prototype s'ouvre sur un téléphone en 4G ; le Wi-Fi de l'établissement peut bloquer certains sites, le tester sur place avant.
-4. Préparer le lien (ou un QR code projeté) vers le prototype. Le bouton « Donner mon avis » est dans le prototype.
+4. Préparer les QR codes à projeter :
+   - `qr-demo-animee.png` : la démo animée (1 minute), pour ouvrir la séance ;
+   - `qr-prototype.png` : le prototype, que les élèves manipulent eux-mêmes.
+   Le bouton « Donner mon avis » est dans le prototype.
 
 ## Déroulé (20 minutes)
 
 | Durée | Étape |
 | --- | --- |
-| 3 min | Présentation : un prototype, des données fictives, un questionnaire anonyme. Rappeler de ne jamais saisir ses vrais identifiants Parcoursup. |
+| 3 min | Projection de la démo animée (adresse se terminant par `#demo`), puis présentation : un prototype, des données fictives, un questionnaire anonyme. Rappeler de ne jamais saisir ses vrais identifiants Parcoursup. |
 | 2 min | Les élèves ouvrent le lien sur leur téléphone, appuient sur « Découvrir la démo ». |
 | 8 min | Exploration libre, puis trois consignes : trouver la proposition qui attend une réponse et le temps restant ; ouvrir un vœu en liste d'attente et lire la courbe ; appuyer sur « Simuler la mise à jour de la nuit ». |
 | 5 min | Questionnaire via « Donner mon avis ». |

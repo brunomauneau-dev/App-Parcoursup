@@ -22,8 +22,11 @@ interface Session {
   connexion: (numero: string, motDePasse: string) => Promise<void>;
   deconnexion: () => Promise<void>;
   rafraichir: () => Promise<void>;
-  /** Démonstration uniquement */
-  simulerNuit?: () => Promise<void>;
+  /**
+   * Démonstration uniquement. `notificationSysteme: false` force la
+   * notification imitée (utilisé par la démo automatique).
+   */
+  simulerNuit?: (options?: { notificationSysteme?: boolean }) => Promise<void>;
 }
 
 const Contexte = createContext<Session | null>(null);
@@ -107,11 +110,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setRafraichissement(false);
   }, [charger]);
 
-  const simulerNuit = useCallback(async () => {
+  const simulerNuit = useCallback(async (options?: { notificationSysteme?: boolean }) => {
     if (await api.simulerNuit?.()) {
       // Sur téléphone : vraie notification système dans quelques secondes.
       // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
-      const systeme = await programmerNotificationDemo().catch(() => false);
+      const systeme =
+        options?.notificationSysteme === false ? false : await programmerNotificationDemo().catch(() => false);
       await charger();
       if (!systeme) setNotification(true);
     }
