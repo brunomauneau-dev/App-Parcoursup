@@ -1,13 +1,13 @@
 /**
  * Réception des avis du questionnaire intégré à l'application « Suivi Vœux ».
- * Chaque réponse envoyée par l'application ajoute une ligne dans un tableur Google.
+ * Chaque réponse envoyée par l'application ajoute une ligne dans ce tableur Google.
  *
  * Mise en place (5 minutes, une seule fois) :
- *  1. Ouvrir https://script.google.com, cliquer sur « Nouveau projet ».
- *  2. Effacer le contenu, coller tout ce fichier, enregistrer (icône disquette).
- *  3. Choisir la fonction « installer » dans la liste en haut, cliquer sur « Exécuter »,
- *     accepter les autorisations. Le journal affiche le lien du tableur des réponses.
- *  4. Cliquer sur « Déployer » > « Nouveau déploiement » > roue dentée > « Application web » :
+ *  1. Créer un tableur Google vide (https://sheets.new), le nommer « Réponses – prototype Suivi Vœux ».
+ *  2. Dans ce tableur : menu Extensions > Apps Script.
+ *  3. Effacer le contenu, coller tout ce fichier (il commence par « /** »), enregistrer.
+ *  4. Choisir la fonction « installer » en haut, cliquer sur « Exécuter », accepter les autorisations.
+ *  5. Cliquer sur « Déployer » > « Nouveau déploiement » > roue dentée > « Application web » :
  *       - Exécuter en tant que : Moi
  *       - Qui a accès : Tout le monde
  *     puis « Déployer ». Copier l'« URL de l'application web » (elle finit par /exec)
@@ -34,9 +34,12 @@ var COLONNES = [
 ];
 
 function installer() {
-  var tableur = SpreadsheetApp.create('Réponses – prototype Suivi Vœux');
-  var feuille = tableur.getSheets()[0];
+  // Script rattaché au tableur (Extensions > Apps Script) : on utilise ce tableur.
+  // Sinon, on en crée un.
+  var tableur = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.create('Réponses – prototype Suivi Vœux');
+  var feuille = tableur.getSheetByName(FEUILLE) || tableur.getSheets()[0];
   feuille.setName(FEUILLE);
+  feuille.clear();
   feuille.appendRow(COLONNES.map(function (c) { return c[1]; }));
   feuille.setFrozenRows(1);
   feuille.getRange(1, 1, 1, COLONNES.length).setFontWeight('bold');
