@@ -13,7 +13,7 @@ import type { ErrorBoundaryProps } from 'expo-router';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { modeDemo } from '../api';
 import { BandeauPrototype, Notification } from '../components/ui';
-import { DemoAutoProvider } from '../demo/DemoAuto';
+import { CalqueDemo, DemoAutoProvider, PresentationEcran } from '../demo/DemoAuto';
 import { SessionProvider, useSession } from '../session/SessionProvider';
 import { useTheme } from '../theme';
 
@@ -25,11 +25,10 @@ function Cadre() {
     <View style={{ flex: 1, backgroundColor: t.bg, paddingTop: insets.top }}>
       <StatusBar style="dark" />
       {modeDemo && <BandeauPrototype />}
-      <DemoAutoProvider>
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg } }} />
-        {/* La notification passe au-dessus du reste */}
-        <Notification visible={notification} onClose={fermerNotification} top={insets.top + 8} />
-      </DemoAutoProvider>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg } }} />
+      {/* La notification et la démo passent au-dessus du reste */}
+      <Notification visible={notification} onClose={fermerNotification} top={insets.top + 8} />
+      <CalqueDemo />
     </View>
   );
 }
@@ -43,7 +42,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <SessionProvider>
-        <Cadre />
+        <DemoAutoProvider>
+          <PresentationEcran>
+            <Cadre />
+          </PresentationEcran>
+        </DemoAutoProvider>
       </SessionProvider>
     </SafeAreaProvider>
   );
