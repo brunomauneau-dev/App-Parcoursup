@@ -1,56 +1,112 @@
-import { ReactNode, useEffect, useState } from 'react';
 import { Link } from 'expo-router';
-import { Animated, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { URL_AVIS } from '../config';
+import { ReactNode, useEffect, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import Svg, { Path, Rect } from 'react-native-svg';
 import type { StatutVoeu } from '../api/types';
-import { useTheme } from '../theme';
+import { URL_AVIS } from '../config';
+import { police, useTheme } from '../theme';
 
 export const URL_PARCOURSUP = 'https://www.parcoursup.gouv.fr';
+
+/** Logo original du prototype : un dossier. Pas le logo officiel de Parcoursup. */
+export function Logo({ taille = 40 }: { taille?: number }) {
+  const t = useTheme();
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Suivi Vœux">
+      <Rect width="100" height="100" rx="24" fill={t.primary} />
+      <Rect x="30" y="22" width="40" height="56" rx="8" fill="#FFFFFF" />
+      <Rect x="38" y="34" width="24" height="5" rx="2.5" fill={t.accent} />
+      <Rect x="38" y="45" width="18" height="5" rx="2.5" fill={t.primary} />
+      <Rect x="38" y="56" width="21" height="5" rx="2.5" fill={t.gaugeTrack} />
+    </Svg>
+  );
+}
+
+export function T({ style, children, ...rest }: React.ComponentProps<typeof Text>) {
+  const t = useTheme();
+  return (
+    <Text style={[{ color: t.text, ...police('400') }, style]} {...rest}>
+      {children}
+    </Text>
+  );
+}
 
 export function Card({ children, style, onPress }: { children: ReactNode; style?: ViewStyle; onPress?: () => void }) {
   const t = useTheme();
   const base: ViewStyle = {
     backgroundColor: t.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: t.border,
+    shadowColor: '#0B1A33',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   };
   if (!onPress) return <View style={[base, style]}>{children}</View>;
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [base, style, pressed && { opacity: 0.75 }]}
-    >
+    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [base, style, pressed && { opacity: 0.8 }]}>
       {children}
     </Pressable>
   );
 }
 
 const LIBELLES: Record<StatutVoeu, string> = {
-  proposition: 'Réponse attendue',
+  proposition: 'Proposition d’admission',
   proposition_acceptee: 'Proposition acceptée',
-  en_attente: "En liste d'attente",
+  en_attente: 'En attente d’une place',
   refuse: 'Refus de l’établissement',
   refusee_par_candidat: 'Refusée par vous',
 };
 
+export function couleursStatut(t: ReturnType<typeof useTheme>, statut: StatutVoeu) {
+  return {
+    proposition: { texte: t.success, fond: t.successBg, point: t.successDot },
+    proposition_acceptee: { texte: t.success, fond: t.successBg, point: t.successDot },
+    en_attente: { texte: t.warning, fond: t.warningBg, point: t.warningDot },
+    refuse: { texte: t.textMuted, fond: t.neutralBg, point: t.neutralDot },
+    refusee_par_candidat: { texte: t.textMuted, fond: t.neutralBg, point: t.neutralDot },
+  }[statut];
+}
+
 export function StatutBadge({ statut }: { statut: StatutVoeu }) {
   const t = useTheme();
-  const c = {
-    proposition: [t.warning, t.warningBg],
-    proposition_acceptee: [t.success, t.successBg],
-    en_attente: [t.waiting, t.waitingBg],
-    refuse: [t.textMuted, t.surfaceAlt],
-    refusee_par_candidat: [t.textMuted, t.surfaceAlt],
-  }[statut];
+  const c = couleursStatut(t, statut);
   return (
-    <View style={{ alignSelf: 'flex-start', backgroundColor: c[1], borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
-      <Text style={{ color: c[0], fontSize: 12, fontWeight: '700' }}>{LIBELLES[statut]}</Text>
+    <View style={{ alignSelf: 'flex-start', backgroundColor: c.fond, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+      <Text style={{ color: c.texte, fontSize: 12.5, ...police('700') }}>{LIBELLES[statut]}</Text>
     </View>
   );
 }
+
+/** Pastille de variation : « −16 depuis hier » (en vert, une position qui baisse est une bonne nouvelle). */
+export function Variation({ valeur, suffixe = 'depuis hier', fond = true }: { valeur: number; suffixe?: string; fond?: boolean }) {
+  const t = useTheme();
+  if (valeur <= 0) return null;
+  const style: TextStyle = { color: t.success, fontSize: 13, ...police('700') };
+  if (!fond) return <Text style={style}>−{valeur.toLocaleString('fr-FR')} {suffixe}</Text>;
+  return (
+    <View style={{ backgroundColor: t.successBg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+      <Text style={style}>−{valeur.toLocaleString('fr-FR')} {suffixe}</Text>
+    </View>
+  );
+}
+
+const styleBouton = (t: ReturnType<typeof useTheme>, variante: 'primary' | 'secondary' | 'clair') => ({
+  backgroundColor: variante === 'primary' ? t.primary : 'transparent',
+  borderWidth: variante === 'primary' ? 0 : 1.5,
+  borderColor: variante === 'clair' ? 'rgba(255,255,255,0.55)' : t.primary,
+  borderRadius: 16,
+  paddingVertical: 15,
+  paddingHorizontal: 16,
+});
+
+const texteBouton = (t: ReturnType<typeof useTheme>, variante: 'primary' | 'secondary' | 'clair'): TextStyle => ({
+  color: variante === 'secondary' ? t.primary : '#FFFFFF',
+  fontSize: 16,
+  textAlign: 'center',
+  ...police('700'),
+});
 
 export function Button({
   label,
@@ -60,28 +116,18 @@ export function Button({
 }: {
   label: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'clair';
   disabled?: boolean;
 }) {
   const t = useTheme();
-  const primary = variant === 'primary';
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      style={({ pressed }) => ({
-        backgroundColor: primary ? t.primary : 'transparent',
-        borderWidth: primary ? 0 : 1.5,
-        borderColor: t.primary,
-        borderRadius: 12,
-        paddingVertical: 14,
-        paddingHorizontal: 16,
-        alignItems: 'center',
-        opacity: disabled ? 0.5 : pressed ? 0.8 : 1,
-      })}
+      style={({ pressed }) => [styleBouton(t, variant), { opacity: disabled ? 0.5 : pressed ? 0.8 : 1 }]}
     >
-      <Text style={{ color: primary ? t.primaryText : t.primary, fontSize: 16, fontWeight: '700' }}>{label}</Text>
+      <Text style={texteBouton(t, variant)}>{label}</Text>
     </Pressable>
   );
 }
@@ -92,49 +138,46 @@ export function Button({
  */
 export function LienExterne({ url, label, variant = 'primary' }: { url: string; label: string; variant?: 'primary' | 'secondary' }) {
   const t = useTheme();
-  const primary = variant === 'primary';
   return (
     <Link
       href={url}
       target="_blank"
       rel="noopener noreferrer"
       accessibilityRole="link"
-      style={{
-        backgroundColor: primary ? t.primary : 'transparent',
-        borderWidth: primary ? 0 : 1.5,
-        borderColor: t.primary,
-        borderRadius: 12,
-        paddingVertical: 14,
-        paddingHorizontal: 16,
-        textAlign: 'center',
-        color: primary ? t.primaryText : t.primary,
-        fontSize: 16,
-        fontWeight: '700',
-        overflow: 'hidden',
-      }}
+      style={{ ...styleBouton(t, variant), ...texteBouton(t, variant), overflow: 'hidden' }}
     >
       {label}
     </Link>
   );
 }
 
-export function BoutonRepondre() {
-  return <LienExterne url={URL_PARCOURSUP} label="Répondre sur Parcoursup ↗" />;
+export function BoutonRepondre({ label = 'Répondre sur le site ↗' }: { label?: string }) {
+  return <LienExterne url={URL_PARCOURSUP} label={label} />;
 }
 
-/** Bouton vers le questionnaire d'avis, affiché seulement si un lien est configuré. */
 export function BoutonAvis() {
   if (!URL_AVIS) return null;
-  return <LienExterne url={URL_AVIS} label="💬 Donner mon avis (2 min) ↗" variant="secondary" />;
+  return <LienExterne url={URL_AVIS} label="Donner mon avis sur le prototype ↗" variant="secondary" />;
 }
 
 export function BandeauPrototype() {
   const t = useTheme();
   return (
-    <View style={{ backgroundColor: t.warningBg, paddingVertical: 6, paddingHorizontal: 16 }}>
-      <Text style={{ color: t.warning, fontSize: 12, fontWeight: '600', textAlign: 'center' }}>
-        Prototype de démonstration · données fictives
+    <View style={{ backgroundColor: t.primaryDark, paddingVertical: 5, paddingHorizontal: 16 }}>
+      <Text style={{ color: '#FFFFFF', fontSize: 11.5, textAlign: 'center', letterSpacing: 0.6, textTransform: 'uppercase', ...police('700') }}>
+        Prototype · données fictives
       </Text>
+    </View>
+  );
+}
+
+/** Titre de section : « Listes d'attente » + mention à droite. */
+export function TitreSection({ titre, aDroite }: { titre: string; aDroite?: string }) {
+  const t = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12, paddingHorizontal: 4 }}>
+      <Text style={{ color: t.text, fontSize: 19, ...police('800') }}>{titre}</Text>
+      {aDroite && <Text style={{ color: t.textMuted, fontSize: 13, ...police('500') }}>{aDroite}</Text>}
     </View>
   );
 }
@@ -166,8 +209,8 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
       <Pressable
         onPress={onClose}
         style={{
-          backgroundColor: t.surface,
-          borderRadius: 18,
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderRadius: 20,
           padding: 14,
           flexDirection: 'row',
           gap: 12,
@@ -181,14 +224,36 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
           elevation: 8,
         }}
       >
-        <View style={{ width: 36, height: 36, borderRadius: 9, backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: t.primaryText, fontWeight: '800' }}>SV</Text>
-        </View>
+        <Logo taille={38} />
         <View style={{ flex: 1 }}>
-          <Text style={{ color: t.text, fontWeight: '700', fontSize: 14 }}>Suivi Vœux · maintenant</Text>
-          <Text style={{ color: t.textMuted, fontSize: 14 }}>Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.</Text>
+          <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Suivi Vœux · maintenant</Text>
+          <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
+            Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.
+          </Text>
         </View>
       </Pressable>
     </Animated.View>
+  );
+}
+
+/** Icônes des onglets, dessinées pour le prototype. */
+export function IconeOnglet({ nom, couleur, taille = 24 }: { nom: 'accueil' | 'voeux' | 'messages'; couleur: string; taille?: number }) {
+  const trait = { stroke: couleur, strokeWidth: 2, fill: 'none', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  return (
+    <Svg width={taille} height={taille} viewBox="0 0 24 24">
+      {nom === 'accueil' && <Path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" {...trait} />}
+      {nom === 'voeux' && (
+        <>
+          <Rect x="4" y="4" width="16" height="6" rx="2" {...trait} />
+          <Rect x="4" y="14" width="16" height="6" rx="2" {...trait} />
+        </>
+      )}
+      {nom === 'messages' && (
+        <>
+          <Rect x="3" y="5" width="18" height="14" rx="3" {...trait} />
+          <Path d="m4 7 8 6 8-6" {...trait} />
+        </>
+      )}
+    </Svg>
   );
 }

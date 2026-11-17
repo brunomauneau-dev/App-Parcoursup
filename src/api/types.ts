@@ -20,6 +20,8 @@ export interface PointHistorique {
 
 export interface Voeu {
   id: string;
+  /** Type de formation : « BUT », « Classe prépa », « Licence »… */
+  categorie: string;
   formation: string;
   etablissement: string;
   ville: string;
@@ -47,6 +49,23 @@ export interface Dossier {
    */
   dateServeur: string;
   voeux: Voeu[];
+  /** Messages du dossier, du plus récent au plus ancien */
+  messages: Message[];
+  /** Dates générales de la phase d'admission (identiques pour tous les candidats) */
+  calendrier: EtapeCalendrier[];
+}
+
+export interface EtapeCalendrier {
+  date: string;
+  libelle: string;
+}
+
+export interface Message {
+  id: string;
+  date: string;
+  categorie: 'proposition' | 'admission' | 'info' | 'etablissement';
+  titre: string;
+  lu: boolean;
 }
 
 /** Interface consommée par l'application. */

@@ -5,7 +5,7 @@
  *
  * La phase d'admission simulée commence le 2 juin 2027 (jour 0).
  */
-import type { Dossier, PointHistorique, Voeu } from './types';
+import type { Dossier, Message, PointHistorique, Voeu } from './types';
 
 export const JOUR_INITIAL = 4;
 export const JOUR_MAX = 7;
@@ -39,12 +39,12 @@ interface VoeuSource {
 
 const SOURCES: VoeuSource[] = [
   {
-    base: { id: 'v1', formation: 'CPGE MPSI', etablissement: 'Lycée Jules Ferry', ville: 'Nantes' },
+    base: { id: 'v1', categorie: 'Classe prépa', formation: 'CPGE MPSI', etablissement: 'Lycée Jules Ferry', ville: 'Nantes' },
     jourProposition: 3,
     delaiReponse: 4,
   },
   {
-    base: { id: 'v2', formation: 'Licence Mathématiques', etablissement: 'Université de Nantes', ville: 'Nantes' },
+    base: { id: 'v2', categorie: 'Licence', formation: 'Licence Mathématiques', etablissement: 'Université de Nantes', ville: 'Nantes' },
     jourProposition: 0,
     delaiReponse: 3,
     accepteeLeJour: 1,
@@ -52,6 +52,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: {
       id: 'v3',
+      categorie: 'BUT',
       formation: 'BUT Informatique',
       etablissement: 'IUT de Nantes',
       ville: 'Nantes',
@@ -64,6 +65,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: {
       id: 'v4',
+      categorie: 'BUT',
       formation: 'BUT GEII',
       etablissement: 'IUT de Rennes',
       ville: 'Rennes',
@@ -78,6 +80,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: {
       id: 'v5',
+      categorie: 'Licence',
       formation: 'Licence Informatique',
       etablissement: 'Université de Rennes',
       ville: 'Rennes',
@@ -90,6 +93,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: {
       id: 'v6',
+      categorie: 'École d’ingénieurs',
       formation: 'Cycle ingénieur post-bac',
       etablissement: 'INSA (fictif)',
       ville: 'Lyon',
@@ -100,7 +104,7 @@ const SOURCES: VoeuSource[] = [
     rangs: [2104, 2040, 1998, 1962, 1930, 1911, 1880, 1855],
   },
   {
-    base: { id: 'v8', formation: 'BTS SIO', etablissement: 'Lycée (fictif) de Saint-Nazaire', ville: 'Saint-Nazaire' },
+    base: { id: 'v8', categorie: 'BTS', formation: 'BTS SIO', etablissement: 'Lycée (fictif) de Saint-Nazaire', ville: 'Saint-Nazaire' },
     jourProposition: 0,
     delaiReponse: 3,
     refuseeLeJour: 1,
@@ -108,6 +112,7 @@ const SOURCES: VoeuSource[] = [
   {
     base: {
       id: 'v7',
+      categorie: 'Double licence',
       formation: 'Double licence Maths-Informatique',
       etablissement: 'Université (fictive) de Paris',
       ville: 'Paris',
@@ -143,6 +148,24 @@ function construireVoeu(src: VoeuSource, jour: number): Voeu {
   return v;
 }
 
+const FORMATIONS = new Map(SOURCES.map((src) => [src.base.id, src.base.formation]));
+
+function construireMessages(jour: number): Message[] {
+  const m: Message[] = [];
+  const ajouter = (j: number, id: string, categorie: Message['categorie'], titre: string) => {
+    if (j <= jour) m.push({ id, date: dateDuJour(j, HEURE_MAJ.h, HEURE_MAJ.m).toISOString(), categorie, titre, lu: j < jour });
+  };
+  ajouter(0, 'm-debut', 'admission', 'Les premières réponses sont arrivées');
+  for (const src of SOURCES) {
+    if (src.jourProposition != null) {
+      ajouter(src.jourProposition, `m-prop-${src.base.id}`, 'proposition', `Proposition d’admission : ${FORMATIONS.get(src.base.id)}`);
+    }
+  }
+  ajouter(4, 'm-jpo', 'etablissement', 'IUT de Nantes : journée découverte le 19 juin');
+  if (jour >= 1) ajouter(jour, `m-rangs-${jour}`, 'info', 'Vos positions en liste d’attente ont évolué');
+  return m.sort((a, b) => b.date.localeCompare(a.date));
+}
+
 export function construireDossier(jour: number, debut: number, numeroDossier = '0000000'): Dossier {
   return {
     prenom: 'Camille',
@@ -150,5 +173,11 @@ export function construireDossier(jour: number, debut: number, numeroDossier = '
     derniereMiseAJour: dateDuJour(jour, HEURE_MAJ.h, HEURE_MAJ.m).toISOString(),
     dateServeur: maintenantSimule(jour, debut).toISOString(),
     voeux: SOURCES.map((s) => construireVoeu(s, jour)),
+    messages: construireMessages(jour),
+    calendrier: [
+      { date: dateDuJour(9, 9).toISOString(), libelle: 'Ouverture de la phase complémentaire' },
+      { date: dateDuJour(16, 9).toISOString(), libelle: 'Point d’étape : confirmer ses vœux en attente sur le site' },
+      { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale d’admission' },
+    ],
   };
 }

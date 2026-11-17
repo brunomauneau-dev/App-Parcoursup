@@ -1,20 +1,22 @@
 import { useRouter } from 'expo-router';
-import { HomeScreen } from '../../screens/HomeScreen';
-import { useMaintenant, useSession } from '../../session/SessionProvider';
+import { AccueilScreen } from '../../../screens/AccueilScreen';
+import { useMaintenant, useSession } from '../../../session/SessionProvider';
 
-export default function TableauDeBord() {
+export default function Accueil() {
   const s = useSession();
   const maintenant = useMaintenant();
   const router = useRouter();
   if (!s.dossier) return null;
   return (
-    <HomeScreen
+    <AccueilScreen
       dossier={s.dossier}
       maintenant={maintenant}
       rafraichissement={s.rafraichissement}
       erreur={s.erreur}
       onRefresh={s.rafraichir}
       onOuvrir={(v) => router.push({ pathname: '/dossier/[id]', params: { id: v.id } })}
+      onVoirVoeux={(filtre) => router.navigate({ pathname: '/dossier/voeux', params: { filtre } })}
+      onMessages={() => router.navigate('/dossier/messages')}
       onSimuler={s.simulerNuit}
       onDeconnexion={async () => {
         await s.deconnexion();

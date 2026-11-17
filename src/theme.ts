@@ -1,54 +1,69 @@
-const light = {
-  bg: '#F4F5F7',
-  surface: '#FFFFFF',
-  surfaceAlt: '#EEF0F4',
-  text: '#16181D',
-  textMuted: '#5B6170',
-  border: '#DDE1E8',
-  primary: '#2F4BD8',
-  primaryText: '#FFFFFF',
-  success: '#1E8E5A',
-  successBg: '#E3F5EC',
-  warning: '#B25E09',
-  warningBg: '#FDF0DF',
-  danger: '#C23B3B',
-  dangerBg: '#FBE6E6',
-  waiting: '#4C5BD4',
-  waitingBg: '#E8EAFB',
-  chartLine: '#2F4BD8',
-  chartRef: '#B25E09',
-};
-
-const dark: typeof light = {
-  bg: '#0F1115',
-  surface: '#191C22',
-  surfaceAlt: '#232731',
-  text: '#ECEEF2',
-  textMuted: '#9AA1AF',
-  border: '#2C313C',
-  primary: '#7D93FF',
-  primaryText: '#0F1115',
-  success: '#5BD198',
-  successBg: '#16301F',
-  warning: '#F2A75B',
-  warningBg: '#35260F',
-  danger: '#F08080',
-  dangerBg: '#3A1A1A',
-  waiting: '#9CA7FF',
-  waitingBg: '#1F2340',
-  chartLine: '#7D93FF',
-  chartRef: '#F2A75B',
-};
-
-export type Theme = typeof light;
+import { Platform, TextStyle } from 'react-native';
 
 /**
- * Mode clair forcé pendant la phase de test, pour que tous les testeurs voient
- * la même chose. La palette sombre reste prête : il suffira de revenir à
- * `useColorScheme() === 'dark' ? dark : light`.
+ * Couleurs et typographie reprises de la maquette Claude Design
+ * « Parcoursup Dossier » (direction « service public »).
+ * Mode clair uniquement pendant la phase de test.
  */
-export const PALETTE_SOMBRE = dark;
+const palette = {
+  bg: '#F3F5F9',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F3F5F9',
+  text: '#181F2E',
+  textMuted: '#5B6375',
+  border: '#E1E5EC',
+
+  /** Bleu « service public » : carte d'accueil, onglet actif, boutons */
+  primary: '#005D84',
+  primaryDark: '#004E71',
+  primaryText: '#FFFFFF',
+  /** Orange : pastilles de notification, points d'alerte */
+  accent: '#D73817',
+
+  success: '#07562F',
+  successBg: '#D2F6DD',
+  successDot: '#14874E',
+  warning: '#7A4D00',
+  warningBg: '#FFEBC2',
+  warningDot: '#D49838',
+  danger: '#B42318',
+  dangerBg: '#FDE7E4',
+  neutralBg: '#ECEEF2',
+  neutralDot: '#A1A8B3',
+
+  info: '#DDE7FB',
+  gaugeTrack: '#E4E8EF',
+  gaugeZone: '#ADDFBD',
+
+  // Compatibilité avec les composants existants
+  waiting: '#7A4D00',
+  waitingBg: '#FFEBC2',
+  chartLine: '#005D84',
+  chartRef: '#14874E',
+};
+
+export type Theme = typeof palette;
 
 export function useTheme(): Theme {
-  return light;
+  return palette;
+}
+
+type Graisse = '400' | '500' | '600' | '700' | '800';
+
+const NOMS: Record<Graisse, string> = {
+  '400': 'Figtree_400Regular',
+  '500': 'Figtree_500Medium',
+  '600': 'Figtree_600SemiBold',
+  '700': 'Figtree_700Bold',
+  '800': 'Figtree_800ExtraBold',
+};
+
+/**
+ * Police Figtree à la graisse demandée.
+ * Sur téléphone, chaque graisse est un fichier distinct (chargé dans _layout) ;
+ * sur le web, la police est servie par Google Fonts et la graisse s'applique normalement.
+ */
+export function police(graisse: Graisse = '400'): TextStyle {
+  if (Platform.OS === 'web') return { fontFamily: 'Figtree, system-ui, sans-serif', fontWeight: graisse };
+  return { fontFamily: NOMS[graisse] };
 }

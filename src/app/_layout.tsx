@@ -1,6 +1,14 @@
+import {
+  Figtree_400Regular,
+  Figtree_500Medium,
+  Figtree_600SemiBold,
+  Figtree_700Bold,
+  Figtree_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/figtree';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, Text, View } from 'react-native';
+import { Platform, ScrollView, Text, View } from 'react-native';
 import type { ErrorBoundaryProps } from 'expo-router';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { modeDemo } from '../api';
@@ -14,7 +22,7 @@ function Cadre() {
   const { notification, fermerNotification } = useSession();
   return (
     <View style={{ flex: 1, backgroundColor: t.bg, paddingTop: insets.top }}>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       {modeDemo && <BandeauPrototype />}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg } }} />
       {/* Dernier enfant : la notification passe au-dessus du reste */}
@@ -24,6 +32,13 @@ function Cadre() {
 }
 
 export default function RootLayout() {
+  // Sur le web, Figtree est servie par Google Fonts (balise <link> de la page).
+  const [policesChargees] = useFonts(
+    Platform.OS === 'web'
+      ? {}
+      : { Figtree_400Regular, Figtree_500Medium, Figtree_600SemiBold, Figtree_700Bold, Figtree_800ExtraBold },
+  );
+  if (!policesChargees && Platform.OS !== 'web') return null;
   return (
     <SafeAreaProvider>
       <SessionProvider>
