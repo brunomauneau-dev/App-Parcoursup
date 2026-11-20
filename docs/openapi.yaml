@@ -34,10 +34,10 @@ paths:
         - `grant_type=refresh_token` : renouvellement. Chaque jeton de renouvellement
           est à usage unique ; sa réutilisation révoque toute la session.
 
-        **Point ouvert avec le SCN** : le flux `password` est déconseillé par OAuth 2.1.
-        Il n'est envisageable que pour une application officielle (« first-party »).
-        Alternative : flux `authorization_code` + PKCE, la page de connexion du SCN
-        s'ouvrant dans le navigateur système.
+        **Cible pour la production** : flux `authorization_code` + PKCE (RFC 8252),
+        la page de connexion officielle s'ouvrant dans le navigateur du téléphone ;
+        l'application ne voit jamais le mot de passe. Le flux `password`, déconseillé
+        par OAuth 2.1, n'est utilisé que par le serveur de démonstration (données fictives).
       requestBody:
         required: true
         content:
