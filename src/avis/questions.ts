@@ -94,6 +94,13 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
+    cle: 'canal',
+    type: 'choix',
+    titre: 'Pour être prévenu d’un changement dans votre dossier, vous préférez…',
+    options: ['Une notification de l’application', 'Un SMS', 'Un mail', 'Les trois', 'Peu importe'],
+    obligatoire: true,
+  },
+  {
     cle: 'manques',
     type: 'texte',
     titre: 'Qu’est-ce qui vous a manqué, ou gêné ?',

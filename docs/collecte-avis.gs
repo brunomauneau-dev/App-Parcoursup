@@ -33,9 +33,11 @@ var COLONNES = [
   ['facilite', 'Facilité de compréhension (1-5)'],
   ['utiliserait', 'Utiliserait l’application (1-5)'],
   ['utile', 'Le plus utile'],
+  ['canal', 'Canal préféré pour être prévenu'],
   ['manques', 'Manques ou gênes'],
   ['citation', 'Accepte d’être cité'],
-  ['version', 'Version du questionnaire'],
+  ['version', 'Version du questionnaire (et dossier fictif vu)'],
+  ['autres', 'Autres réponses'],
 ];
 
 function installer() {
@@ -57,9 +59,17 @@ function doPost(e) {
     verrou.waitLock(10000);
     var d = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     var ligne = {};
+    var connues = {};
     COLONNES.forEach(function (c) {
+      connues[c[0]] = true;
       ligne[c[0]] = c[0] === 'date' ? new Date().toISOString() : nettoyer(d[c[0]]);
     });
+    // Questions ajoutées plus tard à l'application : conservées sans modifier ce script
+    var autres = {};
+    Object.keys(d).forEach(function (k) {
+      if (!connues[k]) autres[k] = d[k];
+    });
+    ligne.autres = Object.keys(autres).length ? nettoyer(JSON.stringify(autres)) : '';
     var proprietes = PropertiesService.getScriptProperties();
     var n = Number(proprietes.getProperty('NB') || 0) + 1;
     proprietes.setProperty('R' + ('00000' + n).slice(-5), JSON.stringify(ligne));

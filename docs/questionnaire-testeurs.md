@@ -89,6 +89,13 @@ Ce questionnaire est anonyme. N'indiquez ni votre nom, ni votre numéro de dossi
 - Être prévenu par une notification quand le dossier change
 - Rester connecté sans ressaisir son mot de passe
 
+**8 bis. Pour être prévenu d'un changement dans votre dossier, vous préférez…** *(choix unique, obligatoire)*
+- Une notification de l'application
+- Un SMS
+- Un mail
+- Les trois
+- Peu importe
+
 **9. Qu'est-ce qui vous a manqué, ou gêné ?** *(réponse longue, facultative)*
 
 **10. Acceptez-vous que vos réponses écrites soient citées, de façon anonyme, dans une note destinée au ministère ?** *(choix unique, obligatoire)*
