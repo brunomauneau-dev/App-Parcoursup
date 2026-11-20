@@ -68,3 +68,7 @@ npm test            # tests du serveur : jetons, lecture seule, révocation
 - Elle refuse un jeton dont le périmètre dépasse la consultation.
 - Les jetons de renouvellement sont à usage unique ; leur réutilisation révoque la session.
 - Les comptes à rebours utilisent l'heure du serveur, pas celle du téléphone.
+
+## Droits
+
+© 2026 Bruno Mauneau – tous droits réservés. Projet personnel, réalisé sur temps libre et en dehors de toute fonction professionnelle. Aucune réutilisation sans autorisation écrite de l'auteur (voir `LICENSE`).

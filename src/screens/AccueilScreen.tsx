@@ -7,6 +7,7 @@ import { AVIS_ACTIF } from '../config';
 import { dateCourte, echeance, heure, jourLong, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
+import { Droits } from '../components/Droits';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
 
@@ -558,6 +559,9 @@ export function AccueilScreen(p: Props) {
       <Pressable onPress={p.onDeconnexion} accessibilityRole="button" style={{ alignSelf: 'center', padding: 12 }}>
         <Text style={{ color: t.primary, fontSize: 14, ...police('600') }}>Se déconnecter</Text>
       </Pressable>
+      <View style={{ marginTop: 8 }}>
+        <Droits />
+      </View>
     </ScrollView>
   );
 }

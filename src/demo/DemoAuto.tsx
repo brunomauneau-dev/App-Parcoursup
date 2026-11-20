@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { apiSimulee } from '../api';
 import { AVIS_ACTIF } from '../config';
 import { useSession } from '../session/SessionProvider';
+import { MENTION_DROITS } from '../components/Droits';
 import { police } from '../theme';
 
 /**
@@ -731,6 +732,7 @@ export function PresentationEcran({ children }: { children: ReactNode }) {
             <Text style={{ color: '#5B6375', fontSize: 14, lineHeight: 20, ...police('400') }}>
               Ou manipulez librement le téléphone ci-contre. Pour l’essayer sur votre propre téléphone, ouvrez ce même lien.
             </Text>
+            <Text style={{ marginTop: 24, color: '#5B6375', fontSize: 12, opacity: 0.75, ...police('400') }}>{MENTION_DROITS}</Text>
           </>
         ) : (
           <ContenuLegende demo={demo} grand />
