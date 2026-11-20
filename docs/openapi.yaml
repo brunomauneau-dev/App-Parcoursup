@@ -24,27 +24,48 @@ tags:
   - name: Consultation
 
 paths:
+  /oauth/authorize:
+    get:
+      tags: [Authentification]
+      summary: Page de connexion (ouverte dans le navigateur du téléphone)
+      description: |
+        L'application ouvre cette page dans le navigateur système (RFC 8252). Le candidat y
+        saisit son mot de passe puis le code de vérification de la double authentification :
+        l'application ne voit ni l'un ni l'autre. En fin de parcours, le serveur redirige vers
+        `redirect_uri` avec un code d'autorisation à usage unique (60 s) et le `state` reçu.
+        Les adresses de retour sont enregistrées à l'avance ; une adresse inconnue est refusée
+        sans redirection.
+      parameters:
+        - { name: response_type, in: query, required: true, schema: { const: code } }
+        - { name: client_id, in: query, required: true, schema: { type: string, example: suivi-voeux-mobile } }
+        - { name: redirect_uri, in: query, required: true, schema: { type: string, example: 'suivivoeux://connexion' } }
+        - { name: scope, in: query, schema: { const: dossier.read } }
+        - { name: state, in: query, required: true, schema: { type: string } }
+        - { name: code_challenge, in: query, required: true, schema: { type: string }, description: 'BASE64URL(SHA256(code_verifier))' }
+        - { name: code_challenge_method, in: query, required: true, schema: { const: S256 } }
+      responses:
+        '200': { description: Page de connexion (HTML) }
+        '302': { description: Retour vers l'application avec `code` et `state`, ou `error` }
+        '400': { description: Client ou adresse de retour inconnus }
+
   /oauth/token:
     post:
       tags: [Authentification]
       summary: Obtenir ou renouveler un jeton
       description: |
-        - `grant_type=password` : connexion avec le numéro de dossier et le mot de passe
-          Parcoursup. Le mot de passe n'est jamais conservé par l'application.
+        - `grant_type=authorization_code` : échange du code reçu en fin de connexion, avec le
+          `code_verifier` PKCE. Le code est à usage unique, même en cas d'échec.
         - `grant_type=refresh_token` : renouvellement. Chaque jeton de renouvellement
           est à usage unique ; sa réutilisation révoque toute la session.
 
-        **Cible pour la production** : flux `authorization_code` + PKCE (RFC 8252),
-        la page de connexion officielle s'ouvrant dans le navigateur du téléphone ;
-        l'application ne voit jamais le mot de passe. Le flux `password`, déconseillé
-        par OAuth 2.1, n'est utilisé que par le serveur de démonstration (données fictives).
+        Le flux `password` (mot de passe saisi dans l'application) n'est pas accepté.
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/DemandeMotDePasse'
+                - $ref: '#/components/schemas/DemandeCode'
                 - $ref: '#/components/schemas/DemandeRenouvellement'
       responses:
         '200':
@@ -53,7 +74,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ReponseJeton' }
         '400':
-          description: Identifiants incorrects, jeton de renouvellement invalide ou périmètre refusé
+          description: Code, vérificateur PKCE ou jeton de renouvellement invalide
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErreurOAuth' }
@@ -116,22 +137,23 @@ components:
     jeton:
       type: oauth2
       flows:
-        password:
+        authorizationCode:
+          authorizationUrl: /oauth/authorize
           tokenUrl: /oauth/token
           refreshUrl: /oauth/token
           scopes:
             dossier.read: Consultation du dossier, sans aucune action possible
 
   schemas:
-    DemandeMotDePasse:
+    DemandeCode:
       type: object
-      required: [grant_type, client_id, username, password]
+      required: [grant_type, client_id, code, redirect_uri, code_verifier]
       properties:
-        grant_type: { const: password }
+        grant_type: { const: authorization_code }
         client_id: { type: string, example: suivi-voeux-mobile }
-        scope: { const: dossier.read }
-        username: { type: string, description: Numéro de dossier Parcoursup, example: '1234567' }
-        password: { type: string, format: password }
+        code: { type: string, description: Code d'autorisation reçu sur l'adresse de retour }
+        redirect_uri: { type: string, description: Identique à celle de la demande }
+        code_verifier: { type: string, description: Secret PKCE gardé par l'application }
 
     DemandeRenouvellement:
       type: object

@@ -1,3 +1,6 @@
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+import { aleatoire, creerPkce } from '../auth/pkce';
 import { effacerJetons, enregistrerJetons, Jetons, lireJetons } from '../auth/stockageJetons';
 import { ApiError } from './erreurs';
 import type { Dossier, DossierApi } from './types';
@@ -19,33 +22,59 @@ interface ReponseJeton {
 /**
  * Client de l'API de consultation (contrat : docs/openapi.yaml).
  *
- * Authentification : OAuth 2 / OpenID Connect. Le mot de passe est envoyé une
- * seule fois au serveur d'authentification, puis oublié. L'application ne garde
- * qu'un jeton limité au périmètre `dossier.read` et un jeton de renouvellement
- * à usage unique (rotation).
+ * Authentification : OAuth 2 / OpenID Connect, code d'autorisation + PKCE (RFC 8252).
+ * La page de connexion du serveur d'authentification s'ouvre dans le navigateur
+ * du téléphone : le mot de passe et le code de vérification (double
+ * authentification) y sont saisis, jamais dans l'application. Celle-ci ne reçoit
+ * qu'un code à usage unique, qu'elle échange contre un jeton limité au périmètre
+ * `dossier.read` et un jeton de renouvellement à usage unique (rotation).
  */
 export class HttpApi implements DossierApi {
   private renouvellement: Promise<Jetons> | null = null;
 
   constructor(private readonly baseUrl: string) {}
 
-  async connexion(numeroDossier: string, motDePasse: string): Promise<void> {
-    if (!numeroDossier.trim() || !motDePasse) {
-      throw new ApiError('identifiants', 'Saisissez votre numéro de dossier et votre mot de passe.');
+  async connexion(): Promise<void> {
+    const { verificateur, defi } = await creerPkce();
+    const etat = aleatoire();
+    const retour = Linking.createURL('connexion');
+    const url =
+      `${this.baseUrl}/oauth/authorize?` +
+      formulaire({
+        response_type: 'code',
+        client_id: CLIENT_ID,
+        redirect_uri: retour,
+        scope: SCOPE,
+        state: etat,
+        code_challenge: defi,
+        code_challenge_method: 'S256',
+      });
+
+    const resultat = await WebBrowser.openAuthSessionAsync(url, retour);
+    if (resultat.type !== 'success') {
+      throw new ApiError('annulee', 'Connexion interrompue. Vous pouvez recommencer quand vous voulez.');
     }
+    const params = new URL(resultat.url).searchParams;
+    // Le paramètre « state » doit être celui envoyé : sinon, la réponse ne vient pas de notre demande.
+    if (params.get('state') !== etat) {
+      throw new ApiError('inattendu', 'Réponse de connexion non reconnue. Recommencez.');
+    }
+    const code = params.get('code');
+    if (!code) throw new ApiError('identifiants', 'La connexion n’a pas abouti. Recommencez.');
+
     const r = await this.requete('/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: formulaire({
-        grant_type: 'password',
+        grant_type: 'authorization_code',
         client_id: CLIENT_ID,
-        scope: SCOPE,
-        username: numeroDossier.trim(),
-        password: motDePasse,
+        code,
+        redirect_uri: retour,
+        code_verifier: verificateur,
       }),
     });
     if (r.status === 400 || r.status === 401) {
-      throw new ApiError('identifiants', 'Numéro de dossier ou mot de passe incorrect.');
+      throw new ApiError('identifiants', 'La connexion n’a pas abouti. Recommencez.');
     }
     await this.verifierStatut(r);
     await this.memoriser((await r.json()) as ReponseJeton);

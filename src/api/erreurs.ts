@@ -1,5 +1,6 @@
 export type TypeErreur =
-  | 'identifiants' // numéro de dossier ou mot de passe incorrect
+  | 'identifiants' // connexion refusée
+  | 'annulee' // page de connexion fermée par l'utilisateur
   | 'session_expiree' // jeton refusé et renouvellement impossible
   | 'reseau' // pas de connexion ou délai dépassé
   | 'indisponible' // serveur saturé ou en maintenance (429, 5xx)

@@ -37,7 +37,9 @@ Puis, dans un autre terminal, lancer l'application en lui donnant l'adresse du s
 EXPO_PUBLIC_API_URL=http://192.168.1.10:4000 EXPO_PUBLIC_DEMO=1 npx expo start
 ```
 
-Identifiants : n'importe quel numéro de dossier (chiffres) et n'importe quel mot de passe. Le mot de passe `incorrect` simule une erreur d'identification.
+« Se connecter » ouvre la page de connexion du serveur dans le navigateur du téléphone (code d'autorisation + PKCE), puis demande un code de vérification à 6 chiffres (double authentification ; le serveur de démonstration l'affiche sur la page au lieu de l'envoyer par mail). Identifiants : n'importe quel numéro de dossier (chiffres) et n'importe quel mot de passe ; le mot de passe `incorrect` simule une erreur.
+
+Sans serveur, l'écran de connexion propose « Comment se connecte-t-on en toute sécurité ? » : une simulation du même parcours, avec des identifiants fictifs déjà remplis.
 
 ## Vérifications
 
@@ -63,11 +65,21 @@ npm test            # tests du serveur : jetons, lecture seule, révocation
 
 ## Sécurité
 
-- Le mot de passe n'est jamais stocké : il est envoyé une fois au serveur d'authentification.
+- Le mot de passe et le code de vérification sont saisis sur la page du serveur d'authentification, dans le navigateur du téléphone : l'application ne les voit jamais (OAuth 2, code d'autorisation + PKCE, RFC 8252). La double authentification existante s'applique telle quelle.
 - L'application ne garde qu'un jeton limité au périmètre `dossier.read`, dans le trousseau iOS ou le Keystore Android (en mémoire seulement sur le web).
 - Elle refuse un jeton dont le périmètre dépasse la consultation.
 - Les jetons de renouvellement sont à usage unique ; leur réutilisation révoque la session.
 - Les comptes à rebours utilisent l'heure du serveur, pas celle du téléphone.
+- Verrouillage optionnel par empreinte, visage ou code du téléphone (réglage en bas de l'accueil) ; contenu masqué dans l'aperçu des applications ouvertes.
+- Mises à jour à distance signées : l'application refuse toute mise à jour non signée par la clé privée de l'auteur (certificat dans `certs/`). La clé privée n'est pas dans le dépôt.
+
+### Publier une mise à jour signée
+
+```bash
+npm run mise-a-jour-signee -- --channel <canal> --message "<description>"
+```
+
+La clé privée doit se trouver dans `cle-signature-a-conserver/private-key.pem` (dossier ignoré par git). Sans elle, il faut recompiler l'application pour toute modification.
 
 ## Droits
 

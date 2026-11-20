@@ -77,8 +77,11 @@ export interface Message {
 
 /** Interface consommée par l'application. */
 export interface DossierApi {
-  /** Connexion avec les identifiants Parcoursup. Le mot de passe n'est jamais conservé. */
-  connexion(numeroDossier: string, motDePasse: string): Promise<void>;
+  /**
+   * Connexion. Avec l'API réelle, ouvre la page de connexion officielle dans le
+   * navigateur du téléphone : l'application ne voit jamais le mot de passe.
+   */
+  connexion(): Promise<void>;
   /** Reprend une session existante au démarrage. Renvoie false s'il n'y en a pas. */
   restaurer(): Promise<boolean>;
   deconnexion(): Promise<void>;

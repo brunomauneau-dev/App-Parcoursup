@@ -33,6 +33,13 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Suivi Vœux utilise Face ID, si vous l’activez, pour verrouiller l’accès à votre dossier."
+        }
+      ],
+      "expo-web-browser",
       "expo-notifications",
       "expo-status-bar",
       "expo-font",
@@ -57,10 +64,15 @@
     },
     "owner": "rivendel",
     "runtimeVersion": {
-      "policy": "sdkVersion"
+      "policy": "fingerprint"
     },
     "updates": {
-      "url": "https://u.expo.dev/cde44ae5-d3be-4d7e-bb37-0dda704a55e8"
+      "url": "https://u.expo.dev/cde44ae5-d3be-4d7e-bb37-0dda704a55e8",
+      "codeSigningCertificate": "./certs/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "main",
+        "alg": "rsa-v1_5-sha256"
+      }
     }
   }
 }

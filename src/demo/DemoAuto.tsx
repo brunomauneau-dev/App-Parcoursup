@@ -294,7 +294,7 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       r.replace('/connexion');
       return;
     }
-    if (s.statut !== 'connecte') await s.connexion('0000000', 'demo');
+    if (s.statut !== 'connecte') await s.connexion();
     // La démo guidée raconte toujours l'histoire de Camille
     await s.definirProfil?.('camille');
     await s.definirJour?.(e.jour);

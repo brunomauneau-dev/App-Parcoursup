@@ -14,6 +14,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { modeDemo } from '../api';
 import { BandeauPrototype, Notification } from '../components/ui';
 import { CalqueDemo, DemoAutoProvider, PresentationEcran } from '../demo/DemoAuto';
+import { VerrouProvider } from '../securite/Verrou';
 import { SessionProvider, useSession } from '../session/SessionProvider';
 import { useTheme } from '../theme';
 
@@ -42,11 +43,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <SessionProvider>
-        <DemoAutoProvider>
-          <PresentationEcran>
-            <Cadre />
-          </PresentationEcran>
-        </DemoAutoProvider>
+        <VerrouProvider>
+          <DemoAutoProvider>
+            <PresentationEcran>
+              <Cadre />
+            </PresentationEcran>
+          </DemoAutoProvider>
+        </VerrouProvider>
       </SessionProvider>
     </SafeAreaProvider>
   );

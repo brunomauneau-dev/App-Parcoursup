@@ -19,7 +19,7 @@ interface Session {
   decalageHorloge: number;
   notification: boolean;
   fermerNotification: () => void;
-  connexion: (numero: string, motDePasse: string) => Promise<void>;
+  connexion: () => Promise<void>;
   deconnexion: () => Promise<void>;
   rafraichir: () => Promise<void>;
   /**
@@ -99,13 +99,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => abonnement.remove();
   }, [charger]);
 
-  const connexion = useCallback(
-    async (numero: string, motDePasse: string) => {
-      await api.connexion(numero, motDePasse);
-      await charger();
-    },
-    [charger],
-  );
+  const connexion = useCallback(async () => {
+    await api.connexion();
+    await charger();
+  }, [charger]);
 
   const deconnexion = useCallback(async () => {
     await api.deconnexion();

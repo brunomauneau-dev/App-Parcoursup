@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { apiSimulee, modeDemo } from '../api';
 import { messageErreur } from '../api/erreurs';
 import { Button, Logo } from '../components/ui';
@@ -7,31 +8,18 @@ import { Cible, useDemoAuto } from '../demo/DemoAuto';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
 
-export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string) => Promise<void> }) {
+export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
   const t = useTheme();
-  const [numero, setNumero] = useState('');
-  const [mdp, setMdp] = useState('');
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const demoAuto = useDemoAuto();
+  const router = useRouter();
 
-  const champ = {
-    backgroundColor: t.surface,
-    borderColor: t.border,
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: t.text,
-    ...police('500'),
-  } as const;
-
-  const valider = async (n = numero, m = mdp) => {
+  const valider = async () => {
     setChargement(true);
     setErreur(null);
     try {
-      await onLogin(n, m);
+      await onLogin();
     } catch (e) {
       setErreur(messageErreur(e));
       setChargement(false);
@@ -39,7 +27,7 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={{
           padding: 24,
@@ -92,7 +80,7 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
             ) : (
               <>
                 <Cible id="connexion-demo">
-                  <Button label="Découvrir la démo" onPress={() => void valider('0000000', 'demo')} />
+                  <Button label="Découvrir la démo" onPress={() => void valider()} />
                 </Cible>
                 {demoAuto && <Button label="Voir la démo animée (1 min)" variant="secondary" onPress={demoAuto.lancer} />}
               </>
@@ -108,34 +96,22 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
             >
               Démonstration avec un dossier fictif : aucun identifiant n’est demandé.
             </Text>
+            <Pressable
+              onPress={() => router.push('/connexion-simulee')}
+              accessibilityRole="link"
+              style={{ alignSelf: 'center', padding: 6 }}
+            >
+              <Text style={{ color: t.primary, fontSize: 14, textDecorationLine: 'underline', ...police('600') }}>
+                Comment se connecte-t-on en toute sécurité ?
+              </Text>
+            </Pressable>
           </View>
         ) : (
           <View style={{ gap: 14 }}>
-            <View style={{ gap: 6 }}>
-              <Text style={{ color: t.text, ...police('600') }}>Numéro de dossier</Text>
-              <TextInput
-                value={numero}
-                onChangeText={setNumero}
-                placeholder="Ex. 1234567"
-                placeholderTextColor={t.textMuted}
-                keyboardType="number-pad"
-                autoComplete="username"
-                style={champ}
-              />
-            </View>
-            <View style={{ gap: 6 }}>
-              <Text style={{ color: t.text, ...police('600') }}>Mot de passe</Text>
-              <TextInput
-                value={mdp}
-                onChangeText={setMdp}
-                placeholder="••••••••"
-                placeholderTextColor={t.textMuted}
-                secureTextEntry
-                autoComplete="password"
-                onSubmitEditing={() => void valider()}
-                style={champ}
-              />
-            </View>
+            <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+              La page de connexion officielle s’ouvre dans le navigateur de votre téléphone. Votre mot de passe et votre code de
+              vérification y sont saisis, jamais dans l’application.
+            </Text>
             {erreur && (
               <Text
                 accessibilityRole="alert"
@@ -156,15 +132,8 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
               <Button label="Se connecter" onPress={() => void valider()} />
             )}
             {modeDemo && (
-              <Text
-                style={{
-                  color: t.textMuted,
-                  fontSize: 13,
-                  textAlign: 'center',
-                  ...police('400'),
-                }}
-              >
-                Démo : n’importe quel identifiant fonctionne. Ne saisissez pas vos vrais identifiants.
+              <Text style={{ color: t.textMuted, fontSize: 13, textAlign: 'center', ...police('400') }}>
+                Serveur de démonstration : n’importe quel identifiant fonctionne. Ne saisissez pas vos vrais identifiants.
               </Text>
             )}
           </View>
@@ -187,6 +156,6 @@ export function LoginScreen({ onLogin }: { onLogin: (numero: string, mdp: string
           <Droits />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

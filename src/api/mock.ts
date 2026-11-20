@@ -14,11 +14,8 @@ export class MockApi implements DossierApi {
   private profil = PROFILS_DEMO[0].id;
   private readonly debut = Date.now();
 
-  async connexion(numeroDossier: string, motDePasse: string): Promise<void> {
+  async connexion(): Promise<void> {
     await attendre(600);
-    if (!numeroDossier.trim() || !motDePasse) {
-      throw new ApiError('identifiants', 'Saisissez votre numéro de dossier et votre mot de passe.');
-    }
     // Chaque connexion de démonstration tire un dossier fictif au hasard
     this.profil = PROFILS_DEMO[Math.floor(Math.random() * PROFILS_DEMO.length)].id;
     this.jour = JOUR_INITIAL;

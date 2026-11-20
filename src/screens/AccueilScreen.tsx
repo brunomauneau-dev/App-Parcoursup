@@ -8,6 +8,7 @@ import { dateCourte, echeance, heure, jourLong, ordinal, resteAvant } from '../f
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
+import { ReglageVerrou } from '../securite/Verrou';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
 
@@ -555,6 +556,8 @@ export function AccueilScreen(p: Props) {
           )}
         </View>
       )}
+
+      <ReglageVerrou />
 
       <Pressable onPress={p.onDeconnexion} accessibilityRole="button" style={{ alignSelf: 'center', padding: 12 }}>
         <Text style={{ color: t.primary, fontSize: 14, ...police('600') }}>Se déconnecter</Text>
