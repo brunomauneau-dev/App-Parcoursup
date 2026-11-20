@@ -192,12 +192,15 @@ components:
             `refusee_par_candidat` : proposition refusée par le candidat.
         rang:
           type: integer
-          description: Rang actuel en liste d'attente (statut en_attente)
+          description: Position actuelle dans la liste d'attente, parmi les candidats encore en attente (statut en_attente). Évolue chaque jour.
+        rangClassement:
+          type: integer
+          description: Rang du candidat dans le classement de la formation (ordre d'appel). Fixe. Seul ce rang se compare à rangDernierAppeleAnneePrecedente.
         totalEnAttente: { type: integer }
         places: { type: integer }
         rangDernierAppeleAnneePrecedente:
           type: integer
-          description: Rang du dernier candidat ayant reçu une proposition l'an dernier
+          description: Rang de classement du dernier candidat ayant reçu une proposition l'an dernier
         historique:
           type: array
           description: Rang à chaque mise à jour nocturne depuis le début de la phase

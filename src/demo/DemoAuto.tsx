@@ -73,7 +73,7 @@ const ETAPES: Etape[] = [
     jour: 4,
     route: '/dossier',
     cible: 'accueil-attente-0',
-    legende: 'Le vœu qui lui tient le plus à cœur, le BUT GEII, est en liste d’attente : 119e, et 12 places gagnées depuis hier.',
+    legende: 'Le vœu qui lui tient le plus à cœur, le BUT GEII, est en liste d’attente : 119e position, et 12 places gagnées depuis hier.',
     duree: 5000,
     toucher: true,
   },
@@ -81,15 +81,15 @@ const ETAPES: Etape[] = [
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
-    legende: 'L’an dernier, la formation a appelé jusqu’au 112e candidat. La jauge montre à Camille qu’elle s’en approche.',
+    legende: 'Sa position dans la liste d’attente : 119e parmi les 410 candidats encore en attente. Elle avance chaque matin.',
     duree: 5500,
   },
   {
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
-    cible: 'detail-aide',
-    legende: 'Une aide explique chaque chiffre en mots simples, sans jargon.',
-    duree: 3500,
+    cible: 'detail-classement',
+    legende: 'Son rang de classement, 240e, se compare au dernier candidat appelé l’an dernier, 215e : un ordre d’idée, pas une garantie.',
+    duree: 6000,
   },
   // 3. Être prévenue (lundi)
   {

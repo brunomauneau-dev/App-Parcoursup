@@ -117,133 +117,84 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
 function BlocAttente({ voeu }: { voeu: Voeu }) {
   const t = useTheme();
   const [aide, setAide] = useState(false);
-  const rang = voeu.rang!;
+  const position = voeu.rang!;
+  const classement = voeu.rangClassement;
   const ref = voeu.rangDernierAppeleAnneePrecedente;
   const d = variationVeille(voeu);
+  const corps = { color: t.text, fontSize: 15.5, lineHeight: 23, ...police('400') } as const;
+  const discret = { color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') } as const;
 
   return (
     <>
+      {/* Position dans la liste d'attente : évolue chaque jour */}
       <Card style={{ gap: 14, padding: 18 }}>
         <Cible id="detail-jauge" style={{ gap: 14 }}>
           <Text style={{ color: t.textMuted, fontSize: 14, ...police('600') }}>Position dans la liste d’attente</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Text
-              style={{
-                color: t.text,
-                fontSize: 48,
-                lineHeight: 52,
-                ...police('800'),
-              }}
-            >
-              {ordinal(rang)}
-            </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={{ color: t.text, fontSize: 48, lineHeight: 52, ...police('800') }}>{ordinal(position)}</Text>
             {d != null && <Variation valeur={d} />}
           </View>
-          {voeu.totalEnAttente != null && <Jauge rang={rang} total={voeu.totalEnAttente} zone={ref} grande />}
-          {ref != null && (
+          {voeu.totalEnAttente != null && <Jauge rang={position} total={voeu.totalEnAttente} grande />}
+        </Cible>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {voeu.totalEnAttente != null && <Chiffre valeur={nombre(voeu.totalEnAttente)} libelle="candidats encore en attente" />}
+          {voeu.places != null && <Chiffre valeur={nombre(voeu.places)} libelle="places dans la formation" />}
+        </View>
+      </Card>
+
+      {/* Rang de classement : fixe, seul comparable au rang du dernier appelé */}
+      {classement != null && ref != null && (
+        <Card style={{ gap: 14, padding: 18 }}>
+          <Cible id="detail-classement" style={{ gap: 14 }}>
+            <Text style={{ color: t.textMuted, fontSize: 14, ...police('600') }}>Votre rang de classement</Text>
+            <Text style={{ color: t.text, fontSize: 36, lineHeight: 40, ...police('800') }}>{ordinal(classement)}</Text>
+            <Jauge rang={classement} total={Math.round(Math.max(classement, ref) * 1.25)} zone={ref} grande bornes={false} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View
-                style={{
-                  width: 14,
-                  height: 10,
-                  borderRadius: 2,
-                  backgroundColor: t.gaugeZone,
-                }}
-              />
-              <Text
-                style={{
-                  color: t.textMuted,
-                  fontSize: 13,
-                  flex: 1,
-                  ...police('400'),
-                }}
-              >
-                Jusqu’au rang du dernier candidat appelé l’an dernier
+              <View style={{ width: 14, height: 10, borderRadius: 2, backgroundColor: t.gaugeZone }} />
+              <Text style={{ color: t.textMuted, fontSize: 13, flex: 1, ...police('400') }}>
+                Jusqu’au dernier candidat appelé l’an dernier ({ordinal(ref)})
+              </Text>
+            </View>
+            <Text style={corps}>
+              L’an dernier, la formation a appelé jusqu’au {ordinal(ref)} candidat de son classement. Votre rang de classement est{' '}
+              {ordinal(classement)}
+              {classement > ref ? ' : il faudrait que les appels aillent un peu plus loin que l’an dernier.' : '.'} Ce n’est qu’un ordre
+              d’idée.
+            </Text>
+          </Cible>
+          <Cible id="detail-aide">
+            <Pressable
+              onPress={() => setAide(!aide)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: aide }}
+              style={{ flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderColor: t.border, paddingTop: 14 }}
+            >
+              <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Comment lire ces chiffres ?</Text>
+              <Text style={{ color: t.primary, fontSize: 20, lineHeight: 20, ...police('700') }}>{aide ? '−' : '+'}</Text>
+            </Pressable>
+          </Cible>
+          {aide && (
+            <View style={{ gap: 10 }}>
+              <Text style={discret}>
+                <Text style={police('700')}>La position dans la liste d’attente</Text> est votre place parmi les candidats encore en
+                attente. Elle baisse chaque fois qu’un candidat placé devant vous accepte une autre formation ou renonce.
+              </Text>
+              <Text style={discret}>
+                <Text style={police('700')}>Le rang de classement</Text> est votre place dans le classement établi par la formation. Il ne
+                change pas. C’est lui qui se compare au rang du dernier candidat appelé l’an dernier.
+              </Text>
+              <Text style={discret}>
+                Le rang du dernier appelé l’an dernier donne un ordre d’idée, pas une garantie : chaque année est différente.
               </Text>
             </View>
           )}
-        </Cible>
-        {ref != null && (
-          <Text
-            style={{
-              color: t.text,
-              fontSize: 15.5,
-              lineHeight: 23,
-              ...police('400'),
-            }}
-          >
-            L’an dernier, la formation a appelé jusqu’au {ordinal(ref)} candidat. Vous êtes {ordinal(rang)}
-            {rang > ref ? ` : il vous reste ${nombre(rang - ref)} places pour atteindre ce rang.` : '.'} Ce n’est qu’un ordre d’idée.
-          </Text>
-        )}
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {voeu.totalEnAttente != null && <Chiffre valeur={nombre(voeu.totalEnAttente)} libelle="candidats en liste d’attente" />}
-          {voeu.places != null && <Chiffre valeur={nombre(voeu.places)} libelle="places dans la formation" />}
-          {ref != null && <Chiffre valeur={ordinal(ref)} libelle="rang du dernier appelé l’an dernier" />}
-        </View>
-        <Cible id="detail-aide">
-          <Pressable
-            onPress={() => setAide(!aide)}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: aide }}
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              borderTopWidth: 1,
-              borderColor: t.border,
-              paddingTop: 14,
-            }}
-          >
-            <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Comment lire ces chiffres ?</Text>
-            <Text
-              style={{
-                color: t.primary,
-                fontSize: 20,
-                lineHeight: 20,
-                ...police('700'),
-              }}
-            >
-              {aide ? '−' : '+'}
-            </Text>
-          </Pressable>
-        </Cible>
-        {aide && (
-          <View style={{ gap: 10 }}>
-            <Text
-              style={{
-                color: t.textMuted,
-                fontSize: 14.5,
-                lineHeight: 21,
-                ...police('400'),
-              }}
-            >
-              La position dans la liste d’attente, c’est votre place parmi les candidats encore en attente. Elle baisse à chaque fois qu’un
-              candidat devant vous accepte une autre formation ou renonce.
-            </Text>
-            <Text
-              style={{
-                color: t.textMuted,
-                fontSize: 14.5,
-                lineHeight: 21,
-                ...police('400'),
-              }}
-            >
-              Le rang du dernier candidat appelé l’an dernier donne un ordre d’idée, pas une garantie : chaque année est différente.
-            </Text>
-          </View>
-        )}
-      </Card>
+        </Card>
+      )}
 
       {voeu.historique && voeu.historique.length > 1 && (
         <Card style={{ gap: 8 }}>
-          <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>Évolution de votre position</Text>
-          <RankChart historique={voeu.historique} reference={ref} />
+          <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>Évolution de votre position dans la liste d’attente</Text>
+          <RankChart historique={voeu.historique} />
         </Card>
       )}
 

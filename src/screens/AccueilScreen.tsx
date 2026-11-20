@@ -62,7 +62,12 @@ export function AccueilScreen(p: Props) {
   const situationDifficile =
     nbPropositions === 0 &&
     attente.length > 0 &&
-    attente.every((v) => v.rang != null && v.rangDernierAppeleAnneePrecedente != null && v.rang > 1.5 * v.rangDernierAppeleAnneePrecedente);
+    attente.every(
+      (v) =>
+        v.rangClassement != null &&
+        v.rangDernierAppeleAnneePrecedente != null &&
+        v.rangClassement > 1.5 * v.rangDernierAppeleAnneePrecedente,
+    );
 
   const dates = [
     ...aRepondre.map((v) => ({
@@ -372,6 +377,7 @@ export function AccueilScreen(p: Props) {
                       </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={{ color: t.textMuted, fontSize: 11.5, ...police('600') }}>Position</Text>
                       <Text
                         style={{
                           color: t.text,
@@ -384,7 +390,7 @@ export function AccueilScreen(p: Props) {
                       {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
                     </View>
                   </View>
-                  {v.totalEnAttente != null && <Jauge rang={v.rang!} total={v.totalEnAttente} zone={ref} />}
+                  {v.totalEnAttente != null && <Jauge rang={v.rang!} total={v.totalEnAttente} />}
                   {ref != null && (
                     <Text
                       style={{
@@ -393,9 +399,9 @@ export function AccueilScreen(p: Props) {
                         ...police('400'),
                       }}
                     >
-                      {v.rang! <= ref
-                        ? `Dans les rangs appelés l’an dernier (jusqu’au ${ordinal(ref)})`
-                        : `L’an dernier, appel jusqu’au ${ordinal(ref)}`}
+                      {v.rangClassement != null
+                        ? `Classement : ${ordinal(v.rangClassement)} · dernier appelé l’an dernier : ${ordinal(ref)}`
+                        : `Dernier appelé l’an dernier : ${ordinal(ref)} du classement`}
                     </Text>
                   )}
                 </Card>

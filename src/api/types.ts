@@ -26,11 +26,16 @@ export interface Voeu {
   etablissement: string;
   ville: string;
   statut: StatutVoeu;
-  /** Liste d'attente */
+  /** Position dans la liste d'attente (parmi les candidats encore en attente). Évolue chaque jour. */
   rang?: number;
   totalEnAttente?: number;
   places?: number;
-  /** Rang du dernier candidat ayant reçu une proposition lors de la session précédente */
+  /**
+   * Rang du candidat dans le classement de la formation (ordre d'appel). Fixe.
+   * C'est lui, et non la position en liste d'attente, qui se compare au rang du dernier appelé.
+   */
+  rangClassement?: number;
+  /** Rang de classement du dernier candidat ayant reçu une proposition lors de la session précédente */
   rangDernierAppeleAnneePrecedente?: number;
   historique?: PointHistorique[];
   /** Propositions */

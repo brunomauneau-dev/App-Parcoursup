@@ -124,7 +124,10 @@ export function VoeuxScreen({
               >
                 <StatutBadge statut={v.statut} />
                 {v.statut === 'en_attente' && v.rang != null && (
-                  <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>{ordinal(v.rang)}</Text>
+                  <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>
+                    <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>Position </Text>
+                    {ordinal(v.rang)}
+                  </Text>
                 )}
               </View>
               <Text

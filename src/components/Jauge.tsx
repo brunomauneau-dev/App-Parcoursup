@@ -4,11 +4,25 @@ import { ordinal } from '../format';
 import { police, useTheme } from '../theme';
 
 /**
- * Jauge de liste d'attente : la barre va du 1er au dernier candidat en attente,
- * la zone verte s'arrête au rang du dernier candidat appelé l'an dernier,
- * le repère « Vous » marque la position actuelle.
+ * Jauge : le repère « Vous » marque un rang sur une échelle de 1 à `total`.
+ * Utilisée pour la position en liste d'attente (sans zone) et pour le rang de
+ * classement, où la zone verte s'arrête au rang du dernier candidat appelé l'an dernier.
+ * Ne jamais mélanger les deux : seuls des rangs de même nature se comparent.
  */
-export function Jauge({ rang, total, zone, grande = false }: { rang: number; total: number; zone?: number; grande?: boolean }) {
+export function Jauge({
+  rang,
+  total,
+  zone,
+  grande = false,
+  bornes = true,
+}: {
+  rang: number;
+  total: number;
+  zone?: number;
+  grande?: boolean;
+  /** Afficher « 1er » et « … (fin de liste) » sous la jauge */
+  bornes?: boolean;
+}) {
   const t = useTheme();
   const [largeur, setLargeur] = useState(0);
   const fin = Math.max(total, rang, zone ?? 0);
@@ -70,7 +84,7 @@ export function Jauge({ rang, total, zone, grande = false }: { rang: number; tot
           />
         )}
       </View>
-      {grande && (
+      {grande && bornes && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('500') }}>1er</Text>
           <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('500') }}>{ordinal(total)} (fin de liste)</Text>
