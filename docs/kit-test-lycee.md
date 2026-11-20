@@ -6,7 +6,7 @@ Faire essayer le prototype « Suivi Vœux » à des élèves de terminale, en 20
 
 1. **Accord du chef d'établissement.** Lui envoyer le message ci-dessous. Idéalement, la séance a lieu avec le professeur principal ou le psychologue de l'Éducation nationale, par exemple pendant une heure consacrée à l'orientation.
 2. **Information des familles** par l'établissement (ENT ou carnet), au moins une semaine avant, avec la note ci-dessous. Un élève dont la famille s'oppose ne participe pas, sans avoir à se justifier.
-3. **Vérifier le matériel** : le lien du prototype s'ouvre sur un téléphone en 4G ; le Wi-Fi de l'établissement peut bloquer certains sites, le tester sur place avant.
+3. **Vérifier le matériel** : le lien du prototype (https://brunomauneau-dev.github.io/suivi-voeux-demo/) s'ouvre sur un téléphone en 4G ; le Wi-Fi de l'établissement peut bloquer certains sites, le tester sur place avant.
 4. Préparer les QR codes à projeter :
    - `qr-demo-animee.png` : la démo animée (1 minute), pour ouvrir la séance ;
    - `qr-prototype.png` : le prototype, que les élèves manipulent eux-mêmes.
