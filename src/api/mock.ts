@@ -1,4 +1,4 @@
-import { construireDossier, JOUR_INITIAL, JOUR_MAX } from './donneesDemo';
+import { construireDossier, JOUR_INITIAL, JOUR_MAX, PROFILS_DEMO } from './donneesDemo';
 import { ApiError } from './erreurs';
 import type { Dossier, DossierApi } from './types';
 
@@ -11,6 +11,7 @@ const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export class MockApi implements DossierApi {
   private jour = JOUR_INITIAL;
   private connecte = false;
+  private profil = PROFILS_DEMO[0].id;
   private readonly debut = Date.now();
 
   async connexion(numeroDossier: string, motDePasse: string): Promise<void> {
@@ -18,6 +19,9 @@ export class MockApi implements DossierApi {
     if (!numeroDossier.trim() || !motDePasse) {
       throw new ApiError('identifiants', 'Saisissez votre numéro de dossier et votre mot de passe.');
     }
+    // Chaque connexion de démonstration tire un dossier fictif au hasard
+    this.profil = PROFILS_DEMO[Math.floor(Math.random() * PROFILS_DEMO.length)].id;
+    this.jour = JOUR_INITIAL;
     this.connecte = true;
   }
 
@@ -33,7 +37,17 @@ export class MockApi implements DossierApi {
   async getDossier(): Promise<Dossier> {
     if (!this.connecte) throw new ApiError('session_expiree', 'Votre session a expiré. Reconnectez-vous.');
     await attendre(250);
-    return construireDossier(this.jour, this.debut);
+    return construireDossier(this.jour, this.debut, undefined, this.profil);
+  }
+
+  async definirProfil(id: string): Promise<void> {
+    if (PROFILS_DEMO.some((p) => p.id === id)) this.profil = id;
+  }
+
+  async profilSuivant(): Promise<void> {
+    const i = PROFILS_DEMO.findIndex((p) => p.id === this.profil);
+    this.profil = PROFILS_DEMO[(i + 1) % PROFILS_DEMO.length].id;
+    this.jour = JOUR_INITIAL;
   }
 
   async definirJour(jour: number): Promise<void> {

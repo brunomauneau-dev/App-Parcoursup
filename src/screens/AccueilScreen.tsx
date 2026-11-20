@@ -21,6 +21,8 @@ interface Props {
   onMessages: () => void;
   onSimuler?: () => void;
   onDeconnexion: () => void;
+  /** Démonstration uniquement : afficher un autre dossier fictif */
+  onChangerProfil?: () => void;
 }
 
 export function variationVeille(v: Voeu): number | null {
@@ -56,6 +58,11 @@ export function AccueilScreen(p: Props) {
   const nbRefusees = dossier.voeux.filter((v) => v.statut === 'refuse' || v.statut === 'refusee_par_candidat').length;
   const nonLus = dossier.messages.filter((m) => !m.lu).length;
   const prochaine = aRepondre[0];
+  // Aucune proposition et des listes d'attente bien au-delà du dernier appelé de l'an dernier
+  const situationDifficile =
+    nbPropositions === 0 &&
+    attente.length > 0 &&
+    attente.every((v) => v.rang != null && v.rangDernierAppeleAnneePrecedente != null && v.rang > 1.5 * v.rangDernierAppeleAnneePrecedente);
 
   const dates = [
     ...aRepondre.map((v) => ({
@@ -127,6 +134,27 @@ export function AccueilScreen(p: Props) {
         <Text style={{ color: t.text, fontSize: 30, ...police('800') }}>Bonjour {dossier.prenom}</Text>
         <Text style={{ color: t.textMuted, fontSize: 13, ...police('400') }}>Dossier n° {dossier.numeroDossier} · consultation</Text>
       </View>
+
+      {dossier.profilDemo && p.onChangerProfil && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            backgroundColor: t.surface,
+            borderRadius: 14,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+          }}
+        >
+          <Text style={{ color: t.textMuted, fontSize: 13, flex: 1, lineHeight: 18, ...police('500') }}>
+            Dossier fictif : {dossier.profilDemo.presentation}
+          </Text>
+          <Pressable onPress={p.onChangerProfil} accessibilityRole="button" hitSlop={8}>
+            <Text style={{ color: t.primary, fontSize: 13.5, ...police('700') }}>Voir un autre dossier ›</Text>
+          </Pressable>
+        </View>
+      )}
 
       {p.erreur && (
         <View
@@ -252,12 +280,36 @@ export function AccueilScreen(p: Props) {
                   ...police('800'),
                 }}
               >
-                Vos listes d’attente avancent chaque matin.
+                Pas encore de proposition : vos listes d’attente avancent.
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+                Les places se libèrent tout au long de la phase, au fil des réponses des autres candidats. Vous serez prévenu dès que votre
+                dossier change.
               </Text>
             </>
           )}
         </View>
       </Cible>
+
+      {situationDifficile && (
+        <View
+          style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.warningDot }}
+        >
+          <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Des solutions existent</Text>
+          <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+            Vos listes d’attente sont encore loin des rangs appelés l’an dernier. Rien n’est joué, mais vous pouvez préparer d’autres pistes
+            :
+          </Text>
+          <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 22, ...police('400') }}>
+            • <Text style={police('700')}>La phase complémentaire</Text> ouvre le 11 juin : de nouveaux vœux dans les formations qui ont
+            encore des places.
+            {'\n'}• <Text style={police('700')}>Votre professeur principal</Text> ou un psychologue de l’Éducation nationale peut vous aider
+            à choisir.
+            {'\n'}• Après la phase principale, <Text style={police('700')}>la commission d’accès à l’enseignement supérieur</Text> de votre
+            académie accompagne les candidats sans proposition.
+          </Text>
+        </View>
+      )}
 
       {AVIS_ACTIF && (
         <View style={{ backgroundColor: t.info, borderRadius: 20, padding: 16, gap: 10 }}>

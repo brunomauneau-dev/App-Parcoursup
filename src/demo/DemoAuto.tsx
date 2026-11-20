@@ -294,6 +294,8 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (s.statut !== 'connecte') await s.connexion('0000000', 'demo');
+    // La démo guidée raconte toujours l'histoire de Camille
+    await s.definirProfil?.('camille');
     await s.definirJour?.(e.jour);
     r.navigate(e.route);
     if (e.notification) s.montrerNotification();

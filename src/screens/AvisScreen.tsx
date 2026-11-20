@@ -8,7 +8,7 @@ import { police, useTheme } from '../theme';
 
 type Etat = 'accueil' | 'questions' | 'envoi' | 'merci' | 'erreur';
 
-export function AvisScreen({ onFermer }: { onFermer: () => void }) {
+export function AvisScreen({ onFermer, profilVu }: { onFermer: () => void; profilVu?: string }) {
   const t = useTheme();
   const [etat, setEtat] = useState<Etat>('accueil');
   const [index, setIndex] = useState(0);
@@ -30,7 +30,7 @@ export function AvisScreen({ onFermer }: { onFermer: () => void }) {
     const payload: Reponses = {};
     for (const question of questions) if (reponses[question.cle] !== undefined) payload[question.cle] = reponses[question.cle];
     try {
-      await envoyerAvis(payload);
+      await envoyerAvis(payload, profilVu);
       setEtat('merci');
     } catch {
       setEtat('erreur');

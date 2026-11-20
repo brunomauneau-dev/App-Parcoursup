@@ -53,6 +53,8 @@ export interface Dossier {
   messages: Message[];
   /** Dates générales de la phase d'admission (identiques pour tous les candidats) */
   calendrier: EtapeCalendrier[];
+  /** Démonstration uniquement : profil fictif affiché. Absent de l'API réelle. */
+  profilDemo?: { id: string; presentation: string };
 }
 
 export interface EtapeCalendrier {
@@ -80,4 +82,8 @@ export interface DossierApi {
   simulerNuit?(): Promise<boolean>;
   /** Démonstration uniquement : place le dossier à un jour donné de la phase simulée. */
   definirJour?(jour: number): Promise<void>;
+  /** Démonstration uniquement : choisit le dossier fictif affiché. */
+  definirProfil?(id: string): Promise<void>;
+  /** Démonstration uniquement : passe au dossier fictif suivant, au jour initial. */
+  profilSuivant?(): Promise<void>;
 }

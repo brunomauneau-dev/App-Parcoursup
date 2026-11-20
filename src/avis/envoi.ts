@@ -7,7 +7,7 @@ import type { Reponses } from './questions';
  * que les applications web Google ne savent pas traiter. La réponse est
  * opaque : seule une erreur réseau signale un échec.
  */
-export async function envoyerAvis(reponses: Reponses): Promise<void> {
+export async function envoyerAvis(reponses: Reponses, profilVu?: string): Promise<void> {
   if (!AVIS_ENDPOINT) throw new Error('Questionnaire non configuré');
   const ctrl = new AbortController();
   const minuteur = setTimeout(() => ctrl.abort(), 15_000);
@@ -16,7 +16,8 @@ export async function envoyerAvis(reponses: Reponses): Promise<void> {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...reponses, version: '1' }),
+      // Le dossier fictif vu par le testeur est noté avec la version (ex. « 1-lucas »)
+      body: JSON.stringify({ ...reponses, version: profilVu ? `1-${profilVu}` : '1' }),
       signal: ctrl.signal,
     });
   } finally {

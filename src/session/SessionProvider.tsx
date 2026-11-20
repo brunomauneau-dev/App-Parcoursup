@@ -31,6 +31,10 @@ interface Session {
   definirJour?: (jour: number) => Promise<void>;
   /** Démonstration uniquement : affiche la notification imitée. */
   montrerNotification: () => void;
+  /** Démonstration uniquement : choisit le dossier fictif (sans recharger). */
+  definirProfil?: (id: string) => Promise<void>;
+  /** Démonstration uniquement : affiche un autre dossier fictif. */
+  changerProfil?: () => Promise<void>;
 }
 
 const Contexte = createContext<Session | null>(null);
@@ -129,6 +133,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const fermerNotification = useCallback(() => setNotification(false), []);
   const montrerNotification = useCallback(() => setNotification(true), []);
+  const definirProfil = useCallback(async (id: string) => {
+    await api.definirProfil?.(id);
+  }, []);
+  const changerProfil = useCallback(async () => {
+    await api.profilSuivant?.();
+    await charger();
+  }, [charger]);
   const definirJour = useCallback(
     async (jour: number) => {
       await api.definirJour?.(jour);
@@ -149,6 +160,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         notification,
         fermerNotification,
         montrerNotification,
+        definirProfil: modeDemo && api.definirProfil ? definirProfil : undefined,
+        changerProfil: modeDemo && api.profilSuivant ? changerProfil : undefined,
         definirJour: modeDemo && api.definirJour ? definirJour : undefined,
         connexion,
         deconnexion,
