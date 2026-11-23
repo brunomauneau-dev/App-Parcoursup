@@ -22,9 +22,7 @@ const SILLAGES = [
 /**
  * Animation d'ouverture (≈ 2,5 s) sur un fond en dégradé : des traits de vitesse
  * colorés traversent l'écran vers le haut à droite, le logo apparaît, sa flèche y
- * file en diagonale, deux traits colorés apparaissent ; une pastille
- * « Dossier à jour » rassure (pas de chiffre de liste d'attente : c'est ce qui
- * stresse le plus les candidats), le nom apparaît, puis l'écran remonte comme un rideau.
+ * file en diagonale, deux traits colorés apparaissent, puis le nom apparaît, puis l'écran remonte comme un rideau.
  * Un toucher la passe. Si l'appareil demande de réduire les animations :
  * version douce, uniquement des fondus.
  * Logo original, sans rapport avec le logo officiel de Parcoursup.
@@ -39,7 +37,6 @@ export function Lancement() {
     carre: new Animated.Value(0),
     fleche: new Animated.Value(0),
     traits: TRAITS.map(() => new Animated.Value(0)),
-    statut: new Animated.Value(0),
     nom: new Animated.Value(0),
     sortie: new Animated.Value(0),
   }));
@@ -70,8 +67,7 @@ export function Lancement() {
             v.traits.map((x) => anim(x, 260)),
           ),
         ]),
-        Animated.sequence([Animated.delay(800), ressort(v.statut)]),
-        Animated.sequence([Animated.delay(1100), anim(v.nom, 450)]),
+        Animated.sequence([Animated.delay(800), anim(v.nom, 450)]),
       ]),
       Animated.delay(500),
       anim(v.sortie, 520, Easing.inOut(Easing.cubic)),
@@ -88,7 +84,7 @@ export function Lancement() {
           ),
         ]),
       ]),
-      Animated.parallel([anim(v.statut, 400), anim(v.nom, 500)]),
+      anim(v.nom, 500),
       Animated.delay(700),
       anim(v.sortie, 450, Easing.inOut(Easing.quad)),
     ]);
@@ -218,29 +214,10 @@ export function Lancement() {
           </Animated.View>
         </Animated.View>
 
-        {/* Pastille rassurante : tout est à jour */}
-        <Animated.View
-          style={{
-            marginTop: 22,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 6,
-            backgroundColor: VIF.menthe,
-            borderRadius: 999,
-            paddingHorizontal: 14,
-            paddingVertical: 7,
-            opacity: v.statut,
-            transform: [{ scale: doux ? 1 : v.statut.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }],
-          }}
-        >
-          <Text style={{ color: '#063A2A', fontSize: 15, ...police('800') }}>✓</Text>
-          <Text style={{ color: '#063A2A', fontSize: 15, ...police('700') }}>Dossier à jour</Text>
-        </Animated.View>
-
         {/* Nom et accroche */}
         <Animated.View
           style={{
-            marginTop: 18,
+            marginTop: 26,
             alignItems: 'center',
             opacity: v.nom,
             transform: [{ translateY: doux ? 0 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
