@@ -10,29 +10,21 @@ import { police, useTheme } from '../theme';
 export const URL_PARCOURSUP = 'https://www.parcoursup.gouv.fr';
 
 /**
- * Logo original du prototype : trois chevrons qui montent, comme une liste
- * d'attente qui avance. Volontairement sans rapport avec le logo officiel de Parcoursup.
+ * Logo original du prototype : une flèche vers le haut à droite, avec deux
+ * traits de vitesse — un dossier qui avance. Volontairement sans rapport avec
+ * le logo officiel de Parcoursup (ni ses couleurs, ni sa composition).
  */
-export const CHEVRONS = [26, 42, 58];
-export function cheminChevron(sommet: number): string {
-  return `M31 ${sommet + 15} L50 ${sommet} L69 ${sommet + 15}`;
-}
+export const FLECHE = 'M33 67 L67 33 M45 33 L67 33 L67 55';
+export const TRAITS = ['M20 58 L31 47', 'M42 80 L53 69'];
 
-export function Logo({ taille = 40 }: { taille?: number }) {
+export function Logo({ taille = 40, inverse = false }: { taille?: number; inverse?: boolean }) {
   const t = useTheme();
   return (
     <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Parcours’app">
-      <Rect width="100" height="100" rx="24" fill={t.primary} />
-      {CHEVRONS.map((y, i) => (
-        <Path
-          key={y}
-          d={cheminChevron(y)}
-          stroke={i === 0 ? t.gaugeZone : '#FFFFFF'}
-          strokeWidth={8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
+      <Rect width="100" height="100" rx="24" fill={inverse ? '#FFFFFF' : t.primary} />
+      <Path d={FLECHE} stroke={inverse ? t.primary : '#FFFFFF'} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {TRAITS.map((d) => (
+        <Path key={d} d={d} stroke={inverse ? t.successDot : t.gaugeZone} strokeWidth={6} strokeLinecap="round" fill="none" />
       ))}
     </Svg>
   );
