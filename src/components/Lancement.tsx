@@ -1,24 +1,28 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, useWindowDimensions } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { police, useTheme } from '../theme';
 import { FLECHE, TRAITS } from './ui';
 
 const NATIF = Platform.OS !== 'web';
 const TAILLE = 124;
-/** Traits de vitesse du fond : position de départ (en fraction de l'écran), longueur, décalage */
+/** Couleurs vives de l'ouverture (aucune n'est le rouge ni le bleu du logo officiel) */
+const VIF = { corail: '#FF7A59', soleil: '#FFC93C', menthe: '#3DDC97', ciel: '#7CD3FF', lilas: '#B79CFF' };
+/** Traits de vitesse colorés : position de départ (fraction de l'écran), longueur, épaisseur, couleur, décalage */
 const SILLAGES = [
-  { x: 0.1, y: 0.75, l: 140, retard: 0 },
-  { x: 0.55, y: 0.9, l: 200, retard: 0.12 },
-  { x: -0.1, y: 0.45, l: 170, retard: 0.22 },
-  { x: 0.4, y: 0.6, l: 120, retard: 0.3 },
-  { x: 0.75, y: 0.55, l: 160, retard: 0.4 },
+  { x: 0.05, y: 0.78, l: 150, e: 12, c: VIF.corail, retard: 0 },
+  { x: 0.5, y: 0.95, l: 210, e: 10, c: VIF.soleil, retard: 0.08 },
+  { x: -0.15, y: 0.5, l: 180, e: 14, c: VIF.menthe, retard: 0.16 },
+  { x: 0.35, y: 0.66, l: 120, e: 8, c: VIF.ciel, retard: 0.24 },
+  { x: 0.72, y: 0.6, l: 170, e: 12, c: VIF.lilas, retard: 0.3 },
+  { x: 0.2, y: 1.05, l: 140, e: 9, c: VIF.ciel, retard: 0.36 },
+  { x: -0.05, y: 0.25, l: 130, e: 10, c: VIF.soleil, retard: 0.42 },
+  { x: 0.62, y: 0.3, l: 110, e: 8, c: VIF.corail, retard: 0.48 },
 ];
-
 /**
- * Animation d'ouverture (≈ 2,5 s) sur fond bleu : des traits de vitesse
- * traversent l'écran vers le haut à droite, le logo apparaît, sa flèche y
- * file en diagonale et laisse deux traits derrière elle ; une pastille
+ * Animation d'ouverture (≈ 2,5 s) sur un fond en dégradé : des traits de vitesse
+ * colorés traversent l'écran vers le haut à droite, le logo apparaît, sa flèche y
+ * file en diagonale, deux traits colorés apparaissent ; une pastille
  * « Dossier à jour » rassure (pas de chiffre de liste d'attente : c'est ce qui
  * stresse le plus les candidats), le nom apparaît, puis l'écran remonte comme un rideau.
  * Un toucher la passe. Si l'appareil demande de réduire les animations :
@@ -129,7 +133,19 @@ export function Lancement() {
         transform: [{ translateY: doux ? 0 : v.sortie.interpolate({ inputRange: [0, 1], outputRange: [0, -height] }) }],
       }}
     >
-      {/* Traits de vitesse du fond */}
+      {/* Fond en dégradé : bleu canard vers turquoise et violet */}
+      <Svg style={{ position: 'absolute', top: 0, left: 0 }} width={width} height={height}>
+        <Defs>
+          <LinearGradient id="fond" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#004C73" />
+            <Stop offset="0.55" stopColor="#0A7F95" />
+            <Stop offset="1" stopColor="#4B3FA8" />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width={width} height={height} fill="url(#fond)" />
+      </Svg>
+
+      {/* Traits de vitesse colorés */}
       {SILLAGES.map((s, i) => (
         <Animated.View
           key={i}
@@ -139,12 +155,12 @@ export function Lancement() {
             left: s.x * width,
             top: s.y * height,
             width: s.l,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: 'rgba(255,255,255,0.10)',
+            height: s.e,
+            borderRadius: s.e / 2,
+            backgroundColor: s.c,
             opacity: doux
-              ? v.sillages
-              : v.sillages.interpolate({ inputRange: [0, s.retard, s.retard + 0.15, 1], outputRange: [0, 0, 1, 0.6] }),
+              ? v.sillages.interpolate({ inputRange: [0, 1], outputRange: [0, 0.35] })
+              : v.sillages.interpolate({ inputRange: [0, s.retard, s.retard + 0.15, 1], outputRange: [0, 0, 0.9, 0.35] }),
             transform: [
               { translateX: doux ? 0 : v.sillages.interpolate({ inputRange: [0, 1], outputRange: [0, course * 0.7] }) },
               { translateY: doux ? 0 : v.sillages.interpolate({ inputRange: [0, 1], outputRange: [0, -course * 0.7] }) },
@@ -178,7 +194,7 @@ export function Lancement() {
           {TRAITS.map((d, i) => (
             <Animated.View key={d} style={{ position: 'absolute', top: 0, left: 0, opacity: v.traits[i] }}>
               <Svg width={TAILLE} height={TAILLE} viewBox="0 0 100 100">
-                <Path d={d} stroke={t.successDot} strokeWidth={6} strokeLinecap="round" fill="none" />
+                <Path d={d} stroke={i === 0 ? VIF.corail : VIF.soleil} strokeWidth={6} strokeLinecap="round" fill="none" />
               </Svg>
             </Animated.View>
           ))}
@@ -209,7 +225,7 @@ export function Lancement() {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 6,
-            backgroundColor: 'rgba(255,255,255,0.14)',
+            backgroundColor: VIF.menthe,
             borderRadius: 999,
             paddingHorizontal: 14,
             paddingVertical: 7,
@@ -217,8 +233,8 @@ export function Lancement() {
             transform: [{ scale: doux ? 1 : v.statut.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }],
           }}
         >
-          <Text style={{ color: t.gaugeZone, fontSize: 15, ...police('800') }}>✓</Text>
-          <Text style={{ color: '#FFFFFF', fontSize: 15, ...police('700') }}>Dossier à jour</Text>
+          <Text style={{ color: '#063A2A', fontSize: 15, ...police('800') }}>✓</Text>
+          <Text style={{ color: '#063A2A', fontSize: 15, ...police('700') }}>Dossier à jour</Text>
         </Animated.View>
 
         {/* Nom et accroche */}
@@ -230,7 +246,9 @@ export function Lancement() {
             transform: [{ translateY: doux ? 0 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
           }}
         >
-          <Text style={{ color: '#FFFFFF', fontSize: 30, letterSpacing: -0.5, ...police('800') }}>Parcours’app</Text>
+          <Text style={{ color: '#FFFFFF', fontSize: 32, letterSpacing: -0.5, ...police('800') }}>
+            Parcours’<Text style={{ color: VIF.soleil }}>app</Text>
+          </Text>
           <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, marginTop: 4, ...police('500') }}>Votre dossier, sans stress.</Text>
           <Text
             style={{

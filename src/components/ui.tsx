@@ -23,8 +23,8 @@ export function Logo({ taille = 40, inverse = false }: { taille?: number; invers
     <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Parcours’app">
       <Rect width="100" height="100" rx="24" fill={inverse ? '#FFFFFF' : t.primary} />
       <Path d={FLECHE} stroke={inverse ? t.primary : '#FFFFFF'} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {TRAITS.map((d) => (
-        <Path key={d} d={d} stroke={inverse ? t.successDot : t.gaugeZone} strokeWidth={6} strokeLinecap="round" fill="none" />
+      {TRAITS.map((d, i) => (
+        <Path key={d} d={d} stroke={i === 0 ? '#FF7A59' : '#FFC93C'} strokeWidth={6} strokeLinecap="round" fill="none" />
       ))}
     </Svg>
   );
