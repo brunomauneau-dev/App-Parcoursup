@@ -4,7 +4,7 @@ import type { Voeu } from '../api/types';
 import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
 import { RankChart } from '../components/RankChart';
-import { BoutonRepondre, Card, StatutBadge, Variation } from '../components/ui';
+import { BoutonRepondre, Card, EncartConsultation, StatutBadge, Variation } from '../components/ui';
 import { compteARebours, echeance, nombre, ordinal, resteAvant } from '../format';
 import { police, useTheme } from '../theme';
 import { variationVeille } from './AccueilScreen';
@@ -86,8 +86,8 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
             libérée.
           </Text>
           <Text style={corps}>Pensez à consulter les modalités d’inscription administrative de l’établissement.</Text>
-          <Mention />
-          <BoutonRepondre label="Gérer ce vœu sur le site ↗" />
+          <Mention acceptee />
+          <BoutonRepondre label="Gérer ce vœu sur Parcoursup ↗" />
         </>
       )}
 
@@ -198,7 +198,7 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
         </Card>
       )}
 
-      <BoutonRepondre label="Gérer ce vœu sur le site ↗" />
+      <BoutonRepondre label="Gérer ce vœu sur Parcoursup ↗" />
     </>
   );
 }
@@ -250,20 +250,16 @@ function Echeance({ limite, maintenant }: { limite: string; maintenant: Date }) 
   );
 }
 
-function Mention() {
-  const t = useTheme();
-  return (
-    <View style={{ backgroundColor: t.neutralBg, borderRadius: 16, padding: 14 }}>
-      <Text
-        style={{
-          color: t.textMuted,
-          fontSize: 14,
-          lineHeight: 20,
-          ...police('400'),
-        }}
-      >
-        Cette application sert à consulter votre dossier. Pour accepter ou refuser, connectez-vous à votre dossier sur le site.
-      </Text>
-    </View>
+function Mention({ acceptee = false }: { acceptee?: boolean }) {
+  return acceptee ? (
+    <EncartConsultation
+      titre="Pour gérer ce vœu, direction le site officiel"
+      texte="L’application sert à consulter. Toute démarche se fait sur Parcoursup : le bouton ci-dessous vous y emmène."
+    />
+  ) : (
+    <EncartConsultation
+      titre="Pour répondre, direction le site officiel"
+      texte="L’application sert à consulter. Accepter ou refuser se fait sur Parcoursup : le bouton ci-dessous vous y emmène."
+    />
   );
 }

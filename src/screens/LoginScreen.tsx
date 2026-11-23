@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { apiSimulee, modeDemo } from '../api';
 import { messageErreur } from '../api/erreurs';
-import { Button, Logo } from '../components/ui';
+import { Button, EncartConsultation, Logo } from '../components/ui';
 import { Cible, useDemoAuto } from '../demo/DemoAuto';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
@@ -73,6 +73,11 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
           </Text>
         </View>
 
+        <EncartConsultation
+          titre="Consultation uniquement"
+          texte="L’application ne permet ni d’accepter ni de refuser une proposition. Pour répondre, elle vous renvoie vers le site officiel Parcoursup."
+        />
+
         {apiSimulee ? (
           <View style={{ gap: 12 }}>
             {chargement ? (
@@ -140,19 +145,6 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
           </View>
         )}
 
-        <View
-          style={{
-            backgroundColor: t.surface,
-            borderRadius: 18,
-            padding: 16,
-            gap: 6,
-          }}
-        >
-          <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Aucune action sur votre dossier</Text>
-          <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
-            L’application ne peut ni accepter ni refuser une proposition. Pour répondre, vous serez redirigé vers le site officiel.
-          </Text>
-        </View>
         <View style={{ marginTop: 20 }}>
           <Droits />
         </View>

@@ -193,7 +193,44 @@ export function LienExterne({ url, label, variant = 'primary' }: { url: string; 
   );
 }
 
-export function BoutonRepondre({ label = 'Répondre sur le site ↗' }: { label?: string }) {
+/**
+ * Encart bien visible : l'application consulte, la réponse se fait sur le site officiel.
+ */
+export function EncartConsultation({ titre, texte }: { titre: string; texte: string }) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        gap: 12,
+        backgroundColor: t.info,
+        borderRadius: 16,
+        padding: 14,
+        borderLeftWidth: 4,
+        borderLeftColor: t.primary,
+      }}
+    >
+      <View
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          backgroundColor: t.primary,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#FFFFFF', fontSize: 16, ...police('800') }}>↗</Text>
+      </View>
+      <View style={{ flex: 1, gap: 3 }}>
+        <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>{titre}</Text>
+        <Text style={{ color: t.text, fontSize: 14, lineHeight: 20, opacity: 0.85, ...police('400') }}>{texte}</Text>
+      </View>
+    </View>
+  );
+}
+
+export function BoutonRepondre({ label = 'Répondre sur Parcoursup ↗' }: { label?: string }) {
   return <LienExterne url={URL_PARCOURSUP} label={label} />;
 }
 
