@@ -93,8 +93,7 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'notification',
     notification: true,
-    legende:
-      'Lundi, 6h12. Pendant la nuit, son dossier a bougé : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
+    legende: 'Lundi matin, son dossier a été mis à jour : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
   },
   {
     jour: 5,

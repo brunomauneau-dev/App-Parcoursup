@@ -4,7 +4,7 @@ import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
 import { BoutonAvis, Card, IconeOnglet, Logo, TitreSection, Variation } from '../components/ui';
 import { AVIS_ACTIF } from '../config';
-import { dateCourte, echeance, heure, jourLong, ordinal, resteAvant } from '../format';
+import { dateCourte, echeance, jourLong, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
@@ -355,9 +355,9 @@ export function AccueilScreen(p: Props) {
       {/* Listes d'attente */}
       {attente.length > 0 && (
         <>
-          <TitreSection titre="Listes d’attente" aDroite={`Mises à jour à ${heure(dossier.derniereMiseAJour)}`} />
+          <TitreSection titre="Listes d’attente" aDroite="Mises à jour chaque matin" />
           <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, paddingHorizontal: 4, marginTop: -6, ...police('400') }}>
-            Elles avancent chaque matin, surtout les premiers jours de la phase.
+            Inutile de guetter : elles avancent une fois par jour, le matin, surtout les premiers jours de la phase.
           </Text>
           {attente.map((v, i) => {
             const d = variationVeille(v);
