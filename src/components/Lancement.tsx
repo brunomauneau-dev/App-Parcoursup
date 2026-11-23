@@ -15,6 +15,7 @@ const TAILLE = 112;
 export function Lancement() {
   const t = useTheme();
   const [visible, setVisible] = useState(true);
+  const [doux, setDoux] = useState(false);
   const { height } = useWindowDimensions();
   const [v] = useState(() => ({
     logo: new Animated.Value(0),
@@ -41,16 +42,22 @@ export function Lancement() {
       Animated.delay(450),
       anim(v.sortie, 520, Easing.inOut(Easing.cubic)),
     ]);
+    // Version douce : tout est en place d'emblée, seul un fondu de sortie
+    const douce = Animated.sequence([Animated.delay(1300), anim(v.sortie, 450, Easing.inOut(Easing.quad))]);
     AccessibilityInfo.isReduceMotionEnabled()
       .catch(() => false)
       .then((reduire) => {
         if (annule) return;
-        if (reduire) setVisible(false);
-        else sequence.start(({ finished }) => finished && setVisible(false));
+        if (reduire) {
+          [v.logo, v.halos, v.nom, ...v.lignes].forEach((x) => x.setValue(1));
+          setDoux(true);
+          douce.start(({ finished }) => finished && setVisible(false));
+        } else sequence.start(({ finished }) => finished && setVisible(false));
       });
     return () => {
       annule = true;
       sequence.stop();
+      douce.stop();
     };
   }, [v]);
 
@@ -89,8 +96,9 @@ export function Lancement() {
         zIndex: 50,
         backgroundColor: t.bg,
         overflow: 'hidden',
-        // Sortie en rideau : l'écran remonte d'un bloc et dévoile l'application
-        transform: [{ translateY: v.sortie.interpolate({ inputRange: [0, 1], outputRange: [0, -height] }) }],
+        // Sortie en rideau : l'écran remonte d'un bloc et dévoile l'application (version douce : fondu)
+        opacity: doux ? v.sortie.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) : 1,
+        transform: [{ translateY: doux ? 0 : v.sortie.interpolate({ inputRange: [0, 1], outputRange: [0, -height] }) }],
         borderBottomLeftRadius: 32,
         borderBottomRightRadius: 32,
       }}
