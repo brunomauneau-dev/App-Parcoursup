@@ -94,7 +94,7 @@ export const QUESTIONS: Question[] = [
     options: [
       'Voir propositions et vœux en un coup d’œil',
       'Le compte à rebours avant la date limite',
-      'La jauge et la courbe des listes d’attente',
+      'La jauge et la progression vers une proposition',
       'La comparaison avec le dernier appelé l’an dernier',
       'Les notifications quand le dossier change',
       'Rester connecté sans ressaisir son mot de passe',

@@ -657,7 +657,7 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
           borderRadius: grand ? 24 : 20,
           padding: grand ? 22 : 14,
           gap: grand ? 16 : 10,
-          opacity: demo.transition ? 0.2 : apparition,
+          opacity: apparition,
           transform: [{ translateY: apparition.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
           shadowColor: '#000',
           shadowOpacity: 0.25,
@@ -682,9 +682,13 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
                 style={{
                   height: grand ? 4 : 3,
                   borderRadius: 2,
+                  overflow: 'hidden',
                   backgroundColor: i <= (demo.etape ?? -1) ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
                 }}
-              />
+              >
+                {/* Pendant le passage à l'étape suivante, son segment se remplit (habille la courte attente) */}
+                {demo.transition && i === (demo.etape ?? -1) + 1 && <Remplissage />}
+              </View>
             </Pressable>
           ))}
         </View>
@@ -694,7 +698,17 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
           </Text>
         )}
         <Pressable onPress={demo.suivant} disabled={derniere} accessibilityRole="text">
-          <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontSize: grand ? 22 : 16,
+              lineHeight: grand ? 30 : 22,
+              opacity: demo.transition ? 0.35 : 1,
+              ...police('600'),
+            }}
+          >
+            {demo.legende}
+          </Text>
         </Pressable>
         {!derniere && !demo.transition && (
           <Pressable onPress={demo.suivant} accessibilityRole="button" accessibilityLabel="Étape suivante">
@@ -742,6 +756,25 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
         </View>
       </Animated.View>
     </Pressable>
+  );
+}
+
+/** Segment qui se remplit pendant le passage à l'étape suivante. */
+function Remplissage() {
+  const [v] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    const a = Animated.timing(v, { toValue: 1, duration: 700, easing: Easing.out(Easing.quad), useNativeDriver: false });
+    a.start();
+    return () => a.stop();
+  }, [v]);
+  return (
+    <Animated.View
+      style={{
+        height: '100%',
+        backgroundColor: '#FFFFFF',
+        width: v.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+      }}
+    />
   );
 }
 

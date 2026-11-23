@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { Voeu } from '../api/types';
 import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
-import { RankChart } from '../components/RankChart';
+import { CheminProposition } from '../components/CheminProposition';
 import { BoutonRepondre, Card, EncartConsultation, StatutBadge, Variation } from '../components/ui';
 import { compteARebours, echeance, nombre, ordinal, resteAvant } from '../format';
 import { police, useTheme } from '../theme';
@@ -192,9 +192,8 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
       )}
 
       {voeu.historique && voeu.historique.length > 1 && (
-        <Card style={{ gap: 8 }}>
-          <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>Évolution de votre position dans la liste d’attente</Text>
-          <RankChart historique={voeu.historique} />
+        <Card>
+          <CheminProposition historique={voeu.historique} />
         </Card>
       )}
 
