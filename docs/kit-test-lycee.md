@@ -8,7 +8,7 @@ Faire essayer le prototype « Suivi Vœux » à des élèves de terminale, en 20
 2. **Information des familles** par l'établissement (ENT ou carnet), au moins une semaine avant, avec la note ci-dessous. Un élève dont la famille s'oppose ne participe pas, sans avoir à se justifier.
 3. **Vérifier le matériel** : le lien du prototype (https://brunomauneau-dev.github.io/suivi-voeux-demo/) s'ouvre sur un téléphone en 4G ; le Wi-Fi de l'établissement peut bloquer certains sites, le tester sur place avant.
 4. Préparer les QR codes à projeter :
-   - `qr-demo-animee.png` : la démo animée (1 minute), pour ouvrir la séance ;
+   - `qr-demo-animee.png` : la visite guidée, pour ouvrir la séance ;
    - `qr-prototype.png` : le prototype, que les élèves manipulent eux-mêmes.
    Le bouton « Donner mon avis » est dans le prototype.
 
@@ -16,7 +16,7 @@ Faire essayer le prototype « Suivi Vœux » à des élèves de terminale, en 20
 
 | Durée | Étape |
 | --- | --- |
-| 3 min | Projection de la démo animée (adresse se terminant par `#demo`), puis présentation : un prototype, des données fictives, un questionnaire anonyme. Rappeler de ne jamais saisir ses vrais identifiants Parcoursup. |
+| 3 min | Projection de la visite guidée (adresse se terminant par `#demo`) : l’animateur avance étape par étape, d’un clic ou avec la flèche →, en laissant le temps de lire. Puis présentation : un prototype, des données fictives, un questionnaire anonyme. Rappeler de ne jamais saisir ses vrais identifiants Parcoursup. |
 | 2 min | Les élèves ouvrent le lien sur leur téléphone, appuient sur « Découvrir la démo ». |
 | 8 min | Exploration libre, puis trois consignes : trouver la proposition qui attend une réponse et le temps restant ; ouvrir un vœu en liste d'attente et lire la courbe ; appuyer sur « Simuler la mise à jour de la nuit ». |
 | 5 min | Questionnaire via « Donner mon avis ». |

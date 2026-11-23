@@ -82,7 +82,7 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
                 <Cible id="connexion-demo">
                   <Button label="Découvrir la démo" onPress={() => void valider()} />
                 </Cible>
-                {demoAuto && <Button label="Voir la démo animée (1 min)" variant="secondary" onPress={demoAuto.lancer} />}
+                {demoAuto && <Button label="Visite guidée" variant="secondary" onPress={demoAuto.lancer} />}
               </>
             )}
             <Text

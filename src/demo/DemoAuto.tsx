@@ -9,10 +9,11 @@ import { MENTION_DROITS } from '../components/Droits';
 import { police } from '../theme';
 
 /**
- * Démo guidée : une semaine de phase d'admission en une minute environ.
- * Chaque étape met en lumière l'élément dont elle parle, montre où l'on touche,
- * puis passe à l'écran suivant. Se lance avec le bouton « Voir la démo animée »
- * ou l'adresse se terminant par #demo.
+ * Visite guidée : une semaine de phase d'admission, au rythme de l'utilisateur.
+ * Chaque étape met en lumière l'élément dont elle parle ; l'utilisateur touche
+ * l'écran quand il a fini de lire, la visite montre alors où l'on touche et passe
+ * à l'écran suivant. Rien n'avance tout seul. Se lance avec le bouton
+ * « Visite guidée » ou l'adresse se terminant par #demo.
  */
 
 type Rect = { x: number; y: number; w: number; h: number };
@@ -37,8 +38,7 @@ interface Etape {
   route: Route;
   cible?: IdCible;
   legende: string;
-  duree: number;
-  /** En lecture : montrer un toucher sur la cible avant de passer à l'étape suivante */
+  /** Au passage à l'étape suivante : montrer un toucher sur la cible */
   toucher?: boolean;
   /** Afficher la notification « dossier mis à jour » */
   notification?: boolean;
@@ -52,7 +52,6 @@ const ETAPES: Etape[] = [
     route: '/connexion',
     cible: 'connexion-demo',
     legende: 'Camille est en terminale. Pendant la phase d’admission, elle suit son dossier Parcoursup avec Suivi Vœux.',
-    duree: 4000,
     toucher: true,
   },
   {
@@ -60,14 +59,12 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-echeance',
     legende: 'Dimanche 6 juin. Dès l’ouverture, elle voit qu’une proposition attend sa réponse, et combien de temps il lui reste.',
-    duree: 5000,
   },
   {
     jour: 4,
     route: '/dossier',
     cible: 'accueil-compteurs',
     legende: 'Son dossier en trois chiffres : propositions, listes d’attente et refus.',
-    duree: 4000,
   },
   // 2. Comprendre sa liste d'attente
   {
@@ -75,7 +72,6 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-attente-0',
     legende: 'Le vœu qui lui tient le plus à cœur, le BUT GEII, est en liste d’attente : 119e position, et 12 places gagnées depuis hier.',
-    duree: 5000,
     toucher: true,
   },
   {
@@ -83,14 +79,12 @@ const ETAPES: Etape[] = [
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
     legende: 'Sa position dans la liste d’attente : 119e parmi les 410 candidats encore en attente. Elle avance chaque matin.',
-    duree: 5500,
   },
   {
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-classement',
     legende: 'Son rang de classement, 240e, se compare au dernier candidat appelé l’an dernier, 215e : un ordre d’idée, pas une garantie.',
-    duree: 6000,
   },
   // 3. Être prévenue (lundi)
   {
@@ -100,14 +94,12 @@ const ETAPES: Etape[] = [
     notification: true,
     legende:
       'Lundi, 6h12 : le dossier a été mis à jour pendant la nuit. Une notification prévient Camille, sans rien afficher de personnel.',
-    duree: 5000,
   },
   {
     jour: 5,
     route: '/dossier',
     cible: 'accueil-carte',
     legende: 'Bonne nouvelle : une place s’est libérée en BUT GEII. Deux propositions attendent maintenant sa réponse.',
-    duree: 5000,
   },
   // 4. Décider sereinement
   {
@@ -115,7 +107,6 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: { onglet: 1 },
     legende: 'Dans « Mes vœux », elle retrouve toutes ses propositions.',
-    duree: 3000,
     toucher: true,
   },
   {
@@ -123,7 +114,6 @@ const ETAPES: Etape[] = [
     route: VOEUX_PROPOSITIONS,
     cible: 'voeu-v4',
     legende: 'Chaque proposition rappelle sa date limite de réponse.',
-    duree: 3500,
     toucher: true,
   },
   {
@@ -131,27 +121,24 @@ const ETAPES: Etape[] = [
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-repondre',
     legende: 'Pour accepter, elle passe par le site officiel : l’application ne fait que consulter, aucune fausse manœuvre n’est possible.',
-    duree: 5500,
   },
   {
     jour: 5,
     route: '/dossier/messages',
     cible: 'messages-0',
     legende: 'Les messages du dossier sont réunis au même endroit, les nouveaux signalés d’un point orange.',
-    duree: 4000,
   },
   {
     jour: 5,
     route: '/dossier',
-    legende: 'Fin de la démo. À vous d’explorer librement, ou de rejouer la démo.',
-    duree: 0,
+    legende: 'Fin de la visite. À vous d’explorer librement, ou de la recommencer.',
   },
 ];
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Laisse le temps à l'écran d'apparaître avant de mesurer. */
 const STABILISATION_MS = 450;
-const TOUCHER_MS = 800;
+const TOUCHER_MS = 650;
 
 // --- Registre des éléments pointables --------------------------------------
 
@@ -171,12 +158,11 @@ interface EtatDemo {
   /** Va directement à une étape */
   allerA: (i: number) => void;
   precedent: () => void;
+  /** Passe à l'étape suivante (en montrant le toucher si l'étape en prévoit un) */
   suivant: () => void;
-  enLecture: boolean;
-  basculerLecture: () => void;
-  vitesse: 1 | 2;
-  changerVitesse: () => void;
   etape: number | null;
+  /** Vrai entre le toucher de l'utilisateur et l'affichage de l'étape suivante */
+  transition: boolean;
   total: number;
   legende: string | null;
   rect: Rect | null;
@@ -272,15 +258,16 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     return null;
   }, []);
 
-  const [enLecture, setEnLecture] = useState(true);
-  const enLectureRef = useRef(true);
-  const [vitesse, setVitesse] = useState<1 | 2>(1);
-  const vitesseRef = useRef<1 | 2>(1);
   const etapeRef = useRef<number | null>(null);
+  /** Vrai pendant un changement d'étape : les touchers sont ignorés (pas de double saut). */
+  const occupe = useRef(false);
+  const [transition, setTransition] = useState(false);
 
   const arreter = useCallback(() => {
     jeton.current += 1;
     etapeRef.current = null;
+    occupe.current = false;
+    setTransition(false);
     setEtape(null);
     setRect(null);
     setToucher(false);
@@ -295,77 +282,79 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (s.statut !== 'connecte') await s.connexion();
-    // La démo guidée raconte toujours l'histoire de Camille
+    // La visite guidée raconte toujours l'histoire de Camille
     await s.definirProfil?.('camille');
     await s.definirJour?.(e.jour);
     r.navigate(e.route);
     if (e.notification) s.montrerNotification();
   }, []);
 
-  // Fonctions mutuellement dépendantes : passées par des refs pour rester stables
-  const allerARef = useRef<(i: number) => Promise<void>>(async () => {});
-
-  /** En lecture : attend la durée de l'étape, montre le toucher, puis enchaîne. */
-  const programmerSuite = useCallback(async (i: number, monJeton: number) => {
-    const actif = () => jeton.current === monJeton && enLectureRef.current;
-    const e = ETAPES[i];
-    if (e.duree === 0) return;
-    await attendre(e.duree / vitesseRef.current);
-    if (!actif()) return;
-    if (e.toucher && e.cible) {
-      setToucher(true);
-      await attendre(TOUCHER_MS / vitesseRef.current);
-      if (!actif()) return;
-    }
-    void allerARef.current(i + 1);
-  }, []);
-
   const allerA = useCallback(
     async (i: number) => {
       if (i < 0 || i >= ETAPES.length) return;
       const monJeton = ++jeton.current;
+      occupe.current = true;
+      setTransition(true);
       const e = ETAPES[i];
       setToucher(false);
-      await preparer(e);
-      await attendre(STABILISATION_MS);
-      if (jeton.current !== monJeton) return;
-      const r = await mesurer(e.cible);
-      if (jeton.current !== monJeton) return;
-      setRect(r);
-      etapeRef.current = i;
-      setEtape(i);
-      if (enLectureRef.current) void programmerSuite(i, monJeton);
+      try {
+        await preparer(e);
+        await attendre(STABILISATION_MS);
+        if (jeton.current !== monJeton) return;
+        const r = await mesurer(e.cible);
+        if (jeton.current !== monJeton) return;
+        setRect(r);
+        etapeRef.current = i;
+        setEtape(i);
+        setTransition(false);
+      } finally {
+        if (jeton.current === monJeton) occupe.current = false;
+      }
     },
-    [preparer, mesurer, programmerSuite],
+    [preparer, mesurer],
   );
-  useEffect(() => {
-    allerARef.current = allerA;
-  }, [allerA]);
 
   const lancer = useCallback(() => {
-    enLectureRef.current = true;
-    setEnLecture(true);
     void allerA(0);
   }, [allerA]);
 
-  const basculerLecture = useCallback(() => {
-    const lecture = !enLectureRef.current;
-    enLectureRef.current = lecture;
-    setEnLecture(lecture);
-    jeton.current += 1; // annule l'enchaînement en cours
-    setToucher(false);
+  /** Toucher de l'utilisateur : on montre le geste sur la cible si besoin, puis on avance. */
+  const suivant = useCallback(async () => {
     const i = etapeRef.current;
-    if (lecture && i != null) {
-      if (i === ETAPES.length - 1) void allerA(0);
-      else void programmerSuite(i, jeton.current);
+    if (i == null || occupe.current || i >= ETAPES.length - 1) return;
+    occupe.current = true;
+    setTransition(true);
+    const monJeton = jeton.current;
+    const e = ETAPES[i];
+    if (e.toucher && e.cible) {
+      setToucher(true);
+      await attendre(TOUCHER_MS);
+      if (jeton.current !== monJeton) return;
     }
-  }, [allerA, programmerSuite]);
+    await allerA(i + 1);
+  }, [allerA]);
 
-  const changerVitesse = useCallback(() => {
-    const v = vitesseRef.current === 1 ? 2 : 1;
-    vitesseRef.current = v;
-    setVitesse(v);
-  }, []);
+  const precedent = useCallback(() => {
+    const i = etapeRef.current;
+    if (i == null || i === 0) return;
+    void allerA(i - 1);
+  }, [allerA]);
+
+  // Sur ordinateur : flèches, espace et Entrée pour avancer, Échap pour quitter
+  useEffect(() => {
+    if (Platform.OS !== 'web' || etape == null || typeof window === 'undefined') return;
+    const clavier = (ev: KeyboardEvent) => {
+      if (ev.key === 'ArrowRight' || ev.key === ' ' || ev.key === 'Enter') {
+        ev.preventDefault();
+        void suivant();
+      } else if (ev.key === 'ArrowLeft') {
+        ev.preventDefault();
+        precedent();
+      } else if (ev.key === 'Escape') arreter();
+    };
+    window.addEventListener('keydown', clavier);
+    return () => window.removeEventListener('keydown', clavier);
+  }, [etape, suivant, precedent, arreter]);
 
   // Lancement par l'adresse #demo, une fois la session initialisée
   const dejaLancee = useRef(false);
@@ -385,13 +374,10 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       ctx.current.router.push('/avis');
     },
     allerA: (i) => void allerA(i),
-    precedent: () => etape != null && void allerA(etape - 1),
-    suivant: () => etape != null && void allerA(etape + 1),
-    enLecture,
-    basculerLecture,
-    vitesse,
-    changerVitesse,
+    precedent,
+    suivant: () => void suivant(),
     etape,
+    transition,
     total: ETAPES.length,
     legende: etape != null ? ETAPES[etape].legende : null,
     rect,
@@ -508,6 +494,15 @@ function Voile({ demo, W, H }: { demo: EtatDemo; W: number; H: number }) {
           borderColor: pulsation.interpolate({ inputRange: [0, 1], outputRange: ['rgba(255,255,255,0.95)', 'rgba(159,211,236,0.95)'] }),
         }}
       />
+      {/* Toucher n'importe où (y compris sur l'élément mis en lumière) : étape suivante */}
+      {!derniere && (
+        <Pressable
+          onPress={demo.suivant}
+          accessibilityRole="button"
+          accessibilityLabel="Étape suivante"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+      )}
       {toucher && rect && (
         <Animated.View
           pointerEvents="none"
@@ -560,7 +555,7 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
         borderRadius: grand ? 24 : 20,
         padding: grand ? 22 : 14,
         gap: grand ? 16 : 10,
-        opacity: apparition,
+        opacity: demo.transition ? 0.2 : apparition,
         transform: [{ translateY: apparition.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
         shadowColor: '#000',
         shadowOpacity: 0.25,
@@ -596,7 +591,10 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
           Étape {(demo.etape ?? 0) + 1} sur {demo.total}
         </Text>
       )}
-      <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
+      <Pressable onPress={demo.suivant} disabled={derniere} accessibilityRole="text">
+        <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
+      </Pressable>
+      {!derniere && !demo.transition && <Indication grand={grand} />}
       {derniere && AVIS_ACTIF && (
         <Pressable
           onPress={demo.donnerAvis}
@@ -617,14 +615,12 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <BoutonCommande libelle="‹" description="Étape précédente" onPress={demo.precedent} desactive={premiere} grand={grand} />
         <BoutonCommande
-          libelle={derniere ? '↺' : demo.enLecture ? '❚❚' : '▶'}
-          description={derniere ? 'Rejouer' : demo.enLecture ? 'Pause' : 'Lecture'}
-          onPress={derniere ? demo.lancer : demo.basculerLecture}
+          libelle={derniere ? 'Recommencer' : 'Suivant ›'}
+          description={derniere ? 'Recommencer la visite' : 'Étape suivante'}
+          onPress={derniere ? demo.lancer : demo.suivant}
           grand={grand}
           principal
         />
-        <BoutonCommande libelle="›" description="Étape suivante" onPress={demo.suivant} desactive={derniere} grand={grand} />
-        <BoutonCommande libelle={`×${demo.vitesse}`} description="Changer la vitesse" onPress={demo.changerVitesse} grand={grand} />
         <View style={{ flex: 1 }} />
         <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
           <Text
@@ -639,6 +635,33 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
         </Pressable>
       </View>
     </Animated.View>
+  );
+}
+
+/** Invite discrète et pulsée : « Touchez l'écran pour continuer ». */
+function Indication({ grand }: { grand: boolean }) {
+  const [pulsation] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    const boucle = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulsation, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
+        Animated.timing(pulsation, { toValue: 0, duration: 1100, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
+      ]),
+    );
+    boucle.start();
+    return () => boucle.stop();
+  }, [pulsation]);
+  return (
+    <Animated.Text
+      style={{
+        color: '#9FD3EC',
+        fontSize: grand ? 14 : 13,
+        opacity: pulsation.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] }),
+        ...police('600'),
+      }}
+    >
+      {grand ? 'Cliquez sur le téléphone ou sur « Suivant » (ou touche →) pour continuer' : 'Touchez l’écran pour continuer'}
+    </Animated.Text>
   );
 }
 
@@ -667,7 +690,7 @@ function BoutonCommande({
       style={({ pressed }) => ({
         minWidth: d,
         height: d,
-        paddingHorizontal: 8,
+        paddingHorizontal: principal ? 18 : 8,
         borderRadius: d / 2,
         alignItems: 'center',
         justifyContent: 'center',
@@ -727,7 +750,7 @@ export function PresentationEcran({ children }: { children: ReactNode }) {
                 opacity: pressed ? 0.85 : 1,
               })}
             >
-              <Text style={{ color: '#FFFFFF', fontSize: 16, ...police('700') }}>Lancer la démo guidée (1 min)</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 16, ...police('700') }}>Lancer la visite guidée</Text>
             </Pressable>
             <Text style={{ color: '#5B6375', fontSize: 14, lineHeight: 20, ...police('400') }}>
               Ou manipulez librement le téléphone ci-contre. Pour l’essayer sur votre propre téléphone, ouvrez ce même lien.

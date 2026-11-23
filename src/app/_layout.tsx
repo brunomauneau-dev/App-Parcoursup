@@ -12,6 +12,7 @@ import { Platform, ScrollView, Text, View } from 'react-native';
 import type { ErrorBoundaryProps } from 'expo-router';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { modeDemo } from '../api';
+import { Lancement } from '../components/Lancement';
 import { BandeauPrototype, Notification } from '../components/ui';
 import { CalqueDemo, DemoAutoProvider, PresentationEcran } from '../demo/DemoAuto';
 import { VerrouProvider } from '../securite/Verrou';
@@ -30,6 +31,7 @@ function Cadre() {
       {/* La notification et la démo passent au-dessus du reste */}
       <Notification visible={notification} onClose={fermerNotification} top={insets.top + 8} />
       <CalqueDemo />
+      <Lancement />
     </View>
   );
 }
