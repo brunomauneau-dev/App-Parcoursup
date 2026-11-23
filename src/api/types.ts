@@ -58,6 +58,11 @@ export interface Dossier {
   messages: Message[];
   /** Dates générales de la phase d'admission (identiques pour tous les candidats) */
   calendrier: EtapeCalendrier[];
+  /**
+   * Période où le candidat doit classer ses vœux en attente sur le site
+   * (calendrier 2027 : du 4 au 7 juin). Absent hors de cette étape.
+   */
+  classementAttente?: { debut: string; fin: string };
   /** Démonstration uniquement : profil fictif affiché. Absent de l'API réelle. */
   profilDemo?: { id: string; presentation: string };
 }

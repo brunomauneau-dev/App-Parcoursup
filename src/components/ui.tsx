@@ -162,7 +162,15 @@ export function Button({
  * Lien vers un site externe. Rendu comme un vrai lien <a> sur le web (seule
  * méthode fiable dans une page intégrée), ouvert dans le navigateur sur mobile.
  */
-export function LienExterne({ url, label, variant = 'primary' }: { url: string; label: string; variant?: 'primary' | 'secondary' }) {
+export function LienExterne({
+  url,
+  label,
+  variant = 'primary',
+}: {
+  url: string;
+  label: string;
+  variant?: 'primary' | 'secondary' | 'clair';
+}) {
   const t = useTheme();
   return (
     <Link

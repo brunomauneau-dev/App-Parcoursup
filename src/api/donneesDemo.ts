@@ -3,14 +3,16 @@
  * Partagées par l'API simulée de l'application (mock.ts) et par le serveur
  * de démonstration (server/). Ce fichier ne doit importer que des types.
  *
- * La phase d'admission simulée commence le 2 juin 2027 (jour 0).
+ * La phase d'admission simulée suit le calendrier officiel 2027 : début le mardi 1er juin
+ * (jour 0), classement des vœux en attente du 4 au 7 juin, phase complémentaire le 10 juin,
+ * fin de la phase principale le 10 juillet.
  */
 import type { Dossier, Message, PointHistorique, Voeu } from './types';
 
 export const JOUR_INITIAL = 4;
 export const JOUR_MAX = 7;
-const J0 = new Date(2027, 5, 2); // 2 juin 2027, heure locale
-const HEURE_MAJ = { h: 6, m: 12 }; // mise à jour nocturne simulée
+const J0 = new Date(2027, 5, 1); // mardi 1er juin 2027, heure locale
+const HEURE_MAJ = { h: 9, m: 0 }; // notifications et messages : à partir de 9 h, jamais la nuit
 
 function dateDuJour(jour: number, h = 0, m = 0): Date {
   const d = new Date(J0);
@@ -428,10 +430,12 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
     voeux: profil.voeux.map((s) => construireVoeu(s, jour)),
     messages: construireMessages(profil, jour),
     calendrier: [
-      { date: dateDuJour(9, 9).toISOString(), libelle: 'Ouverture de la phase complémentaire' },
-      { date: dateDuJour(16, 9).toISOString(), libelle: 'Point d’étape : confirmer ses vœux en attente sur le site' },
-      { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale d’admission' },
+      { date: dateDuJour(6, 23, 59).toISOString(), libelle: 'Dernier jour pour classer vos vœux en attente (sur le site)' },
+      { date: dateDuJour(9, 9).toISOString(), libelle: 'Début de la phase complémentaire : jusqu’à 10 nouveaux vœux' },
+      { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale' },
     ],
+    // Calendrier officiel 2027 : classement des vœux en attente du vendredi 4 au lundi 7 juin inclus
+    classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString() },
     profilDemo: { id: profil.id, presentation: profil.presentation },
   };
 }

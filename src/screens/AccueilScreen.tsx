@@ -1,7 +1,7 @@
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import type { Dossier, Voeu } from '../api/types';
 import { Cible } from '../demo/DemoAuto';
-import { BoutonAvis, Card, IconeOnglet, Logo, TitreSection, Variation } from '../components/ui';
+import { BoutonAvis, Card, IconeOnglet, LienExterne, Logo, TitreSection, URL_PARCOURSUP, Variation } from '../components/ui';
 import { AVIS_ACTIF } from '../config';
 import { dateCourte, echeance, jourLong, nombre, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
@@ -35,18 +35,21 @@ export function variationVeille(v: Voeu): number | null {
   return (h[h.length - 2].rang as number) - (h[h.length - 1].rang as number);
 }
 
-const BON_A_SAVOIR = [
+/** Conseils affichés selon la situation (« pour ») : inutile de parler d'accepter à qui n'a pas de proposition. */
+const BON_A_SAVOIR: { titre: string; texte: string; pour?: 'proposition' | 'attente' }[] = [
   {
+    pour: 'proposition',
     titre: 'Accepter ne ferme pas de portes',
     texte: 'Vous pouvez accepter une proposition et garder vos vœux en attente.',
   },
   {
+    pour: 'attente',
     titre: 'Les positions bougent chaque matin',
     texte: 'Inutile de vérifier toute la journée : la mise à jour est quotidienne.',
   },
   {
     titre: 'Besoin d’en parler ?',
-    texte: 'Votre professeur principal ou un PsyEN peut vous aider à y voir clair.',
+    texte: 'Votre professeur principal ou un psychologue de l’Éducation nationale peut vous aider à y voir clair.',
   },
 ];
 
@@ -62,6 +65,9 @@ export function AccueilScreen(p: Props) {
   const nbRefusees = dossier.voeux.filter((v) => v.statut === 'refuse' || v.statut === 'refusee_par_candidat').length;
   const nonLus = dossier.messages.filter((m) => !m.lu).length;
   const prochaine = aRepondre[0];
+  // Classement des vœux en attente (calendrier 2027 : du 4 au 7 juin), à faire sur le site
+  const ca = dossier.classementAttente;
+  const classementOuvert = ca != null && attente.length > 0 && maintenant >= new Date(ca.debut) && maintenant <= new Date(ca.fin);
   // Aucune proposition (ni en attente de réponse, ni acceptée) : on présente les autres pistes
   const sansProposition = nbPropositions === 0;
   // ... et des listes d'attente bien au-delà du dernier appelé de l'an dernier : message adapté
@@ -223,42 +229,25 @@ export function AccueilScreen(p: Props) {
                 leur côté.
               </Text>
               <Cible id="accueil-echeance">
-                <View
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: 14,
-                    paddingVertical: 12,
-                    paddingHorizontal: 14,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 9,
-                      height: 9,
-                      borderRadius: 5,
-                      backgroundColor: t.accent,
-                    }}
-                  />
-                  <Text
-                    style={{
-                      color: t.text,
-                      fontSize: 14.5,
-                      flex: 1,
-                      ...police('400'),
-                    }}
-                  >
-                    <Text style={police('700')}>Avant le {echeance(prochaine.dateLimiteReponse!)}</Text> ·{' '}
-                    {resteAvant(new Date(prochaine.dateLimiteReponse!), maintenant)}
-                  </Text>
-                </View>
+                <Pastille
+                  texte={`Avant le ${echeance(prochaine.dateLimiteReponse!)}`}
+                  detail={resteAvant(new Date(prochaine.dateLimiteReponse!), maintenant)}
+                />
               </Cible>
               <BoutonClair
                 label={aRepondre.length === 1 ? 'Voir ma proposition' : 'Voir mes propositions'}
                 onPress={() => p.onVoirVoeux('propositions')}
               />
+            </>
+          ) : classementOuvert && ca ? (
+            <>
+              <Etiquette texte="À faire : classer vos vœux en attente" />
+              <Text style={{ color: '#FFFFFF', fontSize: 25, lineHeight: 30, ...police('800') }}>Classez vos vœux en attente.</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+                Indiquez sur le site l’ordre de préférence de vos {attente.length} vœux en attente. Quelques minutes suffisent.
+              </Text>
+              <Pastille texte={`Avant le ${echeance(ca.fin)}`} detail={resteAvant(new Date(ca.fin), maintenant)} />
+              <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="clair" />
             </>
           ) : acceptee ? (
             <>
@@ -306,6 +295,24 @@ export function AccueilScreen(p: Props) {
         </View>
       </Cible>
 
+      {prochaine && classementOuvert && ca && (
+        <Cible id="accueil-classement">
+          <View
+            style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.accent }}
+          >
+            <Text style={{ color: t.accent, fontSize: 12.5, letterSpacing: 0.4, textTransform: 'uppercase', ...police('700') }}>
+              Aussi à faire
+            </Text>
+            <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Classer vos vœux en attente</Text>
+            <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+              Avant le {echeance(ca.fin)} ({resteAvant(new Date(ca.fin), maintenant)}), indiquez sur le site l’ordre de préférence de vos{' '}
+              {attente.length} vœux en attente. Quelques minutes suffisent.
+            </Text>
+            <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="secondary" />
+          </View>
+        </Cible>
+      )}
+
       {sansProposition && (
         <View
           style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.warningDot }}
@@ -317,23 +324,13 @@ export function AccueilScreen(p: Props) {
               : 'Pas encore de proposition : c’est fréquent, et vos listes d’attente avancent. En parallèle, vous pouvez préparer d’autres pistes :'}
           </Text>
           <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 22, ...police('400') }}>
-            • <Text style={police('700')}>La phase complémentaire</Text> ouvre le 11 juin : de nouveaux vœux dans les formations qui ont
-            encore des places.
+            • <Text style={police('700')}>La phase complémentaire</Text> ouvre le jeudi 10 juin : jusqu’à 10 nouveaux vœux dans les
+            formations qui ont encore des places.
             {'\n'}• <Text style={police('700')}>Votre professeur principal</Text> ou un psychologue de l’Éducation nationale peut vous aider
             à choisir.
             {'\n'}• Après la phase principale, <Text style={police('700')}>la commission d’accès à l’enseignement supérieur</Text> de votre
             académie accompagne les candidats sans proposition.
           </Text>
-        </View>
-      )}
-
-      {AVIS_ACTIF && (
-        <View style={{ backgroundColor: t.info, borderRadius: 20, padding: 16, gap: 10 }}>
-          <Text style={{ color: t.text, fontSize: 15.5, lineHeight: 21, ...police('700') }}>Ce prototype vous parle ?</Text>
-          <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>
-            Dites-nous ce que vous en pensez : 2 minutes, questionnaire anonyme.
-          </Text>
-          <BoutonAvis label="Donner mon avis" variant="primary" />
         </View>
       )}
 
@@ -343,6 +340,7 @@ export function AccueilScreen(p: Props) {
           <Tuile
             nombre={nbPropositions}
             libelle={nbPropositions > 1 ? 'Propositions' : 'Proposition'}
+            detail={acceptee ? (aRepondre.length > 0 ? `dont 1 acceptée` : 'acceptée') : aRepondre.length > 0 ? 'à répondre' : undefined}
             point={t.successDot}
             onPress={() => p.onVoirVoeux('propositions')}
           />
@@ -427,7 +425,7 @@ export function AccueilScreen(p: Props) {
         contentContainerStyle={{ gap: 10, paddingRight: 16 }}
         style={{ marginHorizontal: -16, paddingLeft: 16 }}
       >
-        {BON_A_SAVOIR.map((b) => (
+        {BON_A_SAVOIR.filter((b) => b.pour == null || (b.pour === 'proposition' ? nbPropositions > 0 : attente.length > 0)).map((b) => (
           <View
             key={b.titre}
             style={{
@@ -507,9 +505,15 @@ export function AccueilScreen(p: Props) {
         </>
       )}
 
-      <View style={{ marginTop: 10, gap: 10 }}>
-        <BoutonAvis />
-      </View>
+      {AVIS_ACTIF && (
+        <View style={{ backgroundColor: t.info, borderRadius: 20, padding: 16, gap: 10 }}>
+          <Text style={{ color: t.text, fontSize: 15.5, lineHeight: 21, ...police('700') }}>Ce prototype vous parle ?</Text>
+          <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>
+            Dites-nous ce que vous en pensez : 2 minutes, questionnaire anonyme.
+          </Text>
+          <BoutonAvis label="Donner mon avis" variant="primary" />
+        </View>
+      )}
 
       {p.onSimuler && (
         <View
@@ -546,7 +550,7 @@ export function AccueilScreen(p: Props) {
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <Text style={{ color: t.text, ...police('700') }}>Simuler la mise à jour de la nuit</Text>
+            <Text style={{ color: t.text, ...police('700') }}>Passer au lendemain matin</Text>
           </Pressable>
           {notificationsSysteme && (
             <Text
@@ -607,7 +611,19 @@ function BoutonClair({ label, onPress }: { label: string; onPress: () => void })
   );
 }
 
-function Tuile({ nombre, libelle, point, onPress }: { nombre: number; libelle: string; point: string; onPress: () => void }) {
+function Tuile({
+  nombre,
+  libelle,
+  detail,
+  point,
+  onPress,
+}: {
+  nombre: number;
+  libelle: string;
+  detail?: string;
+  point: string;
+  onPress: () => void;
+}) {
   const t = useTheme();
   return (
     <Pressable
@@ -633,6 +649,30 @@ function Tuile({ nombre, libelle, point, onPress }: { nombre: number; libelle: s
       />
       <Text style={{ color: t.text, fontSize: 28, ...police('800') }}>{nombre}</Text>
       <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('500') }}>{libelle}</Text>
+      {detail && <Text style={{ color: t.textMuted, fontSize: 12, ...police('400') }}>{detail}</Text>}
     </Pressable>
+  );
+}
+
+/** Pastille de date limite, sur la carte principale (même présentation pour toutes les échéances). */
+function Pastille({ texte, detail }: { texte: string; detail: string }) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: 14,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+      }}
+    >
+      <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: t.accent }} />
+      <Text style={{ color: t.text, fontSize: 14.5, flex: 1, ...police('400') }}>
+        <Text style={police('700')}>{texte}</Text> · {detail}
+      </Text>
+    </View>
   );
 }

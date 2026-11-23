@@ -2,7 +2,9 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { Dossier, Voeu } from '../api/types';
 import { Card, StatutBadge, Variation } from '../components/ui';
 import { Cible } from '../demo/DemoAuto';
-import { dateCourte, ordinal, resteAvant } from '../format';
+import { echeance, nombre, ordinal, resteAvant } from '../format';
+import { COULEUR_DEVANT } from '../components/CheminProposition';
+import { Jauge } from '../components/Jauge';
 import { police, useTheme } from '../theme';
 import { type Filtre, variationVeille } from './AccueilScreen';
 
@@ -125,7 +127,7 @@ export function VoeuxScreen({
                 <StatutBadge statut={v.statut} />
                 {v.statut === 'en_attente' && v.rang != null && (
                   <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>
-                    <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>Position </Text>
+                    <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>Votre place </Text>
                     {ordinal(v.rang)}
                   </Text>
                 )}
@@ -145,13 +147,27 @@ export function VoeuxScreen({
               </Text>
               {v.statut === 'proposition' && v.dateLimiteReponse && (
                 <Text style={{ color: t.danger, fontSize: 14, ...police('600') }}>
-                  Réponse sur le site avant le {dateCourte(v.dateLimiteReponse)} · {resteAvant(new Date(v.dateLimiteReponse), maintenant)}
+                  Réponse sur le site avant le {echeance(v.dateLimiteReponse)} · {resteAvant(new Date(v.dateLimiteReponse), maintenant)}
                 </Text>
               )}
               {v.statut === 'proposition_acceptee' && (
                 <Text style={{ color: t.success, fontSize: 14, ...police('600') }}>Vous avez accepté cette proposition</Text>
               )}
-              {v.statut === 'en_attente' && d != null && <Variation valeur={d} suffixe="places depuis hier" fond={false} />}
+              {v.statut === 'en_attente' && v.rang != null && (
+                <>
+                  {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
+                  {v.totalEnAttente != null && (
+                    <View style={{ marginTop: 4 }}>
+                      <Jauge rang={v.rang} total={v.totalEnAttente} zone={v.rang} couleurZone={COULEUR_DEVANT} />
+                    </View>
+                  )}
+                  <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('400') }}>
+                    <Text style={{ color: t.text, ...police('700') }}>{nombre(Math.max(0, v.rang - 1))}</Text>{' '}
+                    {v.rang - 1 === 1 ? 'candidat devant vous' : 'candidats devant vous'}
+                    {v.totalEnAttente != null ? `, sur ${nombre(v.totalEnAttente)} en attente` : ''}
+                  </Text>
+                </>
+              )}
             </Card>
           </Cible>
         );

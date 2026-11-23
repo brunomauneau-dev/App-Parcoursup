@@ -59,7 +59,14 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-echeance',
     legende:
-      'Dimanche 6 juin. Dès qu’elle ouvre l’appli : une proposition l’attend, avec le temps qu’il lui reste pour répondre. Pas de mauvaise surprise.',
+      'Samedi 5 juin. Dès qu’elle ouvre l’appli : une proposition l’attend, avec le temps qu’il lui reste pour répondre. Pas de mauvaise surprise.',
+  },
+  {
+    jour: 4,
+    route: '/dossier',
+    cible: 'accueil-classement',
+    legende:
+      'Autre rappel : jusqu’au lundi 7 juin, elle doit classer ses vœux en attente sur le site. L’appli le lui signale, avec un lien direct.',
   },
   {
     jour: 4,
@@ -94,7 +101,7 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'notification',
     notification: true,
-    legende: 'Lundi matin, son dossier a été mis à jour : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
+    legende: 'Dimanche matin, son dossier a été mis à jour : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
   },
   {
     jour: 5,

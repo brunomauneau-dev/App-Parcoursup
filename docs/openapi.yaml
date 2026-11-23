@@ -199,6 +199,12 @@ components:
         voeux:
           type: array
           items: { $ref: '#/components/schemas/Voeu' }
+        classementAttente:
+          type: object
+          description: Période où le candidat doit classer ses vœux en attente sur le site (calendrier 2027 du 4 au 7 juin).
+          properties:
+            debut: { type: string, format: date-time }
+            fin: { type: string, format: date-time }
 
     Voeu:
       type: object
