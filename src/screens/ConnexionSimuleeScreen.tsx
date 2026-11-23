@@ -54,8 +54,8 @@ export function ConnexionSimuleeScreen() {
           <>
             <Text style={{ color: t.text, fontSize: 26, lineHeight: 31, ...police('800') }}>Lier votre compte Parcoursup</Text>
             <Text style={{ color: t.textMuted, fontSize: 15, lineHeight: 22, ...police('400') }}>
-              Une seule fois. Le navigateur de votre téléphone va s’ouvrir sur la page de connexion officielle de Parcoursup : vous vous y
-              connectez, puis vous revenez ici automatiquement.
+              Une seule fois · 1 minute · 3 étapes. Le navigateur de votre téléphone s’ouvre sur le site officiel de Parcoursup, puis vous
+              revenez ici tout seul.
             </Text>
             <Button label="Lier mon compte Parcoursup" onPress={() => setEtape(1)} />
             <Pressable onPress={fermer} accessibilityRole="button" style={{ alignSelf: 'center', padding: 8 }}>
@@ -65,9 +65,8 @@ export function ConnexionSimuleeScreen() {
         ) : (
           <>
             <Text style={{ color: t.text, fontSize: 26, lineHeight: 31, ...police('800') }}>Compte lié ✓</Text>
-            <Explication t={t} etape={4} />
             <Text style={{ color: t.textMuted, fontSize: 15, lineHeight: 22, ...police('400') }}>
-              Vous êtes de retour dans l’application. Vous n’aurez plus à vous connecter sur ce téléphone.
+              {EXPLICATIONS[4].texte} Vous n’aurez plus à vous connecter sur ce téléphone.
             </Text>
             {chargement ? (
               <ActivityIndicator color={t.primary} style={{ paddingVertical: 14 }} />
@@ -222,34 +221,14 @@ export function ConnexionSimuleeScreen() {
 
 const EXPLICATIONS: Record<Etape, { titre: string; texte: string }> = {
   0: { titre: '', texte: '' },
-  1: {
-    titre: 'Le navigateur s’est ouvert par-dessus l’application',
-    texte:
-      'Vous êtes sur le site officiel : l’application ne voit pas ce que vous tapez. Une fausse application ne pourrait pas récupérer votre mot de passe.',
-  },
-  2: {
-    titre: 'Double authentification',
-    texte: 'Même avec votre mot de passe, personne ne peut se connecter sans ce code. C’est la protection qui existe déjà sur le site.',
-  },
-  3: {
-    titre: 'Vous gardez la main',
-    texte: 'Vous voyez ce que l’application pourra consulter, et ce qu’elle ne pourra jamais faire. Cet accès se retire à tout moment.',
-  },
+  1: { titre: 'Vous êtes sur le site officiel', texte: 'L’appli ne voit pas votre mot de passe.' },
+  2: { titre: 'Le code reçu par mail', texte: 'Comme d’habitude sur Parcoursup.' },
+  3: { titre: 'C’est vous qui choisissez', texte: 'Ce que l’appli peut voir, et ce qu’elle ne pourra jamais faire.' },
   4: {
-    titre: 'L’application ne reçoit qu’une autorisation de consultation',
-    texte: 'Ni votre mot de passe, ni votre code : seulement un accès en lecture seule, qui ne permet aucune action sur le dossier.',
+    titre: 'C’est fait !',
+    texte: 'L’appli peut consulter votre dossier, rien de plus. Vous pouvez retirer cet accès quand vous voulez.',
   },
 };
-
-function Explication({ t, etape }: { t: Theme; etape: Etape }) {
-  const e = EXPLICATIONS[etape];
-  return (
-    <View style={{ backgroundColor: t.primary, borderRadius: 18, padding: 16, gap: 6 }}>
-      <Text style={{ color: t.primaryText, fontSize: 16, ...police('700') }}>{e.titre}</Text>
-      <Text style={{ color: t.primaryText, opacity: 0.92, lineHeight: 20, ...police('400') }}>{e.texte}</Text>
-    </View>
-  );
-}
 
 function Liste({ t, titre, signe, couleur, elements }: { t: Theme; titre: string; signe: string; couleur: string; elements: string[] }) {
   return (

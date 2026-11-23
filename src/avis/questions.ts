@@ -81,6 +81,13 @@ export const QUESTIONS: Question[] = [
     obligatoire: true,
   },
   {
+    cle: 'serenite',
+    type: 'choix',
+    titre: 'Avec cette application, pendant la phase d’admission, vous vous sentiriez…',
+    options: ['Plus serein(e)', 'Ni plus ni moins', 'Plus stressé(e)', 'Je ne sais pas'],
+    obligatoire: true,
+  },
+  {
     cle: 'utile',
     type: 'multiple',
     titre: 'Qu’est-ce qui vous paraît le plus utile ?',

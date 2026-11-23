@@ -81,6 +81,12 @@ Ce questionnaire est anonyme. N'indiquez ni votre nom, ni votre numéro de dossi
 **7 bis. Si cette application existait, l'utiliseriez-vous ?** *(échelle linéaire de 1 à 5, obligatoire)*
 - 1 = Certainement pas · 5 = Certainement
 
+**7 ter. Avec cette application, pendant la phase d'admission, vous vous sentiriez…** *(choix unique, obligatoire)*
+- Plus serein(e)
+- Ni plus ni moins
+- Plus stressé(e)
+- Je ne sais pas
+
 **8. Qu'est-ce qui vous paraît le plus utile ?** *(cases à cocher)*
 - Voir toutes ses propositions et ses vœux en un coup d'œil
 - Le compte à rebours avant la date limite de réponse

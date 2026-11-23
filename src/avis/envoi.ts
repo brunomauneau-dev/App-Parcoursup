@@ -16,8 +16,8 @@ export async function envoyerAvis(reponses: Reponses, profilVu?: string): Promis
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      // Le dossier fictif vu par le testeur est noté avec la version (ex. « 1-lucas »)
-      body: JSON.stringify({ ...reponses, version: profilVu ? `1-${profilVu}` : '1' }),
+      // Le dossier fictif vu par le testeur est noté avec la version (ex. « 2-lucas » ; 2 = questionnaire avec la question sur la sérénité)
+      body: JSON.stringify({ ...reponses, version: profilVu ? `2-${profilVu}` : '2' }),
       signal: ctrl.signal,
     });
   } finally {

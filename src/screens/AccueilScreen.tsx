@@ -193,7 +193,11 @@ export function AccueilScreen(p: Props) {
         >
           {prochaine ? (
             <>
-              <Etiquette texte="Bonne nouvelle" />
+              <Etiquette
+                texte={
+                  aRepondre.length === 1 ? 'À faire : répondre à 1 proposition' : `À faire : répondre à ${aRepondre.length} propositions`
+                }
+              />
               <Text
                 style={{
                   color: '#FFFFFF',
@@ -255,7 +259,7 @@ export function AccueilScreen(p: Props) {
             </>
           ) : acceptee ? (
             <>
-              <Etiquette texte="Votre place est assurée" />
+              <Etiquette texte="Rien à faire aujourd’hui" />
               <Text
                 style={{
                   color: '#FFFFFF',
@@ -264,7 +268,7 @@ export function AccueilScreen(p: Props) {
                   ...police('800'),
                 }}
               >
-                Vous avez accepté {acceptee.formation}.
+                Votre place en {acceptee.formation} est assurée.
               </Text>
               <Text
                 style={{
@@ -274,12 +278,12 @@ export function AccueilScreen(p: Props) {
                   ...police('400'),
                 }}
               >
-                Vos vœux en attente continuent d’avancer : vous serez prévenu si une place se libère.
+                Vos vœux en attente continuent d’avancer. On vous prévient si une place se libère.
               </Text>
             </>
           ) : (
             <>
-              <Etiquette texte="Phase d’admission en cours" />
+              <Etiquette texte="Rien à faire aujourd’hui" />
               <Text
                 style={{
                   color: '#FFFFFF',
@@ -288,10 +292,10 @@ export function AccueilScreen(p: Props) {
                   ...police('800'),
                 }}
               >
-                Pas encore de proposition : vos listes d’attente avancent.
+                On garde un œil sur vos listes d’attente.
               </Text>
               <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
-                Les places se libèrent tout au long de la phase, au fil des réponses des autres candidats. Vous serez prévenu dès que votre
+                Les places se libèrent au fil des réponses des autres candidats, surtout les premiers jours. On vous prévient dès que votre
                 dossier change.
               </Text>
             </>
@@ -352,6 +356,9 @@ export function AccueilScreen(p: Props) {
       {attente.length > 0 && (
         <>
           <TitreSection titre="Listes d’attente" aDroite={`Mises à jour à ${heure(dossier.derniereMiseAJour)}`} />
+          <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, paddingHorizontal: 4, marginTop: -6, ...police('400') }}>
+            Elles avancent chaque matin, surtout les premiers jours de la phase.
+          </Text>
           {attente.map((v, i) => {
             const d = variationVeille(v);
             const ref = v.rangDernierAppeleAnneePrecedente;

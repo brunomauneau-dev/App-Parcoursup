@@ -32,6 +32,7 @@ var COLONNES = [
   ['inquietudes', 'Inquiétudes'],
   ['facilite', 'Facilité de compréhension (1-5)'],
   ['utiliserait', 'Utiliserait l’application (1-5)'],
+  ['serenite', 'Se sentirait (sérénité)'],
   ['utile', 'Le plus utile'],
   ['canal', 'Canal préféré pour être prévenu'],
   ['manques', 'Manques ou gênes'],
