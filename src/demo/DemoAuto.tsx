@@ -732,7 +732,7 @@ export function PresentationEcran({ children }: { children: ReactNode }) {
         <Text style={{ color: '#005D84', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', ...police('700') }}>
           Parcours’app · prototype non officiel
         </Text>
-        <Text style={{ color: '#181F2E', fontSize: 38, lineHeight: 44, ...police('800') }}>Suivre son dossier, sans stress.</Text>
+        <Text style={{ color: '#181F2E', fontSize: 38, lineHeight: 44, ...police('800') }}>Suivez votre admission, jour après jour.</Text>
         {demo.etape == null ? (
           <>
             <Text style={{ color: '#5B6375', fontSize: 17, lineHeight: 26, ...police('400') }}>

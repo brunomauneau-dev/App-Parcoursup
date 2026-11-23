@@ -59,7 +59,7 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
               ...police('800'),
             }}
           >
-            Suivre son dossier, sans stress.
+            Suivez votre admission, jour après jour.
           </Text>
           <Text
             style={{

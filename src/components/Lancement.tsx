@@ -226,7 +226,9 @@ export function Lancement() {
           <Text style={{ color: '#FFFFFF', fontSize: 32, letterSpacing: -0.5, ...police('800') }}>
             Parcours’<Text style={{ color: VIF.soleil }}>app</Text>
           </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, marginTop: 4, ...police('500') }}>Votre dossier, sans stress.</Text>
+          <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 15, marginTop: 4, ...police('500') }}>
+            Votre admission, sans rien manquer.
+          </Text>
           <Text
             style={{
               color: 'rgba(255,255,255,0.7)',
