@@ -9,16 +9,31 @@ import { police, useTheme } from '../theme';
 
 export const URL_PARCOURSUP = 'https://www.parcoursup.gouv.fr';
 
-/** Logo original du prototype : un dossier. Pas le logo officiel de Parcoursup. */
+/**
+ * Logo original du prototype : trois chevrons qui montent, comme une liste
+ * d'attente qui avance. Volontairement sans rapport avec le logo officiel de Parcoursup.
+ */
+export const CHEVRONS = [26, 42, 58];
+export function cheminChevron(sommet: number): string {
+  return `M31 ${sommet + 15} L50 ${sommet} L69 ${sommet + 15}`;
+}
+
 export function Logo({ taille = 40 }: { taille?: number }) {
   const t = useTheme();
   return (
     <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Parcours’app">
       <Rect width="100" height="100" rx="24" fill={t.primary} />
-      <Rect x="30" y="22" width="40" height="56" rx="8" fill="#FFFFFF" />
-      <Rect x="38" y="34" width="24" height="5" rx="2.5" fill={t.accent} />
-      <Rect x="38" y="45" width="18" height="5" rx="2.5" fill={t.primary} />
-      <Rect x="38" y="56" width="21" height="5" rx="2.5" fill={t.gaugeTrack} />
+      {CHEVRONS.map((y, i) => (
+        <Path
+          key={y}
+          d={cheminChevron(y)}
+          stroke={i === 0 ? t.gaugeZone : '#FFFFFF'}
+          strokeWidth={8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      ))}
     </Svg>
   );
 }

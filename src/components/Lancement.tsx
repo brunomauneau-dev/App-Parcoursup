@@ -1,74 +1,101 @@
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { police, useTheme } from '../theme';
+import { cheminChevron, CHEVRONS } from './ui';
 
 const NATIF = Platform.OS !== 'web';
-const TAILLE = 112;
+const TAILLE = 120;
+const DEPART = 119;
+const ARRIVEE = 107;
 
 /**
- * Animation d'ouverture (≈ 2 s) : le logo rebondit, ses lignes se remplissent,
- * des halos de couleur s'ouvrent derrière, le nom apparaît, puis l'écran remonte
- * comme un rideau pour révéler l'application. Un toucher la passe.
- * Désactivée si le téléphone demande de réduire les animations.
- * Fond identique à l'écran de démarrage du système, pour un enchaînement sans saut.
+ * Animation d'ouverture (≈ 2,5 s), qui raconte ce que fait l'application :
+ * le carré du logo apparaît, trois chevrons montent un à un et s'empilent,
+ * comme une liste d'attente qui avance ; un compteur passe de 119e à 107e,
+ * puis le nom apparaît et l'écran remonte comme un rideau.
+ * Un toucher la passe. Si l'appareil demande de réduire les animations :
+ * version douce, uniquement des fondus.
+ * Logo original, volontairement sans rapport avec le logo officiel de Parcoursup.
  */
 export function Lancement() {
   const t = useTheme();
+  const { height } = useWindowDimensions();
   const [visible, setVisible] = useState(true);
   const [doux, setDoux] = useState(false);
-  const { height } = useWindowDimensions();
+  const [rang, setRang] = useState(DEPART);
   const [v] = useState(() => ({
-    logo: new Animated.Value(0),
-    lignes: [new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)],
+    carre: new Animated.Value(0),
+    chevrons: CHEVRONS.map(() => new Animated.Value(0)),
     halos: new Animated.Value(0),
+    compteur: new Animated.Value(0),
+    gain: new Animated.Value(0),
     nom: new Animated.Value(0),
     sortie: new Animated.Value(0),
   }));
 
   useEffect(() => {
     let annule = false;
+    const id = v.compteur.addListener(({ value }) => setRang(Math.round(DEPART - (DEPART - ARRIVEE) * value)));
     const anim = (val: Animated.Value, duree: number, easing = Easing.out(Easing.cubic), natif = NATIF) =>
       Animated.timing(val, { toValue: 1, duration: duree, easing, useNativeDriver: natif });
-    const sequence = Animated.sequence([
+    const ressort = (val: Animated.Value) =>
+      Animated.spring(val, {
+        toValue: 1,
+        friction: 6,
+        tension: 110,
+        restDisplacementThreshold: 0.01,
+        restSpeedThreshold: 0.05,
+        useNativeDriver: NATIF,
+      });
+
+    // Les chevrons montent du bas, le plus bas d'abord : la pile se construit vers le haut
+    const ordre = [...v.chevrons].reverse();
+    const complete = Animated.sequence([
       Animated.parallel([
-        Animated.spring(v.logo, { toValue: 1, friction: 5, tension: 70, useNativeDriver: NATIF }),
-        anim(v.halos, 1100, Easing.out(Easing.exp)),
-        Animated.stagger(
-          130,
-          v.lignes.map((l) => anim(l, 380, Easing.out(Easing.back(1.6)), false)),
-        ),
-        Animated.sequence([Animated.delay(420), anim(v.nom, 520)]),
+        ressort(v.carre),
+        anim(v.halos, 1200, Easing.out(Easing.exp)),
+        Animated.sequence([Animated.delay(220), Animated.stagger(140, ordre.map(ressort))]),
+        Animated.sequence([
+          Animated.delay(800),
+          Animated.parallel([
+            anim(v.compteur, 650, Easing.out(Easing.quad), false),
+            Animated.sequence([Animated.delay(450), ressort(v.gain)]),
+          ]),
+        ]),
+        Animated.sequence([Animated.delay(1300), anim(v.nom, 450)]),
       ]),
-      Animated.delay(450),
+      Animated.delay(500),
       anim(v.sortie, 520, Easing.inOut(Easing.cubic)),
     ]);
-    // Version douce : uniquement des fondus et le remplissage des lignes, aucun déplacement
     const douce = Animated.sequence([
       Animated.parallel([
-        anim(v.halos, 900, Easing.out(Easing.quad)),
+        anim(v.halos, 800, Easing.out(Easing.quad)),
         Animated.stagger(
-          160,
-          v.lignes.map((l) => anim(l, 420, Easing.out(Easing.quad), false)),
+          180,
+          ordre.map((c) => anim(c, 400, Easing.out(Easing.quad))),
         ),
-        Animated.sequence([Animated.delay(300), anim(v.nom, 600, Easing.out(Easing.quad))]),
       ]),
+      Animated.parallel([anim(v.compteur, 600, Easing.out(Easing.quad), false), anim(v.gain, 400), anim(v.nom, 500)]),
       Animated.delay(700),
       anim(v.sortie, 450, Easing.inOut(Easing.quad)),
     ]);
+
     AccessibilityInfo.isReduceMotionEnabled()
       .catch(() => false)
       .then((reduire) => {
         if (annule) return;
         if (reduire) {
-          v.logo.setValue(1);
+          v.carre.setValue(1);
           setDoux(true);
           douce.start(({ finished }) => finished && setVisible(false));
-        } else sequence.start(({ finished }) => finished && setVisible(false));
+        } else complete.start(({ finished }) => finished && setVisible(false));
       });
     return () => {
       annule = true;
-      sequence.stop();
+      complete.stop();
       douce.stop();
+      v.compteur.removeListener(id);
     };
   }, [v]);
 
@@ -95,9 +122,6 @@ export function Lancement() {
     />
   );
 
-  const largeurs = [0.6, 0.45, 0.52];
-  const couleurs = [t.accent, t.primary, t.gaugeTrack];
-
   return (
     <Animated.View
       style={{
@@ -109,11 +133,11 @@ export function Lancement() {
         zIndex: 50,
         backgroundColor: t.bg,
         overflow: 'hidden',
-        // Sortie en rideau : l'écran remonte d'un bloc et dévoile l'application (version douce : fondu)
-        opacity: doux ? v.sortie.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) : 1,
-        transform: [{ translateY: doux ? 0 : v.sortie.interpolate({ inputRange: [0, 1], outputRange: [0, -height] }) }],
         borderBottomLeftRadius: 32,
         borderBottomRightRadius: 32,
+        // Sortie en rideau (version douce : fondu)
+        opacity: doux ? v.sortie.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) : 1,
+        transform: [{ translateY: doux ? 0 : v.sortie.interpolate({ inputRange: [0, 1], outputRange: [0, -height] }) }],
       }}
     >
       <Pressable
@@ -121,66 +145,85 @@ export function Lancement() {
         accessibilityLabel="Passer l’animation"
         style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
       >
-        {/* Halos de couleur derrière le logo */}
         <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
           {halo('rgba(0,93,132,0.14)', 340, -60, -90, 0)}
-          {halo('rgba(215,56,23,0.12)', 220, 90, -20, 0.15)}
-          {halo('rgba(20,135,78,0.12)', 260, -40, 110, 0.3)}
+          {halo('rgba(20,135,78,0.14)', 260, 70, 70, 0.2)}
+          {halo('rgba(159,211,236,0.30)', 200, -80, 120, 0.35)}
         </View>
 
-        {/* Logo : rebond, puis ses lignes se remplissent */}
+        {/* Logo : le carré, puis les chevrons qui montent et s'empilent */}
         <Animated.View
           style={{
             width: TAILLE,
             height: TAILLE,
             borderRadius: TAILLE * 0.24,
             backgroundColor: t.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
+            overflow: 'hidden',
             shadowColor: '#0B1A33',
             shadowOpacity: 0.22,
             shadowRadius: 24,
             shadowOffset: { width: 0, height: 12 },
             elevation: 8,
-            transform: [
-              { scale: v.logo.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] }) },
-              { rotate: v.logo.interpolate({ inputRange: [0, 1], outputRange: ['-12deg', '0deg'] }) },
-              { translateY: doux ? -18 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [0, -18] }) },
-            ],
+            transform: [{ scale: v.carre.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }],
           }}
         >
-          <View
+          {CHEVRONS.map((y, i) => (
+            <Animated.View
+              key={y}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                opacity: v.chevrons[i],
+                transform: [{ translateY: doux ? 0 : v.chevrons[i].interpolate({ inputRange: [0, 1], outputRange: [TAILLE * 0.6, 0] }) }],
+              }}
+            >
+              <Svg width={TAILLE} height={TAILLE} viewBox="0 0 100 100">
+                <Path
+                  d={cheminChevron(y)}
+                  stroke={i === 0 ? t.gaugeZone : '#FFFFFF'}
+                  strokeWidth={8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </Svg>
+            </Animated.View>
+          ))}
+        </Animated.View>
+
+        {/* Compteur : la position qui gagne des places */}
+        <Animated.View
+          style={{
+            marginTop: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            opacity: v.compteur.interpolate({ inputRange: [0, 0.05, 1], outputRange: [0, 1, 1] }),
+          }}
+        >
+          <Text style={{ color: t.text, fontSize: 26, fontVariant: ['tabular-nums'], ...police('800') }}>{rang}e</Text>
+          <Animated.View
             style={{
-              width: TAILLE * 0.4,
-              height: TAILLE * 0.56,
-              borderRadius: TAILLE * 0.08,
-              backgroundColor: '#FFFFFF',
-              paddingTop: TAILLE * 0.12,
-              paddingLeft: TAILLE * 0.08,
-              gap: TAILLE * 0.06,
+              backgroundColor: t.successBg,
+              borderRadius: 999,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              opacity: v.gain,
+              transform: [{ scale: doux ? 1 : v.gain.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }],
             }}
           >
-            {v.lignes.map((l, i) => (
-              <Animated.View
-                key={i}
-                style={{
-                  height: TAILLE * 0.05,
-                  borderRadius: TAILLE * 0.025,
-                  backgroundColor: couleurs[i],
-                  width: l.interpolate({ inputRange: [0, 1], outputRange: [0, TAILLE * 0.4 * largeurs[i]] }),
-                }}
-              />
-            ))}
-          </View>
+            <Text style={{ color: t.success, fontSize: 14, ...police('800') }}>▲ {DEPART - ARRIVEE} places</Text>
+          </Animated.View>
         </Animated.View>
 
         {/* Nom et accroche */}
         <Animated.View
           style={{
-            marginTop: 22,
+            marginTop: 18,
             alignItems: 'center',
             opacity: v.nom,
-            transform: [{ translateY: doux ? -6 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [16, -6] }) }],
+            transform: [{ translateY: doux ? 0 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
           }}
         >
           <Text style={{ color: t.text, fontSize: 30, letterSpacing: -0.5, ...police('800') }}>Parcours’app</Text>
