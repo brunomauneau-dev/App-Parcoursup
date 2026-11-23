@@ -18,7 +18,7 @@ export function ConnexionSimuleeScreen() {
   const t = useTheme();
   const router = useRouter();
   const { connexion } = useSession();
-  const [etape, setEtape] = useState<1 | 2 | 3>(1);
+  const [etape, setEtape] = useState<1 | 2 | 3 | 4>(1);
   const [code, setCode] = useState('');
   const [chargement, setChargement] = useState(false);
 
@@ -92,7 +92,32 @@ export function ConnexionSimuleeScreen() {
 
             {etape === 3 && (
               <>
-                <Titre t={t}>Connexion réussie</Titre>
+                <Titre t={t}>Lier votre compte à l’application</Titre>
+                <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
+                  L’application Parcours’app demande à consulter votre dossier.
+                </Text>
+                <Liste
+                  t={t}
+                  titre="Elle pourra voir"
+                  signe="✓"
+                  couleur={t.successDot}
+                  elements={['vos vœux et leur statut', 'vos propositions et leurs dates limites', 'votre position en liste d’attente']}
+                />
+                <Liste
+                  t={t}
+                  titre="Elle ne pourra pas"
+                  signe="✕"
+                  couleur={t.danger}
+                  elements={['répondre à une proposition ou modifier vos vœux', 'voir vos notes, bulletins ou données sensibles']}
+                />
+                <Button label="Autoriser la consultation" onPress={() => setEtape(4)} />
+                <Button label="Refuser" variant="secondary" onPress={fermer} />
+              </>
+            )}
+
+            {etape === 4 && (
+              <>
+                <Titre t={t}>Compte lié</Titre>
                 <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
                   Retour à l’application. Vous n’aurez plus à vous connecter sur ce téléphone.
                 </Text>
@@ -107,16 +132,16 @@ export function ConnexionSimuleeScreen() {
         </View>
 
         <Text style={{ color: t.textMuted, fontSize: 12.5, textAlign: 'center', lineHeight: 18, ...police('400') }}>
-          Étape {etape} sur 3 · simulation : aucune donnée n’est envoyée.
+          Étape {etape} sur 4 · simulation : aucune donnée n’est envoyée.
         </Text>
       </ScrollView>
     </View>
   );
 }
 
-const EXPLICATIONS: Record<1 | 2 | 3, { titre: string; texte: string }> = {
+const EXPLICATIONS: Record<1 | 2 | 3 | 4, { titre: string; texte: string }> = {
   1: {
-    titre: 'Vous avez quitté l’application',
+    titre: 'Lier son compte Parcoursup, une seule fois',
     texte:
       'La connexion se fait sur la page officielle, dans le navigateur du téléphone. L’application ne voit pas ce que vous tapez : une fausse application ne pourrait pas récupérer votre mot de passe.',
   },
@@ -126,18 +151,37 @@ const EXPLICATIONS: Record<1 | 2 | 3, { titre: string; texte: string }> = {
       'Même avec votre mot de passe, personne ne peut se connecter sans ce code. C’est la protection qui existe déjà sur le site : l’application en profite sans rien changer.',
   },
   3: {
+    titre: 'Vous gardez la main',
+    texte:
+      'Vous voyez exactement ce que l’application pourra consulter, et ce qu’elle ne pourra jamais faire. Vous pouvez retirer cet accès à tout moment depuis votre profil.',
+  },
+  4: {
     titre: 'L’application ne reçoit qu’une autorisation de consultation',
     texte:
       'Ni votre mot de passe, ni votre code : seulement un accès en lecture seule, qui ne permet aucune action sur le dossier et que vous pouvez révoquer.',
   },
 };
 
-function Explication({ t, etape }: { t: Theme; etape: 1 | 2 | 3 }) {
+function Explication({ t, etape }: { t: Theme; etape: 1 | 2 | 3 | 4 }) {
   const e = EXPLICATIONS[etape];
   return (
     <View style={{ backgroundColor: t.primary, borderRadius: 18, padding: 16, gap: 6 }}>
       <Text style={{ color: t.primaryText, fontSize: 16, ...police('700') }}>{e.titre}</Text>
       <Text style={{ color: t.primaryText, opacity: 0.92, lineHeight: 20, ...police('400') }}>{e.texte}</Text>
+    </View>
+  );
+}
+
+function Liste({ t, titre, signe, couleur, elements }: { t: Theme; titre: string; signe: string; couleur: string; elements: string[] }) {
+  return (
+    <View style={{ gap: 4 }}>
+      <Text style={{ color: t.text, ...police('700') }}>{titre} :</Text>
+      {elements.map((e) => (
+        <Text key={e} style={{ color: t.text, lineHeight: 20, ...police('400') }}>
+          <Text style={{ color: couleur, ...police('800') }}>{signe} </Text>
+          {e}
+        </Text>
+      ))}
     </View>
   );
 }

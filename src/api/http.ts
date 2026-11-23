@@ -59,6 +59,9 @@ export class HttpApi implements DossierApi {
     if (params.get('state') !== etat) {
       throw new ApiError('inattendu', 'Réponse de connexion non reconnue. Recommencez.');
     }
+    if (params.get('error') === 'access_denied') {
+      throw new ApiError('annulee', 'Vous n’avez pas autorisé l’application. Vous pouvez recommencer quand vous voulez.');
+    }
     const code = params.get('code');
     if (!code) throw new ApiError('identifiants', 'La connexion n’a pas abouti. Recommencez.');
 

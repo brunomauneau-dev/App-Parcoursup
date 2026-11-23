@@ -5,6 +5,7 @@
  *     navigateur du téléphone (OAuth 2, code d'autorisation + PKCE) : l'application
  *     ne voit jamais le mot de passe ;
  *   - double authentification par code à 6 chiffres (3 essais, puis blocage) ;
+ *   - écran d'autorisation : le candidat voit ce que l'application pourra consulter ;
  *   - jeton d'accès limité à `dossier.read`, courte durée ;
  *     jeton de renouvellement à usage unique, avec détection de réutilisation ;
  *   - API en lecture seule : toute autre méthode que GET sur /v1 est refusée (405).
@@ -53,6 +54,8 @@ interface Demande {
   expire: number;
   candidat?: string;
   code2fa?: string;
+  /** Code de vérification validé : reste l'autorisation à donner */
+  verifie?: boolean;
   essais: number;
 }
 interface CodeAutorisation {
@@ -176,6 +179,22 @@ export function creerServeur(options: Options = {}): Server {
         return envoyerPage(res, 200, pageCode(id, d.code2fa));
       }
 
+      // Étape 3 : autorisation de l'application (consentement)
+      if (d.verifie) {
+        demandes.delete(id);
+        if (corps.get('decision') !== 'autoriser') {
+          return rediriger(res, d.redirectUri, { error: 'access_denied', state: d.state });
+        }
+        const code = nouveauJeton();
+        codes.set(code, {
+          candidat: d.candidat,
+          redirectUri: d.redirectUri,
+          challenge: d.challenge,
+          expire: Date.now() + DUREE_CODE_AUTORISATION_MS,
+        });
+        return rediriger(res, d.redirectUri, { code, state: d.state });
+      }
+
       // Étape 2 : code de vérification (double authentification)
       if ((corps.get('code') ?? '').replace(/\s/g, '') !== d.code2fa) {
         d.essais += 1;
@@ -189,15 +208,8 @@ export function creerServeur(options: Options = {}): Server {
         }
         return envoyerPage(res, 200, pageCode(id, d.code2fa ?? '', `Code incorrect. Il vous reste ${ESSAIS_CODE - d.essais} essai(s).`));
       }
-      demandes.delete(id);
-      const code = nouveauJeton();
-      codes.set(code, {
-        candidat: d.candidat,
-        redirectUri: d.redirectUri,
-        challenge: d.challenge,
-        expire: Date.now() + DUREE_CODE_AUTORISATION_MS,
-      });
-      return rediriger(res, d.redirectUri, { code, state: d.state });
+      d.verifie = true;
+      return envoyerPage(res, 200, pageAutorisation(id));
     }
 
     // --- Jetons --------------------------------------------------------------
@@ -349,6 +361,19 @@ ${erreur ? `<p class="alerte">${echapper(erreur)}</p>` : ''}
 <label for="c">Code reçu par mail</label><input id="c" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required>
 <button type="submit">Valider</button></form>
 <p class="demo">Serveur de démonstration : aucun mail n’est envoyé. Le code est <strong>${echapper(code)}</strong>.</p>`);
+}
+
+function pageAutorisation(demande: string): string {
+  return page(`<h1>Lier votre compte à l’application</h1>
+<p>L’application <strong>Parcours’app</strong> demande à consulter votre dossier.</p>
+<p><strong>Elle pourra voir :</strong> vos vœux et leur statut, vos propositions et leurs dates limites, votre position en liste d’attente et votre rang de classement.</p>
+<p><strong>Elle ne pourra pas :</strong> répondre à une proposition, modifier vos vœux, ni voir vos notes, bulletins ou informations personnelles sensibles.</p>
+<p>Vous pourrez retirer cet accès à tout moment depuis votre profil.</p>
+<form method="post" action="/oauth/authorize">
+<input type="hidden" name="demande" value="${echapper(demande)}">
+<button type="submit" name="decision" value="autoriser">Autoriser la consultation</button>
+<button type="submit" name="decision" value="refuser" style="background:#fff;color:#005D84;border:1px solid #005D84">Refuser</button>
+</form>`);
 }
 
 function pageMessage(message: string): string {

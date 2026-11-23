@@ -50,8 +50,9 @@ async function obtenirCode(defi: string, motDePasse = 'secret') {
   const page = await (await fetch(urlAutorisation(defi))).text();
   const demande = champ(page, 'demande');
   const etape2 = await (await fetch(`${base}/oauth/authorize`, formulaire({ demande, username: '1234567', password: motDePasse }))).text();
-  const r = await fetch(`${base}/oauth/authorize`, formulaire({ demande, code: codeAffiche(etape2) }));
-  return { r, etape2, demande };
+  const etape3 = await (await fetch(`${base}/oauth/authorize`, formulaire({ demande, code: codeAffiche(etape2) }))).text();
+  const r = await fetch(`${base}/oauth/authorize`, formulaire({ demande, decision: 'autoriser' }));
+  return { r, etape2, etape3, demande };
 }
 
 const echanger = (code: string, verificateur: string, redirect_uri = RETOUR) =>
@@ -98,8 +99,9 @@ test('un mauvais mot de passe est refusé', async () => {
 
 test("connexion complète : code de vérification, retour à l'application, jeton limité à dossier.read", async () => {
   const { verificateur, defi } = pkce();
-  const { r, etape2 } = await obtenirCode(defi);
+  const { r, etape2, etape3 } = await obtenirCode(defi);
   assert.match(etape2, /Code de vérification/);
+  assert.match(etape3, /Elle ne pourra pas/);
   assert.equal(r.status, 302);
   const retour = new URL(r.headers.get('location') ?? '');
   assert.equal(retour.protocol, 'suivivoeux:');
@@ -107,6 +109,18 @@ test("connexion complète : code de vérification, retour à l'application, jeto
   const j = await (await echanger(retour.searchParams.get('code') ?? '', verificateur)).json();
   assert.equal(j.scope, 'dossier.read');
   assert.ok(j.access_token && j.refresh_token);
+});
+
+test("refuser l'autorisation renvoie à l'application sans code", async () => {
+  const page = await (await fetch(urlAutorisation(pkce().defi))).text();
+  const demande = champ(page, 'demande');
+  const etape2 = await (await fetch(`${base}/oauth/authorize`, formulaire({ demande, username: '1234567', password: 'secret' }))).text();
+  await fetch(`${base}/oauth/authorize`, formulaire({ demande, code: codeAffiche(etape2) }));
+  const r = await fetch(`${base}/oauth/authorize`, formulaire({ demande, decision: 'refuser' }));
+  assert.equal(r.status, 302);
+  const retour = new URL(r.headers.get('location') ?? '');
+  assert.equal(retour.searchParams.get('error'), 'access_denied');
+  assert.equal(retour.searchParams.get('code'), null);
 });
 
 test('trois codes de vérification faux bloquent la demande', async () => {

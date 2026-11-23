@@ -30,8 +30,10 @@ paths:
       summary: Page de connexion (ouverte dans le navigateur du téléphone)
       description: |
         L'application ouvre cette page dans le navigateur système (RFC 8252). Le candidat y
-        saisit son mot de passe puis le code de vérification de la double authentification :
-        l'application ne voit ni l'un ni l'autre. En fin de parcours, le serveur redirige vers
+        saisit son mot de passe puis le code de vérification de la double authentification
+        (l'application ne voit ni l'un ni l'autre), puis autorise l'application : un écran
+        liste ce qu'elle pourra consulter et ce qu'elle ne pourra pas faire. Un refus renvoie
+        `error=access_denied`. En fin de parcours, le serveur redirige vers
         `redirect_uri` avec un code d'autorisation à usage unique (60 s) et le `state` reçu.
         Les adresses de retour sont enregistrées à l'avance ; une adresse inconnue est refusée
         sans redirection.

@@ -102,15 +102,16 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
               style={{ alignSelf: 'center', padding: 6 }}
             >
               <Text style={{ color: t.primary, fontSize: 14, textDecorationLine: 'underline', ...police('600') }}>
-                Comment se connecte-t-on en toute sécurité ?
+                Voir comment lier son compte Parcoursup
               </Text>
             </Pressable>
           </View>
         ) : (
           <View style={{ gap: 14 }}>
             <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
-              La page de connexion officielle s’ouvre dans le navigateur de votre téléphone. Votre mot de passe et votre code de
-              vérification y sont saisis, jamais dans l’application.
+              Une seule fois : la page de connexion officielle s’ouvre dans le navigateur de votre téléphone. Vous y saisissez votre mot de
+              passe et votre code de vérification, puis vous autorisez l’application à consulter votre dossier. Elle ne voit jamais votre
+              mot de passe.
             </Text>
             {erreur && (
               <Text
@@ -129,7 +130,7 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
             {chargement ? (
               <ActivityIndicator color={t.primary} style={{ paddingVertical: 14 }} />
             ) : (
-              <Button label="Se connecter" onPress={() => void valider()} />
+              <Button label="Lier mon compte Parcoursup" onPress={() => void valider()} />
             )}
             {modeDemo && (
               <Text style={{ color: t.textMuted, fontSize: 13, textAlign: 'center', ...police('400') }}>
