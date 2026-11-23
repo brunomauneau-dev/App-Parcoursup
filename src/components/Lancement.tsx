@@ -6,8 +6,6 @@ import { FLECHE, TRAITS } from './ui';
 
 const NATIF = Platform.OS !== 'web';
 const TAILLE = 124;
-const DEPART = 119;
-const ARRIVEE = 107;
 /** Traits de vitesse du fond : position de départ (en fraction de l'écran), longueur, décalage */
 const SILLAGES = [
   { x: 0.1, y: 0.75, l: 140, retard: 0 },
@@ -20,8 +18,9 @@ const SILLAGES = [
 /**
  * Animation d'ouverture (≈ 2,5 s) sur fond bleu : des traits de vitesse
  * traversent l'écran vers le haut à droite, le logo apparaît, sa flèche y
- * file en diagonale et laisse deux traits derrière elle ; un compteur passe
- * de 119e à 107e, le nom apparaît, puis l'écran remonte comme un rideau.
+ * file en diagonale et laisse deux traits derrière elle ; une pastille
+ * « Dossier à jour » rassure (pas de chiffre de liste d'attente : c'est ce qui
+ * stresse le plus les candidats), le nom apparaît, puis l'écran remonte comme un rideau.
  * Un toucher la passe. Si l'appareil demande de réduire les animations :
  * version douce, uniquement des fondus.
  * Logo original, sans rapport avec le logo officiel de Parcoursup.
@@ -31,21 +30,18 @@ export function Lancement() {
   const { width, height } = useWindowDimensions();
   const [visible, setVisible] = useState(true);
   const [doux, setDoux] = useState(false);
-  const [rang, setRang] = useState(DEPART);
   const [v] = useState(() => ({
     sillages: new Animated.Value(0),
     carre: new Animated.Value(0),
     fleche: new Animated.Value(0),
     traits: TRAITS.map(() => new Animated.Value(0)),
-    compteur: new Animated.Value(0),
-    gain: new Animated.Value(0),
+    statut: new Animated.Value(0),
     nom: new Animated.Value(0),
     sortie: new Animated.Value(0),
   }));
 
   useEffect(() => {
     let annule = false;
-    const id = v.compteur.addListener(({ value }) => setRang(Math.round(DEPART - (DEPART - ARRIVEE) * value)));
     const anim = (val: Animated.Value, duree: number, easing = Easing.out(Easing.cubic), natif = NATIF) =>
       Animated.timing(val, { toValue: 1, duration: duree, easing, useNativeDriver: natif });
     const ressort = (val: Animated.Value, friction = 6) =>
@@ -70,14 +66,8 @@ export function Lancement() {
             v.traits.map((x) => anim(x, 260)),
           ),
         ]),
-        Animated.sequence([
-          Animated.delay(850),
-          Animated.parallel([
-            anim(v.compteur, 650, Easing.out(Easing.quad), false),
-            Animated.sequence([Animated.delay(450), ressort(v.gain)]),
-          ]),
-        ]),
-        Animated.sequence([Animated.delay(1300), anim(v.nom, 450)]),
+        Animated.sequence([Animated.delay(800), ressort(v.statut)]),
+        Animated.sequence([Animated.delay(1100), anim(v.nom, 450)]),
       ]),
       Animated.delay(500),
       anim(v.sortie, 520, Easing.inOut(Easing.cubic)),
@@ -94,7 +84,7 @@ export function Lancement() {
           ),
         ]),
       ]),
-      Animated.parallel([anim(v.compteur, 600, Easing.out(Easing.quad), false), anim(v.gain, 400), anim(v.nom, 500)]),
+      Animated.parallel([anim(v.statut, 400), anim(v.nom, 500)]),
       Animated.delay(700),
       anim(v.sortie, 450, Easing.inOut(Easing.quad)),
     ]);
@@ -113,7 +103,6 @@ export function Lancement() {
       annule = true;
       complete.stop();
       douce.stop();
-      v.compteur.removeListener(id);
     };
   }, [v]);
 
@@ -213,29 +202,23 @@ export function Lancement() {
           </Animated.View>
         </Animated.View>
 
-        {/* Compteur : la position qui gagne des places */}
+        {/* Pastille rassurante : tout est à jour */}
         <Animated.View
           style={{
             marginTop: 22,
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
-            opacity: v.compteur.interpolate({ inputRange: [0, 0.05, 1], outputRange: [0, 1, 1] }),
+            gap: 6,
+            backgroundColor: 'rgba(255,255,255,0.14)',
+            borderRadius: 999,
+            paddingHorizontal: 14,
+            paddingVertical: 7,
+            opacity: v.statut,
+            transform: [{ scale: doux ? 1 : v.statut.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }],
           }}
         >
-          <Text style={{ color: '#FFFFFF', fontSize: 26, fontVariant: ['tabular-nums'], ...police('800') }}>{rang}e</Text>
-          <Animated.View
-            style={{
-              backgroundColor: t.successBg,
-              borderRadius: 999,
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-              opacity: v.gain,
-              transform: [{ scale: doux ? 1 : v.gain.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }],
-            }}
-          >
-            <Text style={{ color: t.success, fontSize: 14, ...police('800') }}>▲ {DEPART - ARRIVEE} places</Text>
-          </Animated.View>
+          <Text style={{ color: t.gaugeZone, fontSize: 15, ...police('800') }}>✓</Text>
+          <Text style={{ color: '#FFFFFF', fontSize: 15, ...police('700') }}>Dossier à jour</Text>
         </Animated.View>
 
         {/* Nom et accroche */}
