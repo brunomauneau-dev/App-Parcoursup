@@ -4,6 +4,7 @@ import { api, modeDemo } from '../api';
 import { ApiError, messageErreur } from '../api/erreurs';
 import type { Dossier } from '../api/types';
 import { programmerNotificationDemo } from '../notifications/notificationDemo';
+import { notificationsActives, reinitialiserNotifications } from '../notifications/preference';
 
 type Statut = 'demarrage' | 'deconnecte' | 'connecte';
 
@@ -106,6 +107,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const deconnexion = useCallback(async () => {
     await api.deconnexion();
+    await reinitialiserNotifications();
     reinitialiser();
   }, [reinitialiser]);
 
@@ -118,6 +120,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const simulerNuit = useCallback(
     async (options?: { notificationSysteme?: boolean }) => {
       if (await api.simulerNuit?.()) {
+        // Notifications désactivées dans les réglages : le dossier se met à jour sans prévenir.
+        if (!notificationsActives() && options?.notificationSysteme !== false) {
+          await charger();
+          return;
+        }
         // Sur téléphone : vraie notification système dans quelques secondes.
         // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
         const systeme = options?.notificationSysteme === false ? false : await programmerNotificationDemo().catch(() => false);

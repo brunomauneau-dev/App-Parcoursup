@@ -35,6 +35,20 @@ if (natif) {
 /** Vrai quand une vraie notification système peut être affichée (téléphone, pas le web). */
 export const notificationsSysteme = natif;
 
+/** Autorisation du système : 'accordee', 'refusee' (on peut redemander) ou 'bloquee' (réglages du téléphone). */
+export async function etatAutorisation(): Promise<'accordee' | 'refusee' | 'bloquee'> {
+  if (!natif) return 'accordee';
+  const a = await Notifications.getPermissionsAsync();
+  if (a.granted) return 'accordee';
+  return a.canAskAgain ? 'refusee' : 'bloquee';
+}
+
+/** Demande l'autorisation au système si besoin. */
+export async function demanderAutorisation(): Promise<boolean> {
+  if (!natif) return true;
+  return autorisation();
+}
+
 async function autorisation(): Promise<boolean> {
   const actuelle = await Notifications.getPermissionsAsync();
   if (actuelle.granted) return true;

@@ -8,7 +8,7 @@ import { dateCourte, echeance, heure, jourLong, ordinal, resteAvant } from '../f
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
-import { ReglageVerrou } from '../securite/Verrou';
+import { Reglages } from '../reglages/Reglages';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
 
@@ -22,7 +22,8 @@ interface Props {
   onVoirVoeux: (f: Filtre) => void;
   onMessages: () => void;
   onSimuler?: () => void;
-  onDeconnexion: () => void;
+  /** Déconnexion : retire l'accès de l'application et revient à l'écran de connexion */
+  onDeconnexion: () => Promise<void>;
   /** Démonstration uniquement : afficher un autre dossier fictif */
   onChangerProfil?: () => void;
 }
@@ -557,11 +558,8 @@ export function AccueilScreen(p: Props) {
         </View>
       )}
 
-      <ReglageVerrou />
+      <Reglages onDeconnexion={p.onDeconnexion} />
 
-      <Pressable onPress={p.onDeconnexion} accessibilityRole="button" style={{ alignSelf: 'center', padding: 12 }}>
-        <Text style={{ color: t.primary, fontSize: 14, ...police('600') }}>Se déconnecter</Text>
-      </Pressable>
       <View style={{ marginTop: 8 }}>
         <Droits />
       </View>
