@@ -260,18 +260,25 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       // Barre d'onglets : trois colonnes égales en bas de l'écran
       return { x: (W / 3) * c.onglet + 8, y: H - HAUTEUR_ONGLETS + 4, w: W / 3 - 16, h: HAUTEUR_ONGLETS - 8 };
     }
-    for (let i = 0; i < 8; i++) {
+    // On attend que la cible ne bouge plus et ne change plus de taille (fin de mise en page, de
+    // chargement ou de défilement) : deux mesures identiques à 80 ms d'écart.
+    let precedente: Rect | null = null;
+    for (let i = 0; i < 14; i++) {
       const r = await mesures.current.get(c)?.();
-      if (r) {
-        // On attend que la position ne bouge plus (fin de mise en page ou de défilement)
-        await attendre(50);
-        const r2 = await mesures.current.get(c)?.();
-        if (r2 && Math.abs(r2.x - r.x) < 2 && Math.abs(r2.y - r.y) < 2) return { x: r2.x - ox, y: r2.y - oy, w: r2.w, h: r2.h };
-        continue;
+      if (
+        r &&
+        precedente &&
+        Math.abs(r.x - precedente.x) < 2 &&
+        Math.abs(r.y - precedente.y) < 2 &&
+        Math.abs(r.w - precedente.w) < 2 &&
+        Math.abs(r.h - precedente.h) < 2
+      ) {
+        return { x: r.x - ox, y: r.y - oy, w: r.w, h: r.h };
       }
-      await attendre(100);
+      precedente = r ?? null;
+      await attendre(80);
     }
-    return null;
+    return precedente ? { x: precedente.x - ox, y: precedente.y - oy, w: precedente.w, h: precedente.h } : null;
   }, []);
 
   const etapeRef = useRef<number | null>(null);
@@ -336,8 +343,12 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       const e = ETAPES[i];
       setToucher(false);
       try {
+        // Laisse le cadre se refermer avant de changer d'écran (sur un téléphone lent, le changement
+        // d'écran occupe le processeur et l'animation attendrait son tour)
+        await attendre(170);
+        if (jeton.current !== monJeton) return;
         const ecranChange = await preparer(e);
-        await attendre(ecranChange ? STABILISATION_MS : 30);
+        await attendre(ecranChange ? STABILISATION_MS : 0);
         if (jeton.current !== monJeton) return;
         const r = await mesurer(e.cible);
         if (jeton.current !== monJeton) return;
