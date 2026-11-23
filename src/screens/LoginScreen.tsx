@@ -84,10 +84,11 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
               <ActivityIndicator color={t.primary} style={{ paddingVertical: 14 }} />
             ) : (
               <>
+                {/* La visite guidée d'abord : le meilleur point d'entrée pour découvrir l'application */}
+                {demoAuto && <Button label="Visite guidée, pas à pas" onPress={demoAuto.lancer} />}
                 <Cible id="connexion-demo">
-                  <Button label="Découvrir la démo" onPress={() => void valider()} />
+                  <Button label="Explorer un dossier fictif" variant={demoAuto ? 'secondary' : 'primary'} onPress={() => void valider()} />
                 </Cible>
-                {demoAuto && <Button label="Visite guidée" variant="secondary" onPress={demoAuto.lancer} />}
               </>
             )}
             <Text
@@ -99,7 +100,7 @@ export function LoginScreen({ onLogin }: { onLogin: () => Promise<void> }) {
                 ...police('400'),
               }}
             >
-              Démonstration avec un dossier fictif : aucun identifiant n’est demandé.
+              Tout est fictif : aucun identifiant n’est demandé.
             </Text>
             <Pressable
               onPress={() => router.push('/connexion-simulee')}

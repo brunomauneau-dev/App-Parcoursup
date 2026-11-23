@@ -17,7 +17,7 @@ Faire essayer le prototype « Parcours’app » (non officiel) à des élèves d
 | Durée | Étape |
 | --- | --- |
 | 3 min | Projection de la visite guidée (adresse se terminant par `#demo`) : l’animateur avance étape par étape, d’un clic ou avec la flèche →, en laissant le temps de lire. Puis présentation : un prototype, des données fictives, un questionnaire anonyme. Rappeler de ne jamais saisir ses vrais identifiants Parcoursup. |
-| 2 min | Les élèves ouvrent le lien sur leur téléphone, appuient sur « Découvrir la démo ». |
+| 2 min | Les élèves ouvrent le lien sur leur téléphone, appuient sur « Explorer un dossier fictif » (ou refont la visite guidée à leur rythme). |
 | 8 min | Exploration libre, puis trois consignes : trouver la proposition qui attend une réponse et le temps restant ; ouvrir un vœu en liste d'attente et lire la courbe ; appuyer sur « Simuler la mise à jour de la nuit ». |
 | 5 min | Questionnaire via « Donner mon avis ». |
 | 2 min | Questions ouvertes à l'oral ; noter les phrases marquantes, sans nom. |
