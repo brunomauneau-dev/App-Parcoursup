@@ -42,14 +42,25 @@ export function Lancement() {
       Animated.delay(450),
       anim(v.sortie, 520, Easing.inOut(Easing.cubic)),
     ]);
-    // Version douce : tout est en place d'emblée, seul un fondu de sortie
-    const douce = Animated.sequence([Animated.delay(1300), anim(v.sortie, 450, Easing.inOut(Easing.quad))]);
+    // Version douce : uniquement des fondus et le remplissage des lignes, aucun déplacement
+    const douce = Animated.sequence([
+      Animated.parallel([
+        anim(v.halos, 900, Easing.out(Easing.quad)),
+        Animated.stagger(
+          160,
+          v.lignes.map((l) => anim(l, 420, Easing.out(Easing.quad), false)),
+        ),
+        Animated.sequence([Animated.delay(300), anim(v.nom, 600, Easing.out(Easing.quad))]),
+      ]),
+      Animated.delay(700),
+      anim(v.sortie, 450, Easing.inOut(Easing.quad)),
+    ]);
     AccessibilityInfo.isReduceMotionEnabled()
       .catch(() => false)
       .then((reduire) => {
         if (annule) return;
         if (reduire) {
-          [v.logo, v.halos, v.nom, ...v.lignes].forEach((x) => x.setValue(1));
+          v.logo.setValue(1);
           setDoux(true);
           douce.start(({ finished }) => finished && setVisible(false));
         } else sequence.start(({ finished }) => finished && setVisible(false));
@@ -73,11 +84,13 @@ export function Lancement() {
         borderRadius: diametre / 2,
         backgroundColor: couleur,
         opacity: v.halos.interpolate({ inputRange: [0, retard, 1], outputRange: [0, 0, 1] }),
-        transform: [
-          { translateX: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0, dx] }) },
-          { translateY: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0, dy] }) },
-          { scale: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) },
-        ],
+        transform: doux
+          ? [{ translateX: dx }, { translateY: dy }]
+          : [
+              { translateX: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0, dx] }) },
+              { translateY: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0, dy] }) },
+              { scale: v.halos.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) },
+            ],
       }}
     />
   );
@@ -132,7 +145,7 @@ export function Lancement() {
             transform: [
               { scale: v.logo.interpolate({ inputRange: [0, 1], outputRange: [0.55, 1] }) },
               { rotate: v.logo.interpolate({ inputRange: [0, 1], outputRange: ['-12deg', '0deg'] }) },
-              { translateY: v.nom.interpolate({ inputRange: [0, 1], outputRange: [0, -18] }) },
+              { translateY: doux ? -18 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [0, -18] }) },
             ],
           }}
         >
@@ -167,7 +180,7 @@ export function Lancement() {
             marginTop: 22,
             alignItems: 'center',
             opacity: v.nom,
-            transform: [{ translateY: v.nom.interpolate({ inputRange: [0, 1], outputRange: [16, -6] }) }],
+            transform: [{ translateY: doux ? -6 : v.nom.interpolate({ inputRange: [0, 1], outputRange: [16, -6] }) }],
           }}
         >
           <Text style={{ color: t.text, fontSize: 30, letterSpacing: -0.5, ...police('800') }}>Parcours’app</Text>
