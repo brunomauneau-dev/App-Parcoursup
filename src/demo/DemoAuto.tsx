@@ -368,7 +368,6 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     const i = etapeRef.current;
     if (i == null || occupe.current || i >= ETAPES.length - 1) return;
     occupe.current = true;
-    setTransition(true);
     const monJeton = jeton.current;
     const e = ETAPES[i];
     if (e.toucher && e.cible) {
@@ -500,14 +499,44 @@ function Voile({ demo, W, H }: { demo: EtatDemo; W: number; H: number }) {
   useEffect(() => {
     Animated.timing(opacite, { toValue: derniere ? 0 : 1, duration: 350, useNativeDriver: false }).start();
   }, [derniere, opacite]);
+  // Le cadre se referme sur lui-même dès qu'on avance, puis se rouvre directement sur l'élément suivant
+  // (plutôt que de rester sur l'ancien élément puis de glisser à travers l'écran).
+  const courant = useRef({ x: W / 2, y: H / 2, w: 0, h: 0 });
+  const ferme = useRef(true);
+  const { transition } = demo;
   useEffect(() => {
-    const c = rect
-      ? { x: rect.x - MARGE, y: rect.y - MARGE, w: rect.w + 2 * MARGE, h: rect.h + 2 * MARGE }
-      : { x: W / 2, y: H / 2, w: 0, h: 0 };
-    const anim = (v: Animated.Value, to: number) =>
-      Animated.timing(v, { toValue: to, duration: 480, easing: Easing.inOut(Easing.cubic), useNativeDriver: false });
-    Animated.parallel([anim(pos.x, c.x), anim(pos.y, c.y), anim(pos.w, c.w), anim(pos.h, c.h)]).start();
-  }, [rect, pos, W, H]);
+    const anim = (v: Animated.Value, to: number, duree: number, easing = Easing.out(Easing.cubic)) =>
+      Animated.timing(v, { toValue: to, duration: duree, easing, useNativeDriver: false });
+    const aller = (c: { x: number; y: number; w: number; h: number }, duree: number, easing?: (v: number) => number) => {
+      courant.current = c;
+      Animated.parallel([
+        anim(pos.x, c.x, duree, easing),
+        anim(pos.y, c.y, duree, easing),
+        anim(pos.w, c.w, duree, easing),
+        anim(pos.h, c.h, duree, easing),
+      ]).start();
+    };
+    const cur = courant.current;
+    if (transition) {
+      if (!ferme.current) aller({ x: cur.x + cur.w / 2, y: cur.y + cur.h / 2, w: 0, h: 0 }, 160, Easing.in(Easing.quad));
+      ferme.current = true;
+      return;
+    }
+    if (!rect) return;
+    const c = { x: rect.x - MARGE, y: rect.y - MARGE, w: rect.w + 2 * MARGE, h: rect.h + 2 * MARGE };
+    if (ferme.current) {
+      // Réouverture depuis le centre de la nouvelle cible
+      pos.x.setValue(c.x + c.w / 2);
+      pos.y.setValue(c.y + c.h / 2);
+      pos.w.setValue(0);
+      pos.h.setValue(0);
+      ferme.current = false;
+      aller(c, 260);
+    } else {
+      // Petite correction de position (la page a bougé)
+      aller(c, 180);
+    }
+  }, [rect, transition, pos, W, H]);
 
   const [pulsation] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -550,7 +579,7 @@ function Voile({ demo, W, H }: { demo: EtatDemo; W: number; H: number }) {
           height: pos.h,
           borderRadius: 18,
           borderWidth: 3,
-          opacity: rect ? 1 : 0,
+          opacity: pos.w.interpolate({ inputRange: [0, 16], outputRange: [0, 1], extrapolate: 'clamp' }),
           borderColor: pulsation.interpolate({ inputRange: [0, 1], outputRange: ['rgba(255,255,255,0.95)', 'rgba(159,211,236,0.95)'] }),
         }}
       />
