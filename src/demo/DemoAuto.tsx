@@ -51,40 +51,41 @@ const ETAPES: Etape[] = [
   {
     route: '/connexion',
     cible: 'connexion-demo',
-    legende: 'Camille est en terminale. Pendant la phase d’admission, elle suit son dossier Parcoursup avec Suivi Vœux.',
+    legende: 'Voici Camille, en terminale comme toi. C’est la phase d’admission, et elle suit son dossier depuis son téléphone. Suis-la !',
     toucher: true,
   },
   {
     jour: 4,
     route: '/dossier',
     cible: 'accueil-echeance',
-    legende: 'Dimanche 6 juin. Dès l’ouverture, elle voit qu’une proposition attend sa réponse, et combien de temps il lui reste.',
+    legende:
+      'Dimanche 6 juin. Dès qu’elle ouvre l’appli : une proposition l’attend, avec le temps qu’il lui reste pour répondre. Pas de mauvaise surprise.',
   },
   {
     jour: 4,
     route: '/dossier',
     cible: 'accueil-compteurs',
-    legende: 'Son dossier en trois chiffres : propositions, listes d’attente et refus.',
+    legende: 'Tout son dossier en trois chiffres : ses propositions, ses listes d’attente et ses refus.',
   },
   // 2. Comprendre sa liste d'attente
   {
     jour: 4,
     route: '/dossier',
     cible: 'accueil-attente-0',
-    legende: 'Le vœu qui lui tient le plus à cœur, le BUT GEII, est en liste d’attente : 119e position, et 12 places gagnées depuis hier.',
+    legende: 'Son vœu de cœur, le BUT GEII ? En liste d’attente, 119e… mais 12 places gagnées depuis hier. Ça avance !',
     toucher: true,
   },
   {
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
-    legende: 'Sa position dans la liste d’attente : 119e parmi les 410 candidats encore en attente. Elle avance chaque matin.',
+    legende: 'Ici, sa position : 119e sur les 410 candidats encore en attente. Chaque matin, la jauge bouge.',
   },
   {
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-classement',
-    legende: 'Son rang de classement, 240e, se compare au dernier candidat appelé l’an dernier, 215e : un ordre d’idée, pas une garantie.',
+    legende: 'Et là, son rang de classement : 240e. L’an dernier, le dernier appelé était 215e. Ça donne une idée, pas une promesse.',
   },
   // 3. Être prévenue (lundi)
   {
@@ -93,45 +94,45 @@ const ETAPES: Etape[] = [
     cible: 'notification',
     notification: true,
     legende:
-      'Lundi, 6h12 : le dossier a été mis à jour pendant la nuit. Une notification prévient Camille, sans rien afficher de personnel.',
+      'Lundi, 6h12. Pendant la nuit, son dossier a bougé : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
   },
   {
     jour: 5,
     route: '/dossier',
     cible: 'accueil-carte',
-    legende: 'Bonne nouvelle : une place s’est libérée en BUT GEII. Deux propositions attendent maintenant sa réponse.',
+    legende: 'Bonne nouvelle : une place s’est libérée en BUT GEII ! Deux propositions l’attendent maintenant.',
   },
   // 4. Décider sereinement
   {
     jour: 5,
     route: '/dossier',
     cible: { onglet: 1 },
-    legende: 'Dans « Mes vœux », elle retrouve toutes ses propositions.',
+    legende: 'Direction « Mes vœux » pour retrouver toutes ses propositions.',
     toucher: true,
   },
   {
     jour: 5,
     route: VOEUX_PROPOSITIONS,
     cible: 'voeu-v4',
-    legende: 'Chaque proposition rappelle sa date limite de réponse.',
+    legende: 'Pour chacune, la date limite est bien en vue. Difficile de passer à côté.',
     toucher: true,
   },
   {
     jour: 5,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-repondre',
-    legende: 'Pour accepter, elle passe par le site officiel : l’application ne fait que consulter, aucune fausse manœuvre n’est possible.',
+    legende: 'Pour accepter, elle passe par le site officiel : l’appli sert à consulter, donc zéro fausse manip possible.',
   },
   {
     jour: 5,
     route: '/dossier/messages',
     cible: 'messages-0',
-    legende: 'Les messages du dossier sont réunis au même endroit, les nouveaux signalés d’un point orange.',
+    legende: 'Et tous les messages de son dossier au même endroit, les nouveaux marqués d’un point orange.',
   },
   {
     jour: 5,
     route: '/dossier',
-    legende: 'Fin de la visite. À vous d’explorer librement, ou de la recommencer.',
+    legende: 'C’est tout ! À toi d’explorer, ou de recommencer la visite.',
   },
 ];
 
@@ -660,7 +661,7 @@ function Indication({ grand }: { grand: boolean }) {
         ...police('600'),
       }}
     >
-      {grand ? 'Cliquez sur le téléphone ou sur « Suivant » (ou touche →) pour continuer' : 'Touchez l’écran pour continuer'}
+      {grand ? 'Clique sur le téléphone ou sur « Suivant » (ou touche →) pour continuer' : 'Touche l’écran pour continuer'}
     </Animated.Text>
   );
 }
