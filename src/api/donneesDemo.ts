@@ -9,7 +9,8 @@
  */
 import type { Dossier, Message, PointHistorique, Voeu } from './types';
 
-export const JOUR_INITIAL = 4;
+/** La démonstration commence au premier jour des admissions (mardi 1er juin 2027). */
+export const JOUR_INITIAL = 0;
 export const JOUR_MAX = 7;
 const J0 = new Date(2027, 5, 1); // mardi 1er juin 2027, heure locale
 const HEURE_MAJ = { h: 9, m: 0 }; // notifications et messages : à partir de 9 h, jamais la nuit
@@ -430,7 +431,7 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
     voeux: profil.voeux.map((s) => construireVoeu(s, jour)),
     messages: construireMessages(profil, jour),
     calendrier: [
-      { date: dateDuJour(6, 23, 59).toISOString(), libelle: 'Dernier jour pour classer vos vœux en attente (sur le site)' },
+      { date: dateDuJour(3, 0).toISOString(), libelle: 'Du vendredi 4 au lundi 7 juin : classer vos vœux en attente (sur le site)' },
       { date: dateDuJour(9, 9).toISOString(), libelle: 'Début de la phase complémentaire : jusqu’à 10 nouveaux vœux' },
       { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale' },
     ],

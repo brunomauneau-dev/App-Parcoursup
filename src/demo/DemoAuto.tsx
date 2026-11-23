@@ -55,24 +55,24 @@ const ETAPES: Etape[] = [
     toucher: true,
   },
   {
-    jour: 4,
+    jour: 0,
     route: '/dossier',
     cible: 'accueil-echeance',
     legende:
-      'Samedi 5 juin. Dès qu’elle ouvre l’appli : une proposition l’attend, avec le temps qu’il lui reste pour répondre. Pas de mauvaise surprise.',
+      'Mardi 1er juin, premier jour des réponses. Dès qu’elle ouvre l’appli : deux propositions l’attendent, avec le temps qu’il lui reste pour répondre.',
+  },
+  {
+    jour: 0,
+    route: '/dossier',
+    cible: 'accueil-compteurs',
+    legende: 'Tout son dossier en trois chiffres : ses propositions, ses listes d’attente et ses refus.',
   },
   {
     jour: 4,
     route: '/dossier',
     cible: 'accueil-classement',
     legende:
-      'Autre rappel : jusqu’au lundi 7 juin, elle doit classer ses vœux en attente sur le site. L’appli le lui signale, avec un lien direct.',
-  },
-  {
-    jour: 4,
-    route: '/dossier',
-    cible: 'accueil-compteurs',
-    legende: 'Tout son dossier en trois chiffres : ses propositions, ses listes d’attente et ses refus.',
+      'Samedi 5 juin. Le classement des vœux en attente est ouvert : jusqu’à lundi, elle doit les classer sur le site. L’appli le lui rappelle, avec un lien direct.',
   },
   // 2. Comprendre sa liste d'attente
   {

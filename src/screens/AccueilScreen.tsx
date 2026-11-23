@@ -149,7 +149,6 @@ export function AccueilScreen(p: Props) {
       <View style={{ gap: 2, marginTop: 4 }}>
         <Text style={{ color: t.textMuted, fontSize: 14, ...police('500') }}>{jourLong(maintenant)} · Phase principale d’admission</Text>
         <Text style={{ color: t.text, fontSize: 30, ...police('800') }}>Bonjour {dossier.prenom}</Text>
-        <Text style={{ color: t.textMuted, fontSize: 13, ...police('400') }}>Dossier n° {dossier.numeroDossier} · consultation</Text>
       </View>
 
       {dossier.profilDemo && p.onChangerProfil && (
