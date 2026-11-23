@@ -61,7 +61,9 @@ export function AccueilScreen(p: Props) {
   const nbRefusees = dossier.voeux.filter((v) => v.statut === 'refuse' || v.statut === 'refusee_par_candidat').length;
   const nonLus = dossier.messages.filter((m) => !m.lu).length;
   const prochaine = aRepondre[0];
-  // Aucune proposition et des listes d'attente bien au-delà du dernier appelé de l'an dernier
+  // Aucune proposition (ni en attente de réponse, ni acceptée) : on présente les autres pistes
+  const sansProposition = nbPropositions === 0;
+  // ... et des listes d'attente bien au-delà du dernier appelé de l'an dernier : message adapté
   const situationDifficile =
     nbPropositions === 0 &&
     attente.length > 0 &&
@@ -303,14 +305,15 @@ export function AccueilScreen(p: Props) {
         </View>
       </Cible>
 
-      {situationDifficile && (
+      {sansProposition && (
         <View
           style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.warningDot }}
         >
           <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Des solutions existent</Text>
           <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
-            Vos listes d’attente sont encore loin des rangs appelés l’an dernier. Rien n’est joué, mais vous pouvez préparer d’autres pistes
-            :
+            {situationDifficile
+              ? 'Vos listes d’attente sont encore loin des rangs appelés l’an dernier. Rien n’est joué, mais vous pouvez préparer d’autres pistes :'
+              : 'Pas encore de proposition : c’est fréquent, et vos listes d’attente avancent. En parallèle, vous pouvez préparer d’autres pistes :'}
           </Text>
           <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 22, ...police('400') }}>
             • <Text style={police('700')}>La phase complémentaire</Text> ouvre le 11 juin : de nouveaux vœux dans les formations qui ont
