@@ -15,7 +15,7 @@ export class MockApi implements DossierApi {
   private readonly debut = Date.now();
 
   async connexion(): Promise<void> {
-    await attendre(600);
+    await attendre(300);
     // Chaque connexion de démonstration tire un dossier fictif au hasard
     this.profil = PROFILS_DEMO[Math.floor(Math.random() * PROFILS_DEMO.length)].id;
     this.jour = JOUR_INITIAL;
@@ -33,7 +33,7 @@ export class MockApi implements DossierApi {
 
   async getDossier(): Promise<Dossier> {
     if (!this.connecte) throw new ApiError('session_expiree', 'Votre session a expiré. Reconnectez-vous.');
-    await attendre(250);
+    await attendre(120);
     return construireDossier(this.jour, this.debut, undefined, this.profil);
   }
 

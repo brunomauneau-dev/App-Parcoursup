@@ -138,8 +138,9 @@ const ETAPES: Etape[] = [
 
 const attendre = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** Laisse le temps à l'écran d'apparaître avant de mesurer. */
-const STABILISATION_MS = 450;
-const TOUCHER_MS = 650;
+/** Laisse le temps au nouvel écran d'apparaître (seulement quand on change d'écran). */
+const STABILISATION_MS = 300;
+const TOUCHER_MS = 450;
 
 // --- Registre des éléments pointables --------------------------------------
 
@@ -171,6 +172,8 @@ interface EtatDemo {
   /** Grand écran : l'application est présentée dans un cadre de téléphone, les légendes à côté. */
   large: boolean;
   definirEcran: (e: Ecran) => void;
+  /** Le calque fournit une mesure à l'instant de la position de l'écran de l'application. */
+  definirMesureEcran: (f: (() => Promise<Ecran>) | null) => void;
 }
 const DemoCtx = createContext<EtatDemo | null>(null);
 
@@ -192,8 +195,9 @@ export function Cible({ id, children, style }: { id: string; children: ReactNode
       if (!v) return null;
       if (Platform.OS === 'web') {
         // Sur le web, la vue est un élément HTML : on l'amène au centre de l'écran.
-        (v as unknown as HTMLElement).scrollIntoView?.({ block: 'center', behavior: 'smooth' });
-        await attendre(450);
+        // Défilement immédiat (un défilement animé est lent dans les navigateurs intégrés, ex. Messenger)
+        (v as unknown as HTMLElement).scrollIntoView?.({ block: 'center', behavior: 'instant' as ScrollBehavior });
+        await attendre(60);
       }
       return new Promise<Rect | null>((resoudre) => v.measureInWindow((x, y, w, h) => resoudre(w > 0 && h > 0 ? { x, y, w, h } : null)));
     });
@@ -224,6 +228,10 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
   });
 
   const ecran = useRef<Ecran>({ ox: 0, oy: 0, w: 0, h: 0 });
+  const mesureEcran = useRef<(() => Promise<Ecran>) | null>(null);
+  const definirMesureEcran = useCallback((f: (() => Promise<Ecran>) | null) => {
+    mesureEcran.current = f;
+  }, []);
   const definirEcran = useCallback((e: Ecran) => {
     ecran.current = e;
   }, []);
@@ -246,20 +254,29 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
   /** Rectangle de la cible, relatif à l'écran de l'application. */
   const mesurer = useCallback(async (c?: IdCible): Promise<Rect | null> => {
     if (c == null) return null;
-    const { ox, oy, w: W, h: H } = ecran.current;
+    // Origine de l'écran relevée à l'instant même : la barre d'adresse des navigateurs mobiles la déplace
+    const { ox, oy, w: W, h: H } = (await mesureEcran.current?.()) ?? ecran.current;
     if (typeof c === 'object') {
       // Barre d'onglets : trois colonnes égales en bas de l'écran
       return { x: (W / 3) * c.onglet + 8, y: H - HAUTEUR_ONGLETS + 4, w: W / 3 - 16, h: HAUTEUR_ONGLETS - 8 };
     }
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       const r = await mesures.current.get(c)?.();
-      if (r) return { x: r.x - ox, y: r.y - oy, w: r.w, h: r.h };
-      await attendre(150);
+      if (r) {
+        // On attend que la position ne bouge plus (fin de mise en page ou de défilement)
+        await attendre(50);
+        const r2 = await mesures.current.get(c)?.();
+        if (r2 && Math.abs(r2.x - r.x) < 2 && Math.abs(r2.y - r.y) < 2) return { x: r2.x - ox, y: r2.y - oy, w: r2.w, h: r2.h };
+        continue;
+      }
+      await attendre(100);
     }
     return null;
   }, []);
 
   const etapeRef = useRef<number | null>(null);
+  /** État déjà en place, pour ne refaire que ce qui change d'une étape à l'autre. */
+  const etatPrepare = useRef<{ jour?: number; route?: string; profil?: boolean }>({});
   /** Vrai pendant un changement d'étape : les touchers sont ignorés (pas de double saut). */
   const occupe = useRef(false);
   const [transition, setTransition] = useState(false);
@@ -268,26 +285,46 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     jeton.current += 1;
     etapeRef.current = null;
     occupe.current = false;
+    etatPrepare.current = {};
     setTransition(false);
     setEtape(null);
     setRect(null);
     setToucher(false);
   }, []);
 
-  /** Met l'application dans l'état de l'étape i (connexion, jour, écran). */
-  const preparer = useCallback(async (e: Etape) => {
+  /** Met l'application dans l'état de l'étape. Renvoie vrai si l'écran a changé. */
+  const preparer = useCallback(async (e: Etape): Promise<boolean> => {
     const { router: r, session: s } = ctx.current;
+    const etat = etatPrepare.current;
     if (e.jour == null) {
+      etatPrepare.current = {};
       await s.deconnexion();
       r.replace('/connexion');
-      return;
+      return true;
     }
-    if (s.statut !== 'connecte') await s.connexion();
+    if (s.statut !== 'connecte') {
+      await s.connexion();
+      etat.profil = false;
+      etat.jour = undefined;
+    }
     // La visite guidée raconte toujours l'histoire de Camille
-    await s.definirProfil?.('camille');
-    await s.definirJour?.(e.jour);
-    r.navigate(e.route);
+    if (!etat.profil) {
+      await s.definirProfil?.('camille');
+      etat.profil = true;
+      etat.jour = undefined;
+    }
+    if (etat.jour !== e.jour) {
+      await s.definirJour?.(e.jour);
+      etat.jour = e.jour;
+    }
+    const route = JSON.stringify(e.route);
+    const change = etat.route !== route;
+    if (change) {
+      r.navigate(e.route);
+      etat.route = route;
+    }
     if (e.notification) s.montrerNotification();
+    return change;
   }, []);
 
   const allerA = useCallback(
@@ -299,8 +336,8 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       const e = ETAPES[i];
       setToucher(false);
       try {
-        await preparer(e);
-        await attendre(STABILISATION_MS);
+        const ecranChange = await preparer(e);
+        await attendre(ecranChange ? STABILISATION_MS : 30);
         if (jeton.current !== monJeton) return;
         const r = await mesurer(e.cible);
         if (jeton.current !== monJeton) return;
@@ -308,6 +345,13 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
         etapeRef.current = i;
         setEtape(i);
         setTransition(false);
+        // Correction tardive si la page a encore bougé (images, barre d'adresse du navigateur)
+        setTimeout(() => {
+          if (jeton.current !== monJeton) return;
+          void mesurer(e.cible).then((r2) => {
+            if (jeton.current === monJeton && r2 && r && (Math.abs(r2.x - r.x) > 2 || Math.abs(r2.y - r.y) > 2)) setRect(r2);
+          });
+        }, 400);
       } finally {
         if (jeton.current === monJeton) occupe.current = false;
       }
@@ -385,6 +429,7 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     toucher,
     large,
     definirEcran,
+    definirMesureEcran,
   };
 
   return (
@@ -411,6 +456,20 @@ export function CalqueDemo() {
       setTaille({ w, h });
     });
   };
+
+  const definirMesureEcran = demo?.definirMesureEcran;
+  useEffect(() => {
+    if (!definirMesureEcran) return;
+    definirMesureEcran(
+      () =>
+        new Promise<Ecran>((resoudre) => {
+          const v = ref.current;
+          if (!v) return resoudre({ ox: 0, oy: 0, w: 0, h: 0 });
+          v.measureInWindow((ox, oy, w, h) => resoudre({ ox, oy, w, h }));
+        }),
+    );
+    return () => definirMesureEcran(null);
+  }, [definirMesureEcran]);
 
   const actif = demo?.etape != null;
   return (
@@ -550,92 +609,99 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
   }, [demo.etape, apparition]);
   const taille = grand ? 17 : 15;
   return (
-    <Animated.View
-      style={{
-        backgroundColor: 'rgba(24,31,46,0.96)',
-        borderRadius: grand ? 24 : 20,
-        padding: grand ? 22 : 14,
-        gap: grand ? 16 : 10,
-        opacity: demo.transition ? 0.2 : apparition,
-        transform: [{ translateY: apparition.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
-        shadowColor: '#000',
-        shadowOpacity: 0.25,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 10,
-      }}
-      accessibilityLiveRegion="polite"
-    >
-      {/* Barre de progression : chaque segment mène à son étape */}
-      <View style={{ flexDirection: 'row', gap: 3 }}>
-        {Array.from({ length: demo.total }, (_, i) => (
-          <Pressable
-            key={i}
-            onPress={() => demo.allerA(i)}
-            accessibilityRole="button"
-            accessibilityLabel={`Aller à l’étape ${i + 1}`}
-            hitSlop={{ top: 10, bottom: 10 }}
-            style={{ flex: 1, paddingVertical: 4 }}
-          >
-            <View
-              style={{
-                height: grand ? 4 : 3,
-                borderRadius: 2,
-                backgroundColor: i <= (demo.etape ?? -1) ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
-              }}
-            />
-          </Pressable>
-        ))}
-      </View>
-      {grand && (
-        <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, letterSpacing: 0.8, textTransform: 'uppercase', ...police('700') }}>
-          Étape {(demo.etape ?? 0) + 1} sur {demo.total}
-        </Text>
-      )}
-      <Pressable onPress={demo.suivant} disabled={derniere} accessibilityRole="text">
-        <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
-      </Pressable>
-      {!derniere && !demo.transition && <Indication grand={grand} />}
-      {derniere && AVIS_ACTIF && (
-        <Pressable
-          onPress={demo.donnerAvis}
-          accessibilityRole="button"
-          style={({ pressed }) => ({
-            backgroundColor: '#FFFFFF',
-            borderRadius: 14,
-            paddingVertical: 12,
-            alignItems: 'center',
-            opacity: pressed ? 0.85 : 1,
-          })}
-        >
-          <Text style={{ color: '#181F2E', fontSize: taille, ...police('700') }}>Donner mon avis (2 min)</Text>
-        </Pressable>
-      )}
-
-      {/* Commandes */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <BoutonCommande libelle="‹" description="Étape précédente" onPress={demo.precedent} desactive={premiere} grand={grand} />
-        <BoutonCommande
-          libelle={derniere ? 'Recommencer' : 'Suivant ›'}
-          description={derniere ? 'Recommencer la visite' : 'Étape suivante'}
-          onPress={derniere ? demo.lancer : demo.suivant}
-          grand={grand}
-          principal
-        />
-        <View style={{ flex: 1 }} />
-        <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
-          <Text
-            style={{
-              color: derniere ? '#FFFFFF' : 'rgba(255,255,255,0.75)',
-              fontSize: grand ? 15 : 14,
-              ...police(derniere ? '700' : '600'),
-            }}
-          >
-            {derniere ? 'Explorer' : 'Quitter'}
+    // Toute la bulle fait avancer la visite (ses boutons gardent leur propre action)
+    <Pressable onPress={derniere ? undefined : demo.suivant} disabled={derniere}>
+      <Animated.View
+        style={{
+          backgroundColor: 'rgba(24,31,46,0.96)',
+          borderRadius: grand ? 24 : 20,
+          padding: grand ? 22 : 14,
+          gap: grand ? 16 : 10,
+          opacity: demo.transition ? 0.2 : apparition,
+          transform: [{ translateY: apparition.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }],
+          shadowColor: '#000',
+          shadowOpacity: 0.25,
+          shadowRadius: 18,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 10,
+        }}
+        accessibilityLiveRegion="polite"
+      >
+        {/* Barre de progression : chaque segment mène à son étape */}
+        <View style={{ flexDirection: 'row', gap: 3 }}>
+          {Array.from({ length: demo.total }, (_, i) => (
+            <Pressable
+              key={i}
+              onPress={() => demo.allerA(i)}
+              accessibilityRole="button"
+              accessibilityLabel={`Aller à l’étape ${i + 1}`}
+              hitSlop={{ top: 10, bottom: 10 }}
+              style={{ flex: 1, paddingVertical: 4 }}
+            >
+              <View
+                style={{
+                  height: grand ? 4 : 3,
+                  borderRadius: 2,
+                  backgroundColor: i <= (demo.etape ?? -1) ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
+                }}
+              />
+            </Pressable>
+          ))}
+        </View>
+        {grand && (
+          <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, letterSpacing: 0.8, textTransform: 'uppercase', ...police('700') }}>
+            Étape {(demo.etape ?? 0) + 1} sur {demo.total}
           </Text>
+        )}
+        <Pressable onPress={demo.suivant} disabled={derniere} accessibilityRole="text">
+          <Text style={{ color: '#FFFFFF', fontSize: grand ? 22 : 16, lineHeight: grand ? 30 : 22, ...police('600') }}>{demo.legende}</Text>
         </Pressable>
-      </View>
-    </Animated.View>
+        {!derniere && !demo.transition && (
+          <Pressable onPress={demo.suivant} accessibilityRole="button" accessibilityLabel="Étape suivante">
+            <Indication grand={grand} />
+          </Pressable>
+        )}
+        {derniere && AVIS_ACTIF && (
+          <Pressable
+            onPress={demo.donnerAvis}
+            accessibilityRole="button"
+            style={({ pressed }) => ({
+              backgroundColor: '#FFFFFF',
+              borderRadius: 14,
+              paddingVertical: 12,
+              alignItems: 'center',
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
+            <Text style={{ color: '#181F2E', fontSize: taille, ...police('700') }}>Donner mon avis (2 min)</Text>
+          </Pressable>
+        )}
+
+        {/* Commandes */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <BoutonCommande libelle="‹" description="Étape précédente" onPress={demo.precedent} desactive={premiere} grand={grand} />
+          <BoutonCommande
+            libelle={derniere ? 'Recommencer' : 'Suivant ›'}
+            description={derniere ? 'Recommencer la visite' : 'Étape suivante'}
+            onPress={derniere ? demo.lancer : demo.suivant}
+            grand={grand}
+            principal
+          />
+          <View style={{ flex: 1 }} />
+          <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
+            <Text
+              style={{
+                color: derniere ? '#FFFFFF' : 'rgba(255,255,255,0.75)',
+                fontSize: grand ? 15 : 14,
+                ...police(derniere ? '700' : '600'),
+              }}
+            >
+              {derniere ? 'Explorer' : 'Quitter'}
+            </Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+    </Pressable>
   );
 }
 
