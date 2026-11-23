@@ -7,7 +7,8 @@ import { dateCourte, echeance, jourLong, nombre, ordinal, resteAvant } from '../
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
-import { BarreChemin, progression } from '../components/CheminProposition';
+import { COULEUR_DEVANT } from '../components/CheminProposition';
+import { Jauge } from '../components/Jauge';
 import { Reglages } from '../reglages/Reglages';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
@@ -403,10 +404,13 @@ export function AccueilScreen(p: Props) {
                     </View>
                   </View>
                   {/* Le chemin parcouru vers la 1re place, et combien de candidats restent devant */}
-                  <BarreChemin part={progression(v.historique, v.rang!).part} epaisseur={8} />
+                  {v.totalEnAttente != null && (
+                    <Jauge rang={v.rang!} total={v.totalEnAttente} zone={v.rang!} couleurZone={COULEUR_DEVANT} />
+                  )}
                   <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('400') }}>
                     <Text style={{ color: t.text, ...police('700') }}>{nombre(Math.max(0, v.rang! - 1))}</Text>{' '}
                     {v.rang! - 1 === 1 ? 'candidat devant vous' : 'candidats devant vous'}
+                    {v.totalEnAttente != null ? `, sur ${nombre(v.totalEnAttente)} en attente` : ''}
                   </Text>
                 </Card>
               </Cible>

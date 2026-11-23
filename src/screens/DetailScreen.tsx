@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { Voeu } from '../api/types';
 import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
-import { CheminProposition } from '../components/CheminProposition';
+import { CheminProposition, COULEUR_DEVANT } from '../components/CheminProposition';
 import { BoutonRepondre, Card, EncartConsultation, StatutBadge, Variation } from '../components/ui';
 import { compteARebours, echeance, nombre, ordinal, resteAvant } from '../format';
 import { police, useTheme } from '../theme';
@@ -63,7 +63,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
         </View>
       </View>
 
-      {voeu.statut === 'en_attente' && voeu.rang != null && <BlocAttente voeu={voeu} />}
+      {voeu.statut === 'en_attente' && voeu.rang != null && <BlocAttente voeu={voeu} annee={maintenant.getFullYear() - 1} />}
 
       {voeu.statut === 'proposition' && voeu.dateLimiteReponse && (
         <>
@@ -114,7 +114,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
   );
 }
 
-function BlocAttente({ voeu }: { voeu: Voeu }) {
+function BlocAttente({ voeu, annee }: { voeu: Voeu; annee: number }) {
   const t = useTheme();
   const [aide, setAide] = useState(false);
   const position = voeu.rang!;
@@ -134,7 +134,16 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
             <Text style={{ color: t.text, fontSize: 48, lineHeight: 52, ...police('800') }}>{ordinal(position)}</Text>
             {d != null && <Variation valeur={d} />}
           </View>
-          <Text style={{ color: t.text, fontSize: 16, lineHeight: 22, ...police('400') }}>
+          {voeu.totalEnAttente != null && (
+            <>
+              <Jauge rang={position} total={voeu.totalEnAttente} zone={position} couleurZone={COULEUR_DEVANT} grande />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View style={{ width: 14, height: 10, borderRadius: 2, backgroundColor: COULEUR_DEVANT }} />
+                <Text style={{ color: t.textMuted, fontSize: 13, flex: 1, ...police('400') }}>Candidats devant vous</Text>
+              </View>
+            </>
+          )}
+          <Text style={{ color: t.text, fontSize: 15.5, lineHeight: 23, ...police('400') }}>
             <Text style={police('800')}>{nombre(Math.max(0, position - 1))}</Text>{' '}
             {position - 1 === 1 ? 'candidat est devant vous' : 'candidats sont devant vous'}
             {voeu.totalEnAttente != null ? `, sur ${nombre(voeu.totalEnAttente)} encore en attente.` : '.'}
@@ -149,17 +158,17 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
           <Cible id="detail-classement" style={{ gap: 14 }}>
             <Text style={{ color: t.textMuted, fontSize: 14, ...police('600') }}>Votre rang de classement</Text>
             <Text style={{ color: t.text, fontSize: 36, lineHeight: 40, ...police('800') }}>{ordinal(classement)}</Text>
-            <Jauge rang={classement} total={Math.round(Math.max(classement, ref) * 1.25)} zone={ref} grande bornes={false} />
+            <Jauge rang={classement} total={Math.round(Math.max(classement, ref) * 1.25)} zone={ref} grande bornes="debut" />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={{ width: 14, height: 10, borderRadius: 2, backgroundColor: t.gaugeZone }} />
+              <View style={{ width: 14, height: 10, borderRadius: 2, backgroundColor: '#C9CFD9' }} />
               <Text style={{ color: t.textMuted, fontSize: 13, flex: 1, ...police('400') }}>
-                Jusqu’au dernier candidat appelé l’an dernier ({ordinal(ref)})
+                Rang du dernier appelé en {annee} : {ordinal(ref)}
               </Text>
             </View>
             <Text style={corps}>
-              L’an dernier, la formation a appelé jusqu’au {ordinal(ref)} candidat de son classement. Votre rang de classement est{' '}
+              En {annee}, la formation a appelé jusqu’au {ordinal(ref)} candidat de son classement. Votre rang de classement est{' '}
               {ordinal(classement)}
-              {classement > ref ? ' : il faudrait que les appels aillent un peu plus loin que l’an dernier.' : '.'} Ce n’est qu’un ordre
+              {classement > ref ? ` : il faudrait que les appels aillent un peu plus loin qu’en ${annee}.` : '.'} Ce n’est qu’un ordre
               d’idée.
             </Text>
           </Cible>
@@ -182,10 +191,10 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
               </Text>
               <Text style={discret}>
                 <Text style={police('700')}>Le rang de classement</Text> est votre place dans le classement établi par la formation. Il ne
-                change pas. C’est lui qui se compare au rang du dernier candidat appelé l’an dernier.
+                change pas. C’est lui qui se compare au rang du dernier candidat appelé l’année précédente.
               </Text>
               <Text style={discret}>
-                Le rang du dernier appelé l’an dernier donne un ordre d’idée, pas une garantie : chaque année est différente.
+                Le rang du dernier appelé l’année précédente donne un ordre d’idée, pas une garantie : chaque année est différente.
               </Text>
             </View>
           )}

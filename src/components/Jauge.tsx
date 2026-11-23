@@ -5,8 +5,9 @@ import { police, useTheme } from '../theme';
 
 /**
  * Jauge : le repère « Vous » marque un rang sur une échelle de 1 à `total`.
+ * Sens de lecture identique partout : le 1er à gauche.
  * Utilisée pour la position en liste d'attente (sans zone) et pour le rang de
- * classement, où la zone verte s'arrête au rang du dernier candidat appelé l'an dernier.
+ * classement, où la zone grise s'arrête au rang du dernier candidat appelé l'an dernier.
  * Ne jamais mélanger les deux : seuls des rangs de même nature se comparent.
  */
 export function Jauge({
@@ -15,13 +16,16 @@ export function Jauge({
   zone,
   grande = false,
   bornes = true,
+  couleurZone,
 }: {
   rang: number;
   total: number;
   zone?: number;
   grande?: boolean;
-  /** Afficher « 1er » et « … (fin de liste) » sous la jauge */
-  bornes?: boolean;
+  /** Repères sous la jauge : « 1er » et « … (fin de liste) », ou seulement « 1er » ('debut') */
+  bornes?: boolean | 'debut';
+  /** Couleur de la zone (neutre par défaut : ce repère n'est ni bon ni mauvais signe en soi) */
+  couleurZone?: string;
 }) {
   const t = useTheme();
   const [largeur, setLargeur] = useState(0);
@@ -38,7 +42,7 @@ export function Jauge({
         accessibilityLabel={`Position ${rang} sur ${total}`}
       >
         <View style={{ height: h, borderRadius: h, backgroundColor: t.gaugeTrack, overflow: 'hidden' }}>
-          {zone != null && <View style={{ width: x(zone), height: h, backgroundColor: t.gaugeZone, borderRadius: h }} />}
+          {zone != null && <View style={{ width: x(zone), height: h, backgroundColor: couleurZone ?? '#C9CFD9', borderRadius: h }} />}
         </View>
         {largeur > 0 && grande && (
           <>
@@ -87,7 +91,9 @@ export function Jauge({
       {grande && bornes && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('500') }}>1er</Text>
-          <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('500') }}>{ordinal(total)} (fin de liste)</Text>
+          {bornes !== 'debut' && (
+            <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('500') }}>{ordinal(total)} (fin de liste)</Text>
+          )}
         </View>
       )}
     </View>

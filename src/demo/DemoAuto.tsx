@@ -86,7 +86,7 @@ const ETAPES: Etape[] = [
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-classement',
-    legende: 'Et là, son rang de classement : 240e. L’an dernier, le dernier appelé était 215e. Ça donne une idée, pas une promesse.',
+    legende: 'Et là, son rang de classement : 240e. En 2026, le dernier appelé était 215e. Ça donne une idée, pas une promesse.',
   },
   // 3. Être prévenue (lundi)
   {

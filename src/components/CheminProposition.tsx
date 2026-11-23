@@ -21,38 +21,22 @@ export function progression(historique: PointHistorique[] | undefined, rang: num
   };
 }
 
-/** Barre « chemin » : de la position du début de phase jusqu'à la 1re place. */
-export function BarreChemin({ part, epaisseur = 12 }: { part: number; epaisseur?: number }) {
-  const t = useTheme();
-  return (
-    <View
-      style={{ height: epaisseur, borderRadius: epaisseur / 2, backgroundColor: t.gaugeTrack, overflow: 'hidden', flexDirection: 'row' }}
-    >
-      <View style={{ width: `${Math.max(part, 0.03) * 100}%`, backgroundColor: t.successDot, borderRadius: epaisseur / 2 }} />
-    </View>
-  );
-}
+/** Couleur de la partie « candidats devant vous » sur les jauges de liste d'attente. */
+export const COULEUR_DEVANT = '#9FC3D9';
 
 /** Détail de la progression, dans la fiche du vœu : chemin, places gagnées, rythme de chaque matin. */
 export function CheminProposition({ historique, rang }: { historique: PointHistorique[]; rang: number }) {
   const t = useTheme();
-  const { points, depart, gagnees, part } = progression(historique, rang);
+  const { points, depart, gagnees } = progression(historique, rang);
   const gains = points.slice(1).map((p, i) => ({ date: p.date, gain: Math.max(0, points[i].rang - p.rang) }));
   const gainMax = Math.max(1, ...gains.map((g) => g.gain));
 
   return (
     <View style={{ gap: 14 }}>
-      <View style={{ gap: 6 }}>
-        <BarreChemin part={part} />
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ color: t.textMuted, fontSize: 12, ...police('500') }}>Début de phase : {ordinal(depart)}</Text>
-          <Text style={{ color: t.textMuted, fontSize: 12, ...police('700') }}>1re place 🏁</Text>
-        </View>
-      </View>
-
       {gagnees > 0 && (
         <Text style={{ color: t.success, fontSize: 15, ...police('700') }}>
-          ▲ {nombre(gagnees)} places gagnées depuis le début de la phase
+          ▲ {nombre(gagnees)} places gagnées depuis le début de la phase{' '}
+          <Text style={{ color: t.textMuted, ...police('500') }}>({ordinal(depart)} au départ)</Text>
         </Text>
       )}
 
