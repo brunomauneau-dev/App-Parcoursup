@@ -57,7 +57,7 @@ export async function programmerNotificationDemo(): Promise<boolean> {
   if (!(await autorisation())) return false;
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Suivi Vœux',
+      title: 'Parcours’app',
       body: 'Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.',
     },
     trigger: {

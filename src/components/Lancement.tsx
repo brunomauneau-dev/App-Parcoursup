@@ -162,8 +162,13 @@ export function Lancement() {
             transform: [{ translateY: v.nom.interpolate({ inputRange: [0, 1], outputRange: [16, -6] }) }],
           }}
         >
-          <Text style={{ color: t.text, fontSize: 30, letterSpacing: -0.5, ...police('800') }}>Suivi Vœux</Text>
-          <Text style={{ color: t.textMuted, fontSize: 15, marginTop: 4, ...police('500') }}>Ton dossier, sans stress.</Text>
+          <Text style={{ color: t.text, fontSize: 30, letterSpacing: -0.5, ...police('800') }}>Parcours’app</Text>
+          <Text style={{ color: t.textMuted, fontSize: 15, marginTop: 4, ...police('500') }}>Votre dossier, sans stress.</Text>
+          <Text
+            style={{ color: t.textMuted, fontSize: 12, marginTop: 14, letterSpacing: 0.6, textTransform: 'uppercase', ...police('600') }}
+          >
+            Prototype non officiel
+          </Text>
         </Animated.View>
       </Pressable>
     </Animated.View>

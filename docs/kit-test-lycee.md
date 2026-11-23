@@ -1,6 +1,6 @@
 # Kit de test en lycée
 
-Faire essayer le prototype « Suivi Vœux » à des élèves de terminale, en 20 minutes, dans un cadre propre : accord de l'établissement, familles informées, aucune donnée personnelle.
+Faire essayer le prototype « Parcours’app » (non officiel) à des élèves de terminale, en 20 minutes, dans un cadre propre : accord de l'établissement, familles informées, aucune donnée personnelle.
 
 ## Avant la séance
 

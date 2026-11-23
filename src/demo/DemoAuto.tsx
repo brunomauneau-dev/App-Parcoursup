@@ -730,7 +730,7 @@ export function PresentationEcran({ children }: { children: ReactNode }) {
     >
       <View style={{ width: 380, gap: 18 }}>
         <Text style={{ color: '#005D84', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', ...police('700') }}>
-          Prototype · consultation seule
+          Parcours’app · prototype non officiel
         </Text>
         <Text style={{ color: '#181F2E', fontSize: 38, lineHeight: 44, ...police('800') }}>Suivre son dossier, sans stress.</Text>
         {demo.etape == null ? (

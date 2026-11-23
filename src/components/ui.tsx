@@ -13,7 +13,7 @@ export const URL_PARCOURSUP = 'https://www.parcoursup.gouv.fr';
 export function Logo({ taille = 40 }: { taille?: number }) {
   const t = useTheme();
   return (
-    <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Suivi Vœux">
+    <Svg width={taille} height={taille} viewBox="0 0 100 100" accessibilityLabel="Parcours’app">
       <Rect width="100" height="100" rx="24" fill={t.primary} />
       <Rect x="30" y="22" width="40" height="56" rx="8" fill="#FFFFFF" />
       <Rect x="38" y="34" width="24" height="5" rx="2.5" fill={t.accent} />
@@ -223,7 +223,7 @@ export function BandeauPrototype() {
           ...police('700'),
         }}
       >
-        Prototype · données fictives
+        Prototype non officiel · données fictives
       </Text>
     </View>
   );
@@ -304,7 +304,7 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
         >
           <Logo taille={38} />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Suivi Vœux · maintenant</Text>
+            <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Parcours’app · maintenant</Text>
             <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
               Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.
             </Text>

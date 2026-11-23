@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Suivi Vœux",
+    "name": "Parcours’app",
     "slug": "suivi-voeux",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -36,7 +36,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Suivi Vœux utilise Face ID, si vous l’activez, pour verrouiller l’accès à votre dossier."
+          "faceIDPermission": "Parcours’app utilise Face ID, si vous l’activez, pour verrouiller l’accès à votre dossier."
         }
       ],
       "expo-web-browser",

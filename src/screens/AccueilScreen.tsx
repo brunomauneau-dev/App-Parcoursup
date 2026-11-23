@@ -97,7 +97,7 @@ export function AccueilScreen(p: Props) {
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Logo taille={42} />
         <View style={{ flex: 1 }}>
-          <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Suivi Vœux</Text>
+          <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Parcours’app</Text>
           <Text style={{ color: t.textMuted, fontSize: 13, ...police('500') }}>Mon dossier candidat</Text>
         </View>
         <Pressable

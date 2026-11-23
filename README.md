@@ -1,4 +1,4 @@
-# Suivi Vœux
+# Parcours’app (prototype non officiel)
 
 Application mobile (iOS et Android) pour consulter son dossier Parcoursup pendant la phase d'admission :
 

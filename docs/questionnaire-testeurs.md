@@ -12,7 +12,7 @@ Le formulaire a **trois sections** : un tronc commun, une section pour ceux qui 
 
 ## Titre
 
-Avis sur le prototype « Suivi Vœux »
+Avis sur le prototype « Parcours’app »
 
 ## Description
 

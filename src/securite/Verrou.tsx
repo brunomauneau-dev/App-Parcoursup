@@ -88,7 +88,7 @@ export function VerrouProvider({ children }: { children: ReactNode }) {
 
   const activer = useCallback(async (oui: boolean) => {
     if (oui) {
-      if (!(await verifier('Activer le verrouillage de Suivi Vœux'))) return;
+      if (!(await verifier('Activer le verrouillage de Parcours’app'))) return;
       await SecureStore.setItemAsync(CLE, '1');
     } else {
       await SecureStore.deleteItemAsync(CLE).catch(() => {});
@@ -97,7 +97,7 @@ export function VerrouProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deverrouiller = useCallback(async () => {
-    if (await verifier('Déverrouiller Suivi Vœux')) setVerrouille(false);
+    if (await verifier('Déverrouiller Parcours’app')) setVerrouille(false);
   }, []);
 
   const afficherVerrou = actif && statut === 'connecte' && (verrouille || masque);
@@ -138,7 +138,7 @@ function EcranVerrou({ demander, onDeverrouiller }: { demander: boolean; onDever
       }}
     >
       <Logo taille={64} />
-      <Text style={{ color: t.text, fontSize: 20, textAlign: 'center', ...police('800') }}>Suivi Vœux est verrouillé</Text>
+      <Text style={{ color: t.text, fontSize: 20, textAlign: 'center', ...police('800') }}>Parcours’app est verrouillé</Text>
       <Text style={{ color: t.textMuted, textAlign: 'center', lineHeight: 20, ...police('400') }}>
         Votre dossier reste masqué tant que vous ne l’avez pas déverrouillé.
       </Text>
