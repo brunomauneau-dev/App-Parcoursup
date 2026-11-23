@@ -104,28 +104,16 @@ export function StatutBadge({ statut }: { statut: StatutVoeu }) {
 }
 
 /** Pastille de variation : « −16 depuis hier » (en vert, une position qui baisse est une bonne nouvelle). */
+/** Places gagnées : « ▲ 11 places depuis hier » (une flèche vers le haut, sans signe moins ambigu). */
 export function Variation({ valeur, suffixe = 'depuis hier', fond = true }: { valeur: number; suffixe?: string; fond?: boolean }) {
   const t = useTheme();
   if (valeur <= 0) return null;
   const style: TextStyle = { color: t.success, fontSize: 13, ...police('700') };
-  if (!fond)
-    return (
-      <Text style={style}>
-        −{valeur.toLocaleString('fr-FR')} {suffixe}
-      </Text>
-    );
+  const texte = `▲ ${valeur.toLocaleString('fr-FR')} place${valeur > 1 ? 's' : ''} ${suffixe}`;
+  if (!fond) return <Text style={style}>{texte}</Text>;
   return (
-    <View
-      style={{
-        backgroundColor: t.successBg,
-        borderRadius: 999,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-      }}
-    >
-      <Text style={style}>
-        −{valeur.toLocaleString('fr-FR')} {suffixe}
-      </Text>
+    <View style={{ backgroundColor: t.successBg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+      <Text style={style}>{texte}</Text>
     </View>
   );
 }

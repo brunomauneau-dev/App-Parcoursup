@@ -79,7 +79,8 @@ const ETAPES: Etape[] = [
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
-    legende: 'Ici, sa position : 119e sur les 410 candidats encore en attente. Chaque matin, la jauge bouge.',
+    legende:
+      'Ici, sa place : 119e. Il reste 118 candidats devant elle, et elle a déjà gagné 61 places depuis le début. La barre montre le chemin jusqu’à la 1re place.',
   },
   {
     jour: 4,

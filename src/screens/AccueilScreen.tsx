@@ -1,13 +1,13 @@
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import type { Dossier, Voeu } from '../api/types';
-import { Jauge } from '../components/Jauge';
 import { Cible } from '../demo/DemoAuto';
 import { BoutonAvis, Card, IconeOnglet, Logo, TitreSection, Variation } from '../components/ui';
 import { AVIS_ACTIF } from '../config';
-import { dateCourte, echeance, jourLong, ordinal, resteAvant } from '../format';
+import { dateCourte, echeance, jourLong, nombre, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
 import { police, useTheme } from '../theme';
 import { Droits } from '../components/Droits';
+import { BarreChemin, progression } from '../components/CheminProposition';
 import { Reglages } from '../reglages/Reglages';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
@@ -364,7 +364,6 @@ export function AccueilScreen(p: Props) {
           </Text>
           {attente.map((v, i) => {
             const d = variationVeille(v);
-            const ref = v.rangDernierAppeleAnneePrecedente;
             return (
               <Cible key={v.id} id={`accueil-attente-${i}`}>
                 <Card onPress={() => p.onOuvrir(v)} style={{ gap: 10 }}>
@@ -390,7 +389,7 @@ export function AccueilScreen(p: Props) {
                       </Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={{ color: t.textMuted, fontSize: 11.5, ...police('600') }}>Position</Text>
+                      <Text style={{ color: t.textMuted, fontSize: 11.5, ...police('600') }}>Votre place</Text>
                       <Text
                         style={{
                           color: t.text,
@@ -403,20 +402,12 @@ export function AccueilScreen(p: Props) {
                       {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
                     </View>
                   </View>
-                  {v.totalEnAttente != null && <Jauge rang={v.rang!} total={v.totalEnAttente} />}
-                  {ref != null && (
-                    <Text
-                      style={{
-                        color: t.textMuted,
-                        fontSize: 13,
-                        ...police('400'),
-                      }}
-                    >
-                      {v.rangClassement != null
-                        ? `Classement : ${ordinal(v.rangClassement)} · dernier appelé l’an dernier : ${ordinal(ref)}`
-                        : `Dernier appelé l’an dernier : ${ordinal(ref)} du classement`}
-                    </Text>
-                  )}
+                  {/* Le chemin parcouru vers la 1re place, et combien de candidats restent devant */}
+                  <BarreChemin part={progression(v.historique, v.rang!).part} epaisseur={8} />
+                  <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('400') }}>
+                    <Text style={{ color: t.text, ...police('700') }}>{nombre(Math.max(0, v.rang! - 1))}</Text>{' '}
+                    {v.rang! - 1 === 1 ? 'candidat devant vous' : 'candidats devant vous'}
+                  </Text>
                 </Card>
               </Cible>
             );

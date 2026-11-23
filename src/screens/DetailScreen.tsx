@@ -126,20 +126,21 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
 
   return (
     <>
-      {/* Position dans la liste d'attente : évolue chaque jour */}
+      {/* Position dans la liste d'attente : une seule carte, lisible — combien devant moi, et est-ce que ça avance */}
       <Card style={{ gap: 14, padding: 18 }}>
-        <Cible id="detail-jauge" style={{ gap: 14 }}>
-          <Text style={{ color: t.textMuted, fontSize: 14, ...police('600') }}>Position dans la liste d’attente</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Cible id="detail-jauge" style={{ gap: 12 }}>
+          <Text style={{ color: t.textMuted, fontSize: 14, ...police('600') }}>Votre place dans la liste d’attente</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <Text style={{ color: t.text, fontSize: 48, lineHeight: 52, ...police('800') }}>{ordinal(position)}</Text>
             {d != null && <Variation valeur={d} />}
           </View>
-          {voeu.totalEnAttente != null && <Jauge rang={position} total={voeu.totalEnAttente} grande />}
+          <Text style={{ color: t.text, fontSize: 16, lineHeight: 22, ...police('400') }}>
+            <Text style={police('800')}>{nombre(Math.max(0, position - 1))}</Text>{' '}
+            {position - 1 === 1 ? 'candidat est devant vous' : 'candidats sont devant vous'}
+            {voeu.totalEnAttente != null ? `, sur ${nombre(voeu.totalEnAttente)} encore en attente.` : '.'}
+          </Text>
         </Cible>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {voeu.totalEnAttente != null && <Chiffre valeur={nombre(voeu.totalEnAttente)} libelle="candidats encore en attente" />}
-          {voeu.places != null && <Chiffre valeur={nombre(voeu.places)} libelle="places dans la formation" />}
-        </View>
+        {voeu.historique && voeu.historique.length > 1 && <CheminProposition historique={voeu.historique} rang={position} />}
       </Card>
 
       {/* Rang de classement : fixe, seul comparable au rang du dernier appelé */}
@@ -191,41 +192,8 @@ function BlocAttente({ voeu }: { voeu: Voeu }) {
         </Card>
       )}
 
-      {voeu.historique && voeu.historique.length > 1 && (
-        <Card>
-          <CheminProposition historique={voeu.historique} />
-        </Card>
-      )}
-
       <BoutonRepondre label="Gérer ce vœu sur Parcoursup ↗" />
     </>
-  );
-}
-
-function Chiffre({ valeur, libelle }: { valeur: string; libelle: string }) {
-  const t = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: t.surfaceAlt,
-        borderRadius: 14,
-        padding: 12,
-        gap: 2,
-      }}
-    >
-      <Text style={{ color: t.text, fontSize: 19, ...police('800') }}>{valeur}</Text>
-      <Text
-        style={{
-          color: t.textMuted,
-          fontSize: 12.5,
-          lineHeight: 16,
-          ...police('400'),
-        }}
-      >
-        {libelle}
-      </Text>
-    </View>
   );
 }
 
