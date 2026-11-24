@@ -52,8 +52,15 @@ const ETAPES: Etape[] = [
   {
     route: '/connexion',
     cible: 'connexion-demo',
-    legende: 'Voici Camille, en terminale comme toi. C’est la phase d’admission, et elle suit son dossier depuis son téléphone. Suis-la !',
+    legende: 'Voici Camille, en terminale comme toi. Elle suit son dossier Parcoursup depuis son téléphone. Suis-la !',
     toucher: true,
+  },
+  {
+    jour: -2,
+    route: '/dossier',
+    cible: 'accueil-carte',
+    legende:
+      'Mi-mai, elle a téléchargé l’appli et lié son compte en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille.',
   },
   {
     jour: -1,

@@ -199,6 +199,9 @@ components:
         voeux:
           type: array
           items: { $ref: '#/components/schemas/Voeu' }
+        avantPhase:
+          type: boolean
+          description: Compte lié avant le début de la phase d'admission (application en veille). `voeux` est vide.
         resultatsAttendus:
           type: boolean
           description: |

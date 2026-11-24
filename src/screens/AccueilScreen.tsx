@@ -10,6 +10,7 @@ import { Droits } from '../components/Droits';
 import { COULEUR_DEVANT } from '../components/CheminProposition';
 import { Jauge } from '../components/Jauge';
 import { Reglages } from '../reglages/Reglages';
+import { useNotificationsActives } from '../notifications/preference';
 
 export type Filtre = 'tous' | 'propositions' | 'attente' | 'refusees';
 
@@ -151,7 +152,9 @@ export function AccueilScreen(p: Props) {
 
       {/* Salutation */}
       <View style={{ gap: 2, marginTop: 4 }}>
-        <Text style={{ color: t.textMuted, fontSize: 14, ...police('500') }}>{jourLong(maintenant)} · Phase principale d’admission</Text>
+        <Text style={{ color: t.textMuted, fontSize: 14, ...police('500') }}>
+          {jourLong(maintenant)} · {dossier.avantPhase ? 'Avant la phase d’admission' : 'Phase principale d’admission'}
+        </Text>
         <Text style={{ color: t.text, fontSize: 30, ...police('800') }}>Bonjour {dossier.prenom}</Text>
       </View>
 
@@ -206,7 +209,11 @@ export function AccueilScreen(p: Props) {
         </View>
       )}
 
-      {dossier.resultatsAttendus ? (
+      {dossier.avantPhase ? (
+        <Cible id="accueil-carte">
+          <Veille dossier={dossier} maintenant={maintenant} />
+        </Cible>
+      ) : dossier.resultatsAttendus ? (
         <Cible id="accueil-carte">
           <AttenteResultats />
         </Cible>
@@ -593,7 +600,11 @@ export function AccueilScreen(p: Props) {
             })}
           >
             <Text style={{ color: t.text, ...police('700') }}>
-              {dossier.resultatsAttendus ? 'Simuler l’ouverture des résultats' : 'Passer au lendemain matin'}
+              {dossier.avantPhase
+                ? 'Passer au 1er juin au matin'
+                : dossier.resultatsAttendus
+                  ? 'Simuler l’ouverture des résultats'
+                  : 'Passer au lendemain matin'}
             </Text>
           </Pressable>
           {p.onAffluence && (
@@ -757,6 +768,62 @@ function AttenteResultats() {
       <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13.5, lineHeight: 19, ...police('400') }}>
         L’ouverture se fait progressivement : certains voient leurs résultats quelques minutes avant d’autres. Cela ne dit rien des vôtres.
       </Text>
+    </View>
+  );
+}
+
+/**
+ * Compte lié avant la phase d'admission : l'appli est en veille. Rien à faire, sinon
+ * vérifier en une fois ce qui permettra d'être prévenu le jour J. Pas de compte à rebours
+ * appuyé : la date suffit.
+ */
+function Veille({ dossier, maintenant }: { dossier: Dossier; maintenant: Date }) {
+  const t = useTheme();
+  const notifications = useNotificationsActives();
+  const debut = dossier.calendrier[0] ? new Date(dossier.calendrier[0].date) : null;
+  const jours = debut ? Math.max(0, Math.ceil((debut.getTime() - maintenant.getTime()) / 86_400_000)) : null;
+  const points: { fait: boolean; titre: string; texte: string }[] = [
+    { fait: true, titre: 'Compte lié', texte: 'Vous n’aurez plus à vous connecter sur ce téléphone.' },
+    {
+      fait: notifications,
+      titre: notifications ? 'Notifications activées' : 'Notifications désactivées',
+      texte: notifications
+        ? 'Vous serez prévenu(e) dès que vos résultats arrivent.'
+        : 'Activez-les dans les réglages, plus bas, pour être prévenu(e) le jour J.',
+    },
+  ];
+  if (dossier.coordonnees) {
+    points.push({
+      fait: false,
+      titre: 'Vos alertes Parcoursup',
+      texte: `SMS et mails partent vers ${dossier.coordonnees.mail} et le ${dossier.coordonnees.telephone}. Si c’est faux, corrigez-les sur le site.`,
+    });
+  }
+  return (
+    <View style={{ gap: 14 }}>
+      <View style={{ backgroundColor: t.primaryDark, borderRadius: 24, padding: 22, gap: 14 }}>
+        <Etiquette texte="Compte lié ✓" />
+        <Text style={{ color: '#FFFFFF', fontSize: 27, lineHeight: 31, ...police('800') }}>Vous êtes prêt(e) pour le 1er juin.</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+          La phase d’admission commence le mardi 1er juin{jours != null && jours > 1 ? `, dans ${jours} jours` : ''}. D’ici là, rien à faire
+          : l’appli vous préviendra le jour même.
+        </Text>
+      </View>
+      <Card>
+        <View style={{ gap: 12 }}>
+          <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>Avant le jour J</Text>
+          {points.map((pt) => (
+            <View key={pt.titre} style={{ flexDirection: 'row', gap: 10 }}>
+              <Text style={{ color: pt.fait ? t.successDot : t.textMuted, fontSize: 16, ...police('800') }}>{pt.fait ? '✓' : '•'}</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ color: t.text, ...police('700') }}>{pt.titre}</Text>
+                <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>{pt.texte}</Text>
+              </View>
+            </View>
+          ))}
+          {dossier.coordonnees && <LienExterne label="Vérifier sur Parcoursup ↗" url={URL_PARCOURSUP} />}
+        </View>
+      </Card>
     </View>
   );
 }

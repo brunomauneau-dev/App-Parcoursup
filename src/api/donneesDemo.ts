@@ -22,6 +22,11 @@ function dateDuJour(jour: number, h = 0, m = 0): Date {
   return d;
 }
 
+/** Avant la phase (mardi 18 mai, 18h) : compte lié en avance. */
+export function maintenantVeille(debut: number): Date {
+  return new Date(dateDuJour(-14, 18, 0).getTime() + (Date.now() - debut));
+}
+
 /** Premier jour, avant l'ouverture des résultats : 8h30 + temps réel écoulé. */
 export function maintenantAvantOuverture(debut: number): Date {
   return new Date(dateDuJour(0, 8, 30).getTime() + (Date.now() - debut));
@@ -450,6 +455,23 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
     // Calendrier officiel 2027 : classement des vœux en attente du vendredi 4 au lundi 7 juin inclus
     classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString(), fait: false },
     profilDemo: { id: profil.id, presentation: profil.presentation },
+  };
+}
+
+/**
+ * Compte lié avant le début de la phase : l'application est en veille.
+ * Aucun vœu ni message, seulement le calendrier.
+ */
+export function construireDossierVeille(debut: number, idProfil = PROFIL_PAR_DEFAUT): Dossier {
+  const d = construireDossier(0, debut, undefined, idProfil);
+  return {
+    ...d,
+    avantPhase: true,
+    voeux: [],
+    messages: [],
+    derniereMiseAJour: dateDuJour(-14, 0).toISOString(),
+    dateServeur: maintenantVeille(debut).toISOString(),
+    calendrier: [{ date: dateDuJour(0, 0).toISOString(), libelle: 'Début de la phase d’admission : vos premiers résultats' }, ...d.calendrier],
   };
 }
 

@@ -22,7 +22,7 @@ type Etape = 0 | 1 | 2 | 3 | 4;
 export function ConnexionSimuleeScreen() {
   const t = useTheme();
   const router = useRouter();
-  const { connexion } = useSession();
+  const { connexion, definirJour } = useSession();
   const [etape, setEtape] = useState<Etape>(0);
   const [code, setCode] = useState('');
   const [chargement, setChargement] = useState(false);
@@ -42,6 +42,8 @@ export function ConnexionSimuleeScreen() {
   const ouvrirDossier = async () => {
     setChargement(true);
     await connexion();
+    // Démonstration : le compte est lié en avance, avant le début de la phase d'admission
+    await definirJour?.(-2);
     router.replace('/dossier');
   };
 

@@ -182,9 +182,11 @@ export function VoeuxScreen({
             ...police('400'),
           }}
         >
-          {dossier.resultatsAttendus
-            ? 'Vos résultats arrivent aujourd’hui, à l’ouverture du site. Une notification vous préviendra.'
-            : 'Aucun vœu dans cette catégorie.'}
+          {dossier.avantPhase
+            ? 'La phase d’admission commence le mardi 1er juin. Vos résultats s’afficheront ici.'
+            : dossier.resultatsAttendus
+              ? 'Vos résultats arrivent aujourd’hui, à l’ouverture du site. Une notification vous préviendra.'
+              : 'Aucun vœu dans cette catégorie.'}
         </Text>
       )}
     </ScrollView>

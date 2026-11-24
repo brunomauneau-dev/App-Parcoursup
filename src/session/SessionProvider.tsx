@@ -62,6 +62,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [texteNotification, setTexteNotification] = useState(MESSAGE_MISE_A_JOUR);
   const recupereLeRef = useRef<number | null>(null);
   const attenteRef = useRef(false);
+  const veilleRef = useRef(false);
 
   const reinitialiser = useCallback(() => {
     setDossier(null);
@@ -77,6 +78,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const d = await api.getDossier();
       setDossier(d);
       attenteRef.current = d.resultatsAttendus === true;
+      veilleRef.current = d.avantPhase === true;
       setDecalage(new Date(d.dateServeur).getTime() - Date.now());
       const maintenant = Date.now();
       setRecupereLe(maintenant);
@@ -141,7 +143,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const simulerNuit = useCallback(
     async (options?: { notificationSysteme?: boolean }) => {
       const ouverture = attenteRef.current;
+      const finVeille = veilleRef.current;
       if (await api.simulerNuit?.()) {
+        // Fin de la veille : premier matin, les résultats ne sont pas encore là. Pas de notification.
+        if (finVeille) {
+          await charger();
+          return;
+        }
         // Notifications désactivées dans les réglages : le dossier se met à jour sans prévenir.
         if (!notificationsActives() && options?.notificationSysteme !== false) {
           await charger();

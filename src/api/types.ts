@@ -60,6 +60,11 @@ export interface Dossier {
    * jamais un résultat avant le site.
    */
   resultatsAttendus?: boolean;
+  /**
+   * Compte lié avant le début de la phase d'admission (application téléchargée en avance) :
+   * pas encore de résultats, l'application est « en veille » jusqu'au premier jour.
+   */
+  avantPhase?: boolean;
   /** Messages du dossier, du plus récent au plus ancien */
   messages: Message[];
   /** Dates générales de la phase d'admission (identiques pour tous les candidats) */
@@ -111,7 +116,7 @@ export interface DossierApi {
   simulerNuit?(): Promise<boolean>;
   /**
    * Démonstration uniquement : place le dossier à un jour donné de la phase simulée.
-   * Un jour négatif : premier matin, avant l'ouverture des résultats.
+   * -2 : compte lié avant la phase (veille) ; -1 : premier matin, avant l'ouverture des résultats.
    */
   definirJour?(jour: number): Promise<void>;
   /** Démonstration uniquement : choisit le dossier fictif affiché. */
