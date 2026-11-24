@@ -18,6 +18,10 @@ interface Props {
   maintenant: Date;
   rafraichissement: boolean;
   erreur?: string | null;
+  /** Service saturé : on garde le dossier du matin et on rassure */
+  affluence?: boolean;
+  /** Démonstration uniquement : simuler une forte affluence */
+  onAffluence?: () => void;
   onRefresh: () => void;
   onOuvrir: (v: Voeu) => void;
   onVoirVoeux: (f: Filtre) => void;
@@ -169,6 +173,19 @@ export function AccueilScreen(p: Props) {
           <Pressable onPress={p.onChangerProfil} accessibilityRole="button" hitSlop={8}>
             <Text style={{ color: t.primary, fontSize: 13.5, ...police('700') }}>Voir un autre dossier ›</Text>
           </Pressable>
+        </View>
+      )}
+
+      {p.affluence && (
+        <View accessibilityRole="alert" style={{ backgroundColor: t.info, borderRadius: 16, padding: 14, gap: 4 }}>
+          <Text style={{ color: t.text, ...police('700') }}>Beaucoup de monde ce matin</Text>
+          <Text style={{ color: t.text, fontSize: 14, lineHeight: 20, ...police('400') }}>
+            Le service est très sollicité. Vos informations de ce matin restent affichées et valables :
+            l’appli se remettra à jour toute seule, inutile de réessayer.
+          </Text>
+          <Text style={{ color: t.textMuted, fontSize: 13, lineHeight: 18, ...police('400') }}>
+            Si le site Parcoursup passe momentanément en consultation seule, les réponses aux propositions reprendront dès sa réouverture.
+          </Text>
         </View>
       )}
 
@@ -551,6 +568,25 @@ export function AccueilScreen(p: Props) {
           >
             <Text style={{ color: t.text, ...police('700') }}>Passer au lendemain matin</Text>
           </Pressable>
+          {p.onAffluence && (
+            <Pressable
+              onPress={p.onAffluence}
+              accessibilityRole="button"
+              style={({ pressed }) => ({
+                borderRadius: 16,
+                borderWidth: 1.5,
+                borderStyle: 'dashed',
+                borderColor: t.textMuted,
+                padding: 14,
+                alignItems: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ color: t.text, ...police('700') }}>
+                {p.affluence ? 'Revenir à la normale' : 'Simuler une forte affluence'}
+              </Text>
+            </Pressable>
+          )}
           {notificationsSysteme && (
             <Text
               style={{

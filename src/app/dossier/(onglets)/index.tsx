@@ -13,6 +13,8 @@ export default function Accueil() {
       maintenant={maintenant}
       rafraichissement={s.rafraichissement}
       erreur={s.erreur}
+      affluence={s.affluence}
+      onAffluence={s.basculerAffluence}
       onRefresh={s.rafraichir}
       onOuvrir={(v) => router.push({ pathname: '/dossier/[id]', params: { id: v.id } })}
       onVoirVoeux={(filtre) => router.navigate({ pathname: '/dossier/voeux', params: { filtre } })}

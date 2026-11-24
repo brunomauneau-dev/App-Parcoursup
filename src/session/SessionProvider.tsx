@@ -17,6 +17,10 @@ interface Session {
   /** Erreur du dernier rafraîchissement ; le dernier dossier connu reste affiché */
   erreur: string | null;
   rafraichissement: boolean;
+  /** Service saturé : le dossier gardé sur le téléphone reste affiché, avec un message rassurant */
+  affluence: boolean;
+  /** Démonstration uniquement : simule une forte affluence (ou y met fin). */
+  basculerAffluence?: () => void;
   /** Écart entre l'horloge du serveur et celle du téléphone (ms) */
   decalageHorloge: number;
   notification: boolean;
@@ -52,6 +56,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [recupereLe, setRecupereLe] = useState<number | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [rafraichissement, setRafraichissement] = useState(false);
+  const [affluence, setAffluence] = useState(false);
   const [decalageHorloge, setDecalage] = useState(0);
   const [notification, setNotification] = useState(false);
   const [texteNotification, setTexteNotification] = useState(MESSAGE_MISE_A_JOUR);
@@ -62,6 +67,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setRecupereLe(null);
     recupereLeRef.current = null;
     setErreur(null);
+    setAffluence(false);
     setStatut('deconnecte');
   }, []);
 
@@ -74,11 +80,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setRecupereLe(maintenant);
       recupereLeRef.current = maintenant;
       setErreur(null);
+      setAffluence(false);
       setStatut('connecte');
       return d;
     } catch (e) {
       if (e instanceof ApiError && e.type === 'session_expiree') {
         reinitialiser();
+        return null;
+      }
+      // Service saturé : pas d'alerte rouge, le dossier du matin reste valable
+      if (e instanceof ApiError && e.type === 'indisponible') {
+        setAffluence(true);
+        setStatut('connecte');
         return null;
       }
       setErreur(messageErreur(e));
@@ -144,6 +157,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [charger],
   );
 
+  const basculerAffluence = useCallback(() => setAffluence((a) => !a), []);
   const fermerNotification = useCallback(() => setNotification(false), []);
   const montrerNotification = useCallback(() => {
     setTexteNotification(MESSAGE_MISE_A_JOUR);
@@ -172,6 +186,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         recupereLe,
         erreur,
         rafraichissement,
+        affluence,
+        basculerAffluence: modeDemo ? basculerAffluence : undefined,
         decalageHorloge,
         notification,
         texteNotification,
