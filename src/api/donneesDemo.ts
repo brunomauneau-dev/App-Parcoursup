@@ -436,7 +436,7 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
       { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale' },
     ],
     // Calendrier officiel 2027 : classement des vœux en attente du vendredi 4 au lundi 7 juin inclus
-    classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString() },
+    classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString(), fait: false },
     profilDemo: { id: profil.id, presentation: profil.presentation },
   };
 }

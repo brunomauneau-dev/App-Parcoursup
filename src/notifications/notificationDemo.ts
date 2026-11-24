@@ -60,7 +60,7 @@ async function autorisation(): Promise<boolean> {
  * Programme la notification « dossier mis à jour » dans quelques secondes,
  * le temps de verrouiller l'écran. Renvoie false si l'utilisateur a refusé.
  */
-export async function programmerNotificationDemo(): Promise<boolean> {
+export async function programmerNotificationDemo(texte: string): Promise<boolean> {
   if (!natif) return false;
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CANAL, {
@@ -72,7 +72,7 @@ export async function programmerNotificationDemo(): Promise<boolean> {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'Parcours’app',
-      body: 'Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.',
+      body: texte,
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,

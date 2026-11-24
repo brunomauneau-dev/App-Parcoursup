@@ -205,6 +205,7 @@ components:
           properties:
             debut: { type: string, format: date-time }
             fin: { type: string, format: date-time }
+            fait: { type: boolean, description: Vrai si le candidat a déjà classé ses vœux (plus de rappel) }
 
     Voeu:
       type: object

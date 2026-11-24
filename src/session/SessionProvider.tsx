@@ -5,6 +5,7 @@ import { ApiError, messageErreur } from '../api/erreurs';
 import type { Dossier } from '../api/types';
 import { programmerNotificationDemo } from '../notifications/notificationDemo';
 import { notificationsActives, reinitialiserNotifications } from '../notifications/preference';
+import { MESSAGE_MISE_A_JOUR, messageDuMatin } from '../notifications/messages';
 
 type Statut = 'demarrage' | 'deconnecte' | 'connecte';
 
@@ -19,6 +20,8 @@ interface Session {
   /** Écart entre l'horloge du serveur et celle du téléphone (ms) */
   decalageHorloge: number;
   notification: boolean;
+  /** Texte de la notification affichée */
+  texteNotification: string;
   fermerNotification: () => void;
   connexion: () => Promise<void>;
   deconnexion: () => Promise<void>;
@@ -51,6 +54,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [rafraichissement, setRafraichissement] = useState(false);
   const [decalageHorloge, setDecalage] = useState(0);
   const [notification, setNotification] = useState(false);
+  const [texteNotification, setTexteNotification] = useState(MESSAGE_MISE_A_JOUR);
   const recupereLeRef = useRef<number | null>(null);
 
   const reinitialiser = useCallback(() => {
@@ -61,7 +65,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setStatut('deconnecte');
   }, []);
 
-  const charger = useCallback(async () => {
+  const charger = useCallback(async (): Promise<Dossier | null> => {
     try {
       const d = await api.getDossier();
       setDossier(d);
@@ -71,13 +75,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       recupereLeRef.current = maintenant;
       setErreur(null);
       setStatut('connecte');
+      return d;
     } catch (e) {
       if (e instanceof ApiError && e.type === 'session_expiree') {
         reinitialiser();
-        return;
+        return null;
       }
       setErreur(messageErreur(e));
       setStatut('connecte');
+      return null;
     }
   }, [reinitialiser]);
 
@@ -125,10 +131,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           await charger();
           return;
         }
+        // Le message dépend du jour : rappel du classement des vœux en attente, ou mise à jour du dossier.
+        const d = await charger();
+        const texte = d ? messageDuMatin(d, new Date(d.dateServeur)) : MESSAGE_MISE_A_JOUR;
+        setTexteNotification(texte);
         // Sur téléphone : vraie notification système dans quelques secondes.
         // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
-        const systeme = options?.notificationSysteme === false ? false : await programmerNotificationDemo().catch(() => false);
-        await charger();
+        const systeme = options?.notificationSysteme === false ? false : await programmerNotificationDemo(texte).catch(() => false);
         if (!systeme) setNotification(true);
       }
     },
@@ -136,7 +145,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const fermerNotification = useCallback(() => setNotification(false), []);
-  const montrerNotification = useCallback(() => setNotification(true), []);
+  const montrerNotification = useCallback(() => {
+    setTexteNotification(MESSAGE_MISE_A_JOUR);
+    setNotification(true);
+  }, []);
   const definirProfil = useCallback(async (id: string) => {
     await api.definirProfil?.(id);
   }, []);
@@ -162,6 +174,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         rafraichissement,
         decalageHorloge,
         notification,
+        texteNotification,
         fermerNotification,
         montrerNotification,
         definirProfil: modeDemo && api.definirProfil ? definirProfil : undefined,

@@ -288,8 +288,8 @@ export function TitreSection({ titre, aDroite }: { titre: string; aDroite?: stri
   );
 }
 
-/** Imitation d'une notification push (sans aucune donnée personnelle). */
-export function Notification({ visible, onClose, top }: { visible: boolean; onClose: () => void; top: number }) {
+/** Imitation d'une notification push (sans aucune donnée personnelle ; texte fourni par la session). */
+export function Notification({ visible, texte, onClose, top }: { visible: boolean; texte: string; onClose: () => void; top: number }) {
   const t = useTheme();
   const [anim] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -345,9 +345,7 @@ export function Notification({ visible, onClose, top }: { visible: boolean; onCl
           <Logo taille={38} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.text, fontSize: 14, ...police('700') }}>Parcours’app · maintenant</Text>
-            <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>
-              Votre dossier a été mis à jour. Ouvrez l’application pour le consulter.
-            </Text>
+            <Text style={{ color: t.textMuted, fontSize: 14, ...police('400') }}>{texte}</Text>
           </View>
         </Pressable>
       </Cible>
