@@ -33,8 +33,11 @@ export const MESSAGE_OUVERTURE = 'Les résultats de la phase d’admission sont 
 
 /** Nouvelle proposition (texte générique : rien de personnel sur l'écran verrouillé). */
 export const MESSAGE_NOUVEAUTE = 'Du nouveau dans votre dossier. Ouvrez l’application pour le consulter.';
-/** Veille d'une date limite de réponse. */
-export const MESSAGE_DATE_LIMITE = 'Une date limite de réponse approche : demain, 23h59. Ouvrez l’application pour voir laquelle.';
+/**
+ * Veille d'une date limite de réponse. Formulation neutre (« une échéance ») : sur l'écran verrouillé,
+ * elle ne dit pas qu'il s'agit d'une proposition, mais garde l'essentiel, l'urgence.
+ */
+export const MESSAGE_DATE_LIMITE = 'Une échéance arrive demain dans votre dossier. Ouvrez l’application pour la voir.';
 
 /**
  * Notification du matin, seulement quand il y a quelque chose à faire ou à voir (infobésité) :
