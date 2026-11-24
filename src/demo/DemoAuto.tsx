@@ -8,8 +8,6 @@ import { useSession } from '../session/SessionProvider';
 import { MENTION_DROITS } from '../components/Droits';
 import { MESSAGE_OUVERTURE } from '../notifications/messages';
 import { police } from '../theme';
-import Svg, { Path } from 'react-native-svg';
-import { FLECHE } from '../components/ui';
 
 /**
  * Visite guidée : une semaine de phase d'admission, au rythme de l'utilisateur.
@@ -453,21 +451,6 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
 // --- Calque dans l'écran de l'application : voile, halo, toucher ----------
 
 const VOILE = 'rgba(12,18,32,0.6)';
-
-/**
- * Habillage du cadre de la visite, à comparer (adresse ?habillage=…) :
- * arc  : cadre aux couleurs de l'ouverture qui défilent doucement, avec un halo ;
- * fleche : la flèche du logo, qui rebondit vers l'élément ;
- * onde : ondes qui partent du cadre ;
- * combo : arc + flèche. Sans paramètre : cadre blanc actuel.
- */
-type Habillage = 'classique' | 'arc' | 'fleche' | 'onde' | 'combo';
-const HABILLAGE: Habillage = (() => {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return 'classique';
-  const h = new URLSearchParams(window.location.search).get('habillage');
-  return h === 'arc' || h === 'fleche' || h === 'onde' || h === 'combo' ? h : 'classique';
-})();
-const COULEURS_ARC = ['#FF7A59', '#FFC93C', '#3DDC97', '#7CD3FF', '#B79CFF', '#FF7A59'];
 const MARGE = 6;
 
 /** À placer en dernier enfant de l'écran de l'application. */
@@ -577,32 +560,6 @@ function Voile({ demo, W, H }: { demo: EtatDemo; W: number; H: number }) {
     return () => boucle.stop();
   }, [pulsation]);
 
-  // Habillages : défilement des couleurs, rebond de la flèche, ondes
-  const [cycle] = useState(() => new Animated.Value(0));
-  const [rebond] = useState(() => new Animated.Value(0));
-  const [onde] = useState(() => new Animated.Value(0));
-  useEffect(() => {
-    if (HABILLAGE === 'classique') return;
-    const boucles = [
-      Animated.loop(Animated.timing(cycle, { toValue: 5, duration: 6000, easing: Easing.linear, useNativeDriver: false })),
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(rebond, { toValue: 1, duration: 450, easing: Easing.out(Easing.quad), useNativeDriver: false }),
-          Animated.timing(rebond, { toValue: 0, duration: 450, easing: Easing.in(Easing.quad), useNativeDriver: false }),
-        ]),
-      ),
-      Animated.loop(Animated.timing(onde, { toValue: 1, duration: 1600, easing: Easing.out(Easing.quad), useNativeDriver: false })),
-    ];
-    boucles.forEach((b) => b.start());
-    return () => boucles.forEach((b) => b.stop());
-  }, [cycle, rebond, onde]);
-  const arc = HABILLAGE === 'arc' || HABILLAGE === 'combo';
-  const avecFleche = HABILLAGE === 'fleche' || HABILLAGE === 'combo';
-  const couleurArc = cycle.interpolate({ inputRange: [0, 1, 2, 3, 4, 5], outputRange: COULEURS_ARC });
-  // Flèche : au-dessus de l'élément (pointe vers le bas), ou dessous s'il touche le haut de l'écran.
-  // (La bulle de légende occupe souvent le bas de l'écran.)
-  const flecheDessous = rect ? rect.y - MARGE - 74 < 40 : false;
-
   const [appui] = useState(() => new Animated.Value(0));
   useEffect(() => {
     appui.setValue(0);
@@ -631,78 +588,11 @@ function Voile({ demo, W, H }: { demo: EtatDemo; W: number; H: number }) {
           width: pos.w,
           height: pos.h,
           borderRadius: 18,
-          borderWidth: arc ? 4 : 3,
+          borderWidth: 3,
           opacity: pos.w.interpolate({ inputRange: [0, 16], outputRange: [0, 1], extrapolate: 'clamp' }),
-          borderColor: arc
-            ? couleurArc
-            : pulsation.interpolate({ inputRange: [0, 1], outputRange: ['rgba(255,255,255,0.95)', 'rgba(159,211,236,0.95)'] }),
-          ...(arc ? { shadowColor: couleurArc, shadowOpacity: 0.9, shadowRadius: 16, shadowOffset: { width: 0, height: 0 } } : null),
+          borderColor: pulsation.interpolate({ inputRange: [0, 1], outputRange: ['rgba(255,255,255,0.95)', 'rgba(159,211,236,0.95)'] }),
         }}
       />
-      {/* Halo coloré autour du cadre (habillage arc) */}
-      {arc && rect && !transition && (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: Animated.subtract(pos.x, 5),
-            top: Animated.subtract(pos.y, 5),
-            width: Animated.add(pos.w, 10),
-            height: Animated.add(pos.h, 10),
-            borderRadius: 23,
-            borderWidth: 5,
-            borderColor: couleurArc,
-            opacity: 0.35,
-          }}
-        />
-      )}
-      {/* Ondes qui partent du cadre */}
-      {HABILLAGE === 'onde' &&
-        rect &&
-        !transition &&
-        [0, 0.5].map((decalage) => {
-          const s = Animated.modulo(Animated.add(onde, decalage), 1);
-          const ecart = Animated.multiply(s, 22);
-          return (
-            <Animated.View
-              key={decalage}
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                left: Animated.subtract(pos.x, ecart),
-                top: Animated.subtract(pos.y, ecart),
-                width: Animated.add(pos.w, Animated.multiply(ecart, 2)),
-                height: Animated.add(pos.h, Animated.multiply(ecart, 2)),
-                borderRadius: 24,
-                borderWidth: 2.5,
-                borderColor: '#FFC93C',
-                opacity: s.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0] }),
-              }}
-            />
-          );
-        })}
-      {/* La flèche du logo, qui rebondit vers l'élément */}
-      {avecFleche && rect && !transition && (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: Math.min(Math.max(8, rect.x + rect.w * 0.7 - 32), W - 72),
-            top: flecheDessous ? rect.y + rect.h + MARGE + 4 : rect.y - MARGE - 68,
-            width: 64,
-            height: 64,
-            transform: [
-              { translateY: rebond.interpolate({ inputRange: [0, 1], outputRange: flecheDessous ? [6, -2] : [-6, 2] }) },
-              { rotate: flecheDessous ? '-45deg' : '135deg' },
-            ],
-          }}
-        >
-          <Svg width={64} height={64} viewBox="0 0 100 100">
-            <Path d={FLECHE} stroke="#FFFFFF" strokeWidth={20} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            <Path d={FLECHE} stroke="#FF7A59" strokeWidth={11} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          </Svg>
-        </Animated.View>
-      )}
       {/* Toucher n'importe où (y compris sur l'élément mis en lumière) : étape suivante */}
       {!derniere && (
         <Pressable
