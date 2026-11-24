@@ -100,7 +100,7 @@ const ETAPES: Etape[] = [
   {
     jour: 5,
     route: '/dossier',
-    cible: 'accueil-carte',
+    cible: 'notification',
     notification: true,
     legende:
       'Dimanche matin, une notif : des places se sont libérées en BUT GEII ! Elle avait accepté la licence de maths en gardant ses vœux en attente, et ça paie.',
@@ -133,6 +133,8 @@ type Ecran = { ox: number; oy: number; w: number; h: number };
 interface EtatDemo {
   lancer: () => void;
   arreter: () => void;
+  /** Termine la démo et laisse explorer, depuis l'accueil du dossier */
+  explorer: () => void;
   /** Termine la démo et ouvre le questionnaire */
   donnerAvis: () => void;
   /** Va directement à une étape */
@@ -405,6 +407,10 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
   const valeur: EtatDemo = {
     lancer,
     arreter,
+    explorer: () => {
+      arreter();
+      ctx.current.router.navigate('/dossier');
+    },
     donnerAvis: () => {
       arreter();
       ctx.current.router.push('/avis');
@@ -723,7 +729,7 @@ function ContenuLegende({ demo, grand = false }: { demo: EtatDemo; grand?: boole
             principal
           />
           <View style={{ flex: 1 }} />
-          <Pressable onPress={demo.arreter} accessibilityRole="button" hitSlop={8}>
+          <Pressable onPress={derniere ? demo.explorer : demo.arreter} accessibilityRole="button" hitSlop={8}>
             <Text
               style={{
                 color: derniere ? '#FFFFFF' : 'rgba(255,255,255,0.75)',
