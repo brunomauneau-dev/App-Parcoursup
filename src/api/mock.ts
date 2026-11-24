@@ -1,4 +1,11 @@
-import { construireDossier, construireDossierAvantOuverture, construireDossierVeille, JOUR_INITIAL, JOUR_MAX, PROFILS_DEMO } from './donneesDemo';
+import {
+  construireDossier,
+  construireDossierAvantOuverture,
+  construireDossierVeille,
+  JOUR_INITIAL,
+  JOUR_MAX,
+  PROFILS_DEMO,
+} from './donneesDemo';
 import { ApiError } from './erreurs';
 import type { Dossier, DossierApi } from './types';
 

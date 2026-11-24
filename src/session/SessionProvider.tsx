@@ -66,6 +66,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const recupereLeRef = useRef<number | null>(null);
   const attenteRef = useRef(false);
   const veilleRef = useRef(false);
+  const dossierRef = useRef<Dossier | null>(null);
 
   const reinitialiser = useCallback(() => {
     setDossier(null);
@@ -80,6 +81,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       const d = await api.getDossier();
       setDossier(d);
+      dossierRef.current = d;
       attenteRef.current = d.resultatsAttendus === true;
       veilleRef.current = d.avantPhase === true;
       setDecalage(new Date(d.dateServeur).getTime() - Date.now());
@@ -147,6 +149,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     async (options?: { notificationSysteme?: boolean }) => {
       const ouverture = attenteRef.current;
       const finVeille = veilleRef.current;
+      const avant = dossierRef.current;
       if (await api.simulerNuit?.()) {
         // Fin de la veille : premier matin, les résultats ne sont pas encore là. Pas de notification.
         if (finVeille) {
@@ -158,9 +161,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           await charger();
           return;
         }
-        // Le message dépend du jour : rappel du classement des vœux en attente, ou mise à jour du dossier.
+        // Une notification seulement s'il y a quelque chose à faire ou à voir (pas pour un simple mouvement de liste)
         const d = await charger();
-        const texte = d ? messageDuMatin(d, new Date(d.dateServeur), ouverture) : MESSAGE_MISE_A_JOUR;
+        const texte = d ? messageDuMatin(avant, d, new Date(d.dateServeur), ouverture) : null;
+        if (!texte) return;
         setTexteNotification(texte);
         // Sur téléphone : vraie notification système dans quelques secondes.
         // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.

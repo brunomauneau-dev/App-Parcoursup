@@ -1,7 +1,7 @@
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import type { Dossier, EtapeCalendrier, Voeu } from '../api/types';
 import { Cible } from '../demo/DemoAuto';
-import { BoutonAvis, Card, IconeOnglet, LienExterne, Logo, TitreSection, URL_PARCOURSUP, Variation } from '../components/ui';
+import { BoutonAvis, Card, IconeOnglet, LienExterne, Logo, TitreSection, URL_PARCOURSUP } from '../components/ui';
 import { AVIS_ACTIF } from '../config';
 import { dateCourte, echeance, jourLong, nombre, ordinal, resteAvant } from '../format';
 import { DELAI_NOTIFICATION_S, notificationsSysteme } from '../notifications/notificationDemo';
@@ -86,6 +86,12 @@ export function AccueilScreen(p: Props) {
         v.rangDernierAppeleAnneePrecedente != null &&
         v.rangClassement > 1.5 * v.rangDernierAppeleAnneePrecedente,
     );
+
+  // Un seul conseil, choisi selon la situation du jour
+  const conseil =
+    BON_A_SAVOIR.find((b) => b.pour === 'proposition' && aRepondre.length > 0) ??
+    BON_A_SAVOIR.find((b) => b.pour === 'attente' && attente.length > 0) ??
+    BON_A_SAVOIR.find((b) => b.pour == null);
 
   const dates = (
     [
@@ -417,7 +423,6 @@ export function AccueilScreen(p: Props) {
                 Inutile de guetter : elles avancent une fois par jour, le matin, surtout les premiers jours de la phase.
               </Text>
               {attente.map((v, i) => {
-                const d = variationVeille(v);
                 return (
                   <Cible key={v.id} id={`accueil-attente-${i}`}>
                     <Card onPress={() => p.onOuvrir(v)} style={{ gap: 10 }}>
@@ -453,7 +458,6 @@ export function AccueilScreen(p: Props) {
                           >
                             {ordinal(v.rang!)}
                           </Text>
-                          {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
                         </View>
                       </View>
                       {/* Le chemin parcouru vers la 1re place, et combien de candidats restent devant */}
@@ -474,37 +478,12 @@ export function AccueilScreen(p: Props) {
 
           {/* Bon à savoir */}
           <TitreSection titre="Bon à savoir" />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, paddingRight: 16 }}
-            style={{ marginHorizontal: -16, paddingLeft: 16 }}
-          >
-            {BON_A_SAVOIR.filter((b) => b.pour == null || (b.pour === 'proposition' ? nbPropositions > 0 : attente.length > 0)).map((b) => (
-              <View
-                key={b.titre}
-                style={{
-                  width: 230,
-                  backgroundColor: t.info,
-                  borderRadius: 20,
-                  padding: 16,
-                  gap: 6,
-                }}
-              >
-                <Text style={{ color: t.text, fontSize: 15.5, ...police('700') }}>{b.titre}</Text>
-                <Text
-                  style={{
-                    color: t.textMuted,
-                    fontSize: 14,
-                    lineHeight: 20,
-                    ...police('400'),
-                  }}
-                >
-                  {b.texte}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
+          {conseil && (
+            <View style={{ backgroundColor: t.info, borderRadius: 20, padding: 16, gap: 6 }}>
+              <Text style={{ color: t.text, fontSize: 15.5, ...police('700') }}>{conseil.titre}</Text>
+              <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>{conseil.texte}</Text>
+            </View>
+          )}
         </>
       )}
 
@@ -643,7 +622,8 @@ export function AccueilScreen(p: Props) {
                 ...police('400'),
               }}
             >
-              Une vraie notification arrive {DELAI_NOTIFICATION_S} secondes après : verrouillez l’écran pour la voir.
+              S’il y a du nouveau à faire ou à voir, une vraie notification arrive {DELAI_NOTIFICATION_S} secondes après : verrouillez
+              l’écran pour la voir.
             </Text>
           )}
         </View>

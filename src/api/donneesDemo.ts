@@ -70,7 +70,13 @@ const VOEUX_CAMILLE: VoeuSource[] = [
     refuseeLeJour: 6,
   },
   {
-    base: { id: 'v2', categorie: 'Licence', formation: 'Licence Mathématiques', etablissement: 'Université (fictive) de Nantes', ville: 'Nantes' },
+    base: {
+      id: 'v2',
+      categorie: 'Licence',
+      formation: 'Licence Mathématiques',
+      etablissement: 'Université (fictive) de Nantes',
+      ville: 'Nantes',
+    },
     jourProposition: 0,
     delaiReponse: 3,
     accepteeLeJour: 1,
@@ -494,7 +500,10 @@ export function construireDossierVeille(debut: number, idProfil = PROFIL_PAR_DEF
     messages: [],
     derniereMiseAJour: dateDuJour(-14, 0).toISOString(),
     dateServeur: maintenantVeille(debut).toISOString(),
-    calendrier: [{ date: dateDuJour(0, 0).toISOString(), libelle: 'Début de la phase d’admission : vos premiers résultats' }, ...d.calendrier],
+    calendrier: [
+      { date: dateDuJour(0, 0).toISOString(), libelle: 'Début de la phase d’admission : vos premiers résultats' },
+      ...d.calendrier,
+    ],
   };
 }
 

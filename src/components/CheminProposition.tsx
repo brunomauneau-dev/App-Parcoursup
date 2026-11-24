@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import type { PointHistorique } from '../api/types';
 import { dateCourte, nombre, ordinal } from '../format';
 import { police, useTheme } from '../theme';
@@ -27,24 +28,38 @@ export const COULEUR_DEVANT = '#9FC3D9';
 /** Détail de la progression, dans la fiche du vœu : chemin, places gagnées, rythme de chaque matin. */
 export function CheminProposition({ historique, rang }: { historique: PointHistorique[]; rang: number }) {
   const t = useTheme();
+  // Repliée par défaut : la place et la distance à la 1re suffisent au quotidien
+  const [ouvert, setOuvert] = useState(false);
   const { points, depart, gagnees } = progression(historique, rang);
   const gains = points.slice(1).map((p, i) => ({ date: p.date, gain: Math.max(0, points[i].rang - p.rang) }));
   const gainMax = Math.max(1, ...gains.map((g) => g.gain));
 
   return (
     <View style={{ gap: 14 }}>
-      {gagnees > 0 && (
+      <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>
+        À la 1re place, une seule place libérée suffit pour recevoir une proposition.
+      </Text>
+
+      {(gagnees > 0 || points.length > 1) && (
+        <Pressable
+          onPress={() => setOuvert(!ouvert)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: ouvert }}
+          style={{ flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderColor: t.border, paddingTop: 14 }}
+        >
+          <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Voir ma progression depuis le début</Text>
+          <Text style={{ color: t.primary, fontSize: 20, lineHeight: 20, ...police('700') }}>{ouvert ? '−' : '+'}</Text>
+        </Pressable>
+      )}
+
+      {ouvert && gagnees > 0 && (
         <Text style={{ color: t.success, fontSize: 15, ...police('700') }}>
           ▲ {nombre(gagnees)} places gagnées depuis le début de la phase{' '}
           <Text style={{ color: t.textMuted, ...police('500') }}>({ordinal(depart)} au départ)</Text>
         </Text>
       )}
 
-      <Text style={{ color: t.textMuted, fontSize: 14, lineHeight: 20, ...police('400') }}>
-        À la 1re place, une seule place libérée suffit pour recevoir une proposition.
-      </Text>
-
-      {gains.length > 0 && (
+      {ouvert && gains.length > 0 && (
         <View style={{ gap: 6 }}>
           <Text style={{ color: t.text, fontSize: 13.5, ...police('600') }}>Places gagnées chaque matin</Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 64 }}>

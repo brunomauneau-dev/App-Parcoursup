@@ -52,7 +52,7 @@ export function Reglages({
           <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Notifications</Text>
           <Text style={{ color: t.textMuted, fontSize: 13, lineHeight: 18, ...police('400') }}>
             {notifications
-              ? 'Propositions, rappels avant les dates limites, nouveautés du dossier.'
+              ? 'Seulement quand il y a quelque chose à faire ou à voir : proposition, date limite, démarche. Rien pour les mouvements de liste d’attente.'
               : 'Coupées. Les SMS et les mails de Parcoursup continuent.'}
           </Text>
         </View>

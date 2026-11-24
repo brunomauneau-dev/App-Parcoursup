@@ -6,7 +6,7 @@ import { apiSimulee } from '../api';
 import { AVIS_ACTIF } from '../config';
 import { useSession } from '../session/SessionProvider';
 import { MENTION_DROITS } from '../components/Droits';
-import { MESSAGE_OUVERTURE } from '../notifications/messages';
+import { MESSAGE_NOUVEAUTE, MESSAGE_OUVERTURE } from '../notifications/messages';
 import { police } from '../theme';
 
 /**
@@ -113,9 +113,9 @@ const ETAPES: Etape[] = [
     jour: 5,
     route: '/dossier',
     cible: 'notification',
-    notification: true,
+    notification: MESSAGE_NOUVEAUTE,
     legende:
-      'Dimanche matin, une notif : des places se sont libérées en BUT GEII ! Elle avait accepté la licence de maths en gardant ses vœux en attente, et ça paie.',
+      'Dimanche matin, une notif : du nouveau ! Des places se sont libérées en BUT GEII. Elle avait accepté la licence de maths en gardant ses vœux en attente, et ça paie.',
   },
   {
     jour: 5,
