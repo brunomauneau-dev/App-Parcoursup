@@ -107,7 +107,7 @@ const ETAPES: Etape[] = [
     jour: 4,
     route: '/dossier',
     cible: 'accueil-attente-0',
-    legende: 'Son vœu de cœur, le BUT GEII ? En liste d’attente, 119e… mais 12 places gagnées depuis hier. Ça avance !',
+    legende: 'Son vœu de cœur, le BUT GEII ? En liste d’attente, 9e… et 12 places gagnées depuis hier. Ça avance !',
     toucher: true,
   },
   {
@@ -115,7 +115,7 @@ const ETAPES: Etape[] = [
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
     legende:
-      'Ici, sa place : 119e. Il reste 118 candidats devant elle, et elle a déjà gagné 61 places depuis le début. La barre montre le chemin jusqu’à la 1re place.',
+      'Ici, sa place : 9e. Plus que 8 candidats devant elle, et déjà 59 places gagnées depuis le début. La barre montre le chemin jusqu’à la 1re place.',
   },
   {
     jour: 4,
@@ -123,7 +123,7 @@ const ETAPES: Etape[] = [
     cible: 'detail-classement',
     legende: 'Et là, son rang de classement : 240e. En 2026, le dernier appelé était 215e. Ça donne une idée, pas une promesse.',
   },
-  // 3. Être prévenue (lundi)
+  // 3. Être prévenue (dimanche)
   {
     jour: 5,
     route: '/dossier',
@@ -136,7 +136,7 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-carte',
     legende:
-      'Bonne nouvelle : une place s’est libérée en BUT GEII ! Avec la prépa MPSI arrivée jeudi, deux nouvelles propositions l’attendent.',
+      'Bonne nouvelle : des places se sont libérées en BUT GEII ! Avec la prépa MPSI arrivée vendredi, deux nouvelles propositions l’attendent.',
   },
   // 4. Décider sereinement
   {
