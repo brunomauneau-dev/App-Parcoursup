@@ -60,8 +60,7 @@ const ETAPES: Etape[] = [
     jour: -2,
     route: '/dossier',
     cible: 'accueil-carte',
-    legende:
-      'C’est fait, en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille et la préviendra le jour J.',
+    legende: 'C’est fait, en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille et la préviendra le jour J.',
   },
   {
     jour: -1,
@@ -88,6 +87,13 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-compteurs',
     legende: 'Tout son dossier en trois chiffres : ses propositions, ses listes d’attente et ses refus.',
+  },
+  {
+    jour: 1,
+    route: '/dossier',
+    cible: 'accueil-compteurs',
+    legende:
+      'Le lendemain, elle a répondu sur le site : elle accepte la licence de maths, garde ses vœux en attente, et renonce au BTS. L’appli suit.',
   },
   {
     jour: 4,
@@ -129,7 +135,8 @@ const ETAPES: Etape[] = [
     jour: 5,
     route: '/dossier',
     cible: 'accueil-carte',
-    legende: 'Bonne nouvelle : une place s’est libérée en BUT GEII ! Deux propositions l’attendent maintenant.',
+    legende:
+      'Bonne nouvelle : une place s’est libérée en BUT GEII ! Avec la prépa MPSI arrivée jeudi, deux nouvelles propositions l’attendent.',
   },
   // 4. Décider sereinement
   {
@@ -150,7 +157,7 @@ const ETAPES: Etape[] = [
     jour: 5,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-repondre',
-    legende: 'Pour accepter, elle passe par le site officiel : l’appli sert à consulter, donc zéro fausse manip possible.',
+    legende: 'Pour accepter ou refuser, elle passe par le site officiel : l’appli sert à consulter, donc zéro fausse manip possible.',
   },
   {
     jour: 5,
