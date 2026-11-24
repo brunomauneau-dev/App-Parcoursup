@@ -22,14 +22,20 @@ import { useTheme } from '../theme';
 function Cadre() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
-  const { notification, texteNotification, fermerNotification } = useSession();
+  const { notification, notificationPersistante, texteNotification, fermerNotification } = useSession();
   return (
     <View style={{ flex: 1, backgroundColor: t.bg, paddingTop: insets.top }}>
       <StatusBar style="dark" />
       {modeDemo && <BandeauPrototype />}
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg } }} />
       {/* La notification et la démo passent au-dessus du reste */}
-      <Notification visible={notification} texte={texteNotification} onClose={fermerNotification} top={insets.top + 8} />
+      <Notification
+        visible={notification}
+        persistante={notificationPersistante}
+        texte={texteNotification}
+        onClose={fermerNotification}
+        top={insets.top + 8}
+      />
       <CalqueDemo />
       <Lancement />
     </View>

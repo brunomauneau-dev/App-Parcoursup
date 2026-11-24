@@ -319,6 +319,8 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
 
   const arreter = useCallback(() => {
     jeton.current += 1;
+    // Une notification restée ouverte par la visite se ferme avec elle
+    ctx.current.session.fermerNotification();
     etapeRef.current = null;
     occupe.current = false;
     etatPrepare.current = {};
@@ -359,7 +361,7 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       r.navigate(e.route);
       etat.route = route;
     }
-    if (e.notification) s.montrerNotification(typeof e.notification === 'string' ? e.notification : undefined);
+    if (e.notification) s.montrerNotification(typeof e.notification === 'string' ? e.notification : undefined, true);
     else s.fermerNotification();
     return change;
   }, []);

@@ -289,7 +289,20 @@ export function TitreSection({ titre, aDroite }: { titre: string; aDroite?: stri
 }
 
 /** Imitation d'une notification push (sans aucune donnée personnelle ; texte fourni par la session). */
-export function Notification({ visible, texte, onClose, top }: { visible: boolean; texte: string; onClose: () => void; top: number }) {
+export function Notification({
+  visible,
+  texte,
+  onClose,
+  top,
+  persistante = false,
+}: {
+  visible: boolean;
+  texte: string;
+  onClose: () => void;
+  top: number;
+  /** Ne se ferme pas toute seule (visite guidée : elle reste tant que l'étape la présente) */
+  persistante?: boolean;
+}) {
   const t = useTheme();
   const [anim] = useState(() => new Animated.Value(0));
   useEffect(() => {
@@ -298,11 +311,11 @@ export function Notification({ visible, texte, onClose, top }: { visible: boolea
       duration: 250,
       useNativeDriver: false,
     }).start();
-    if (visible) {
+    if (visible && !persistante) {
       const id = setTimeout(onClose, 5000);
       return () => clearTimeout(id);
     }
-  }, [visible, anim, onClose]);
+  }, [visible, anim, onClose, persistante]);
   return (
     <Animated.View
       pointerEvents={visible ? 'auto' : 'none'}

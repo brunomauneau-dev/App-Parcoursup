@@ -38,7 +38,9 @@ interface Session {
   /** Démonstration uniquement : affiche le dossier à un jour donné. */
   definirJour?: (jour: number) => Promise<void>;
   /** Démonstration uniquement : affiche la notification imitée. */
-  montrerNotification: (texte?: string) => void;
+  /** La notification imitée reste affichée jusqu'à sa fermeture (visite guidée) */
+  notificationPersistante: boolean;
+  montrerNotification: (texte?: string, persistante?: boolean) => void;
   /** Démonstration uniquement : choisit le dossier fictif (sans recharger). */
   definirProfil?: (id: string) => Promise<void>;
   /** Démonstration uniquement : affiche un autre dossier fictif. */
@@ -59,6 +61,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [affluence, setAffluence] = useState(false);
   const [decalageHorloge, setDecalage] = useState(0);
   const [notification, setNotification] = useState(false);
+  const [notificationPersistante, setNotificationPersistante] = useState(false);
   const [texteNotification, setTexteNotification] = useState(MESSAGE_MISE_A_JOUR);
   const recupereLeRef = useRef<number | null>(null);
   const attenteRef = useRef(false);
@@ -169,9 +172,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const basculerAffluence = useCallback(() => setAffluence((a) => !a), []);
-  const fermerNotification = useCallback(() => setNotification(false), []);
-  const montrerNotification = useCallback((texte?: string) => {
+  const fermerNotification = useCallback(() => {
+    setNotification(false);
+    setNotificationPersistante(false);
+  }, []);
+  const montrerNotification = useCallback((texte?: string, persistante = false) => {
     setTexteNotification(texte ?? MESSAGE_MISE_A_JOUR);
+    setNotificationPersistante(persistante);
     setNotification(true);
   }, []);
   const definirProfil = useCallback(async (id: string) => {
@@ -201,6 +208,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         basculerAffluence: modeDemo ? basculerAffluence : undefined,
         decalageHorloge,
         notification,
+        notificationPersistante,
         texteNotification,
         fermerNotification,
         montrerNotification,
