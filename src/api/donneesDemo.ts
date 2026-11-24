@@ -56,7 +56,7 @@ const VOEUX_CAMILLE: VoeuSource[] = [
       id: 'v1',
       categorie: 'Classe prépa',
       formation: 'CPGE MPSI',
-      etablissement: 'Lycée Jules Ferry',
+      etablissement: 'Lycée (fictif) Jules Ferry',
       ville: 'Nantes',
       totalEnAttente: 640,
       places: 48,
@@ -70,7 +70,7 @@ const VOEUX_CAMILLE: VoeuSource[] = [
     refuseeLeJour: 6,
   },
   {
-    base: { id: 'v2', categorie: 'Licence', formation: 'Licence Mathématiques', etablissement: 'Université de Nantes', ville: 'Nantes' },
+    base: { id: 'v2', categorie: 'Licence', formation: 'Licence Mathématiques', etablissement: 'Université (fictive) de Nantes', ville: 'Nantes' },
     jourProposition: 0,
     delaiReponse: 3,
     accepteeLeJour: 1,
@@ -82,7 +82,7 @@ const VOEUX_CAMILLE: VoeuSource[] = [
       id: 'v3',
       categorie: 'BUT',
       formation: 'BUT Informatique',
-      etablissement: 'IUT de Nantes',
+      etablissement: 'IUT (fictif) de Nantes',
       ville: 'Nantes',
       totalEnAttente: 1180,
       places: 104,
@@ -96,7 +96,7 @@ const VOEUX_CAMILLE: VoeuSource[] = [
       id: 'v4',
       categorie: 'BUT',
       formation: 'BUT GEII',
-      etablissement: 'IUT de Rennes',
+      etablissement: 'IUT (fictif) de Rennes',
       ville: 'Rennes',
       totalEnAttente: 410,
       places: 56,
@@ -113,7 +113,7 @@ const VOEUX_CAMILLE: VoeuSource[] = [
       id: 'v5',
       categorie: 'Licence',
       formation: 'Licence Informatique',
-      etablissement: 'Université de Rennes',
+      etablissement: 'Université (fictive) de Rennes',
       ville: 'Rennes',
       totalEnAttente: 905,
       places: 240,
@@ -365,7 +365,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     numero: '1000001',
     coordonnees: { mail: 'c•••@exemple.fr', telephone: '06 •• •• •• 12' },
     voeux: VOEUX_CAMILLE,
-    messageEtablissement: { jour: 4, titre: 'IUT de Nantes : journée découverte le 19 juin' },
+    messageEtablissement: { jour: 4, titre: 'IUT (fictif) de Nantes : journée découverte le 19 juin' },
     classementFaitLeJour: 6,
   },
   {
@@ -375,6 +375,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     numero: '1000002',
     coordonnees: { mail: 'y•••@exemple.fr', telephone: '07 •• •• •• 48' },
     voeux: VOEUX_YANIS,
+    classementFaitLeJour: 5,
     messageEtablissement: { jour: 3, titre: 'Lycée (fictif) Gustave Eiffel : réunion d’information le 15 juin' },
   },
   {
@@ -384,6 +385,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     numero: '1000003',
     coordonnees: { mail: 'i•••@exemple.fr', telephone: '06 •• •• •• 73' },
     voeux: VOEUX_INES,
+    classementFaitLeJour: 4,
     messageEtablissement: { jour: 2, titre: 'IUT (fictif) de Tours : inscription administrative à partir du 1er juillet' },
   },
   {
@@ -393,6 +395,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     numero: '1000004',
     coordonnees: { mail: 'l•••@exemple.fr', telephone: '07 •• •• •• 05' },
     voeux: VOEUX_LUCAS,
+    classementFaitLeJour: 5,
   },
 ];
 
