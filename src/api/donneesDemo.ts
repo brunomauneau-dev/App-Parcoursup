@@ -22,6 +22,11 @@ function dateDuJour(jour: number, h = 0, m = 0): Date {
   return d;
 }
 
+/** Premier jour, avant l'ouverture des résultats : 8h30 + temps réel écoulé. */
+export function maintenantAvantOuverture(debut: number): Date {
+  return new Date(dateDuJour(0, 8, 30).getTime() + (Date.now() - debut));
+}
+
 /** Heure « actuelle » simulée : jour courant à 9h30 + temps réel écoulé depuis `debut`. */
 export function maintenantSimule(jour: number, debut: number): Date {
   return new Date(dateDuJour(jour, 9, 30).getTime() + (Date.now() - debut));
@@ -445,5 +450,21 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
     // Calendrier officiel 2027 : classement des vœux en attente du vendredi 4 au lundi 7 juin inclus
     classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString(), fait: false },
     profilDemo: { id: profil.id, presentation: profil.presentation },
+  };
+}
+
+/**
+ * Le même dossier le premier jour, avant que le SCN n'ouvre les résultats :
+ * aucun vœu, aucun message, seulement l'annonce que la publication est attendue.
+ */
+export function construireDossierAvantOuverture(debut: number, idProfil = PROFIL_PAR_DEFAUT): Dossier {
+  const d = construireDossier(0, debut, undefined, idProfil);
+  return {
+    ...d,
+    resultatsAttendus: true,
+    voeux: [],
+    messages: [],
+    derniereMiseAJour: dateDuJour(0, 0).toISOString(),
+    dateServeur: maintenantAvantOuverture(debut).toISOString(),
   };
 }

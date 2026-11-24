@@ -38,7 +38,7 @@ interface Session {
   /** Démonstration uniquement : affiche le dossier à un jour donné. */
   definirJour?: (jour: number) => Promise<void>;
   /** Démonstration uniquement : affiche la notification imitée. */
-  montrerNotification: () => void;
+  montrerNotification: (texte?: string) => void;
   /** Démonstration uniquement : choisit le dossier fictif (sans recharger). */
   definirProfil?: (id: string) => Promise<void>;
   /** Démonstration uniquement : affiche un autre dossier fictif. */
@@ -61,6 +61,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [notification, setNotification] = useState(false);
   const [texteNotification, setTexteNotification] = useState(MESSAGE_MISE_A_JOUR);
   const recupereLeRef = useRef<number | null>(null);
+  const attenteRef = useRef(false);
 
   const reinitialiser = useCallback(() => {
     setDossier(null);
@@ -75,6 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       const d = await api.getDossier();
       setDossier(d);
+      attenteRef.current = d.resultatsAttendus === true;
       setDecalage(new Date(d.dateServeur).getTime() - Date.now());
       const maintenant = Date.now();
       setRecupereLe(maintenant);
@@ -138,6 +140,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const simulerNuit = useCallback(
     async (options?: { notificationSysteme?: boolean }) => {
+      const ouverture = attenteRef.current;
       if (await api.simulerNuit?.()) {
         // Notifications désactivées dans les réglages : le dossier se met à jour sans prévenir.
         if (!notificationsActives() && options?.notificationSysteme !== false) {
@@ -146,7 +149,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }
         // Le message dépend du jour : rappel du classement des vœux en attente, ou mise à jour du dossier.
         const d = await charger();
-        const texte = d ? messageDuMatin(d, new Date(d.dateServeur)) : MESSAGE_MISE_A_JOUR;
+        const texte = d ? messageDuMatin(d, new Date(d.dateServeur), ouverture) : MESSAGE_MISE_A_JOUR;
         setTexteNotification(texte);
         // Sur téléphone : vraie notification système dans quelques secondes.
         // Sur le web, ou si l'utilisateur refuse les notifications : notification imitée.
@@ -159,8 +162,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const basculerAffluence = useCallback(() => setAffluence((a) => !a), []);
   const fermerNotification = useCallback(() => setNotification(false), []);
-  const montrerNotification = useCallback(() => {
-    setTexteNotification(MESSAGE_MISE_A_JOUR);
+  const montrerNotification = useCallback((texte?: string) => {
+    setTexteNotification(texte ?? MESSAGE_MISE_A_JOUR);
     setNotification(true);
   }, []);
   const definirProfil = useCallback(async (id: string) => {

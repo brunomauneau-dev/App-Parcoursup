@@ -180,8 +180,8 @@ export function AccueilScreen(p: Props) {
         <View accessibilityRole="alert" style={{ backgroundColor: t.info, borderRadius: 16, padding: 14, gap: 4 }}>
           <Text style={{ color: t.text, ...police('700') }}>Beaucoup de monde ce matin</Text>
           <Text style={{ color: t.text, fontSize: 14, lineHeight: 20, ...police('400') }}>
-            Le service est très sollicité. Vos informations de ce matin restent affichées et valables :
-            l’appli se remettra à jour toute seule, inutile de réessayer.
+            Le service est très sollicité. Vos informations de ce matin restent affichées et valables : l’appli se remettra à jour toute
+            seule, inutile de réessayer.
           </Text>
           <Text style={{ color: t.textMuted, fontSize: 13, lineHeight: 18, ...police('400') }}>
             Si le site Parcoursup passe momentanément en consultation seule, les réponses aux propositions reprendront dès sa réouverture.
@@ -206,266 +206,292 @@ export function AccueilScreen(p: Props) {
         </View>
       )}
 
-      {/* Carte principale */}
-      <Cible id="accueil-carte">
-        <View
-          style={{
-            backgroundColor: t.primaryDark,
-            borderRadius: 24,
-            padding: 22,
-            gap: 14,
-          }}
-        >
-          {prochaine ? (
-            <>
-              <Etiquette
-                texte={
-                  aRepondre.length === 1 ? 'À faire : répondre à 1 proposition' : `À faire : répondre à ${aRepondre.length} propositions`
-                }
-              />
-              <Text
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: 27,
-                  lineHeight: 31,
-                  ...police('800'),
-                }}
-              >
-                {aRepondre.length === 1 ? 'Une formation vous dit oui.' : `${aRepondre.length} formations vous disent oui.`}
-              </Text>
-              <Text
-                style={{
-                  color: 'rgba(255,255,255,0.88)',
-                  fontSize: 15.5,
-                  lineHeight: 22,
-                  ...police('400'),
-                }}
-              >
-                Prenez le temps d’en parler autour de vous. La réponse se fait sur le site, et vos listes d’attente continuent d’avancer de
-                leur côté.
-              </Text>
-              <Cible id="accueil-echeance">
-                <Pastille
-                  texte={`Avant le ${echeance(prochaine.dateLimiteReponse!)}`}
-                  detail={resteAvant(new Date(prochaine.dateLimiteReponse!), maintenant)}
-                />
-              </Cible>
-              <BoutonClair
-                label={aRepondre.length === 1 ? 'Voir ma proposition' : 'Voir mes propositions'}
-                onPress={() => p.onVoirVoeux('propositions')}
-              />
-            </>
-          ) : classementOuvert && ca ? (
-            <>
-              <Etiquette texte="À faire : classer vos vœux en attente" />
-              <Text style={{ color: '#FFFFFF', fontSize: 25, lineHeight: 30, ...police('800') }}>Classez vos vœux en attente.</Text>
-              <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
-                Indiquez sur le site l’ordre de préférence de vos {attente.length} vœux en attente. Quelques minutes suffisent.
-              </Text>
-              <Pastille texte={`Avant le ${echeance(ca.fin)}`} detail={resteAvant(new Date(ca.fin), maintenant)} />
-              <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="clair" />
-            </>
-          ) : acceptee ? (
-            <>
-              <Etiquette texte="Rien à faire aujourd’hui" />
-              <Text
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: 25,
-                  lineHeight: 30,
-                  ...police('800'),
-                }}
-              >
-                Votre place en {acceptee.formation} est assurée.
-              </Text>
-              <Text
-                style={{
-                  color: 'rgba(255,255,255,0.88)',
-                  fontSize: 15.5,
-                  lineHeight: 22,
-                  ...police('400'),
-                }}
-              >
-                Vos vœux en attente continuent d’avancer. On vous prévient si une place se libère.
-              </Text>
-            </>
-          ) : (
-            <>
-              <Etiquette texte="Rien à faire aujourd’hui" />
-              <Text
-                style={{
-                  color: '#FFFFFF',
-                  fontSize: 25,
-                  lineHeight: 30,
-                  ...police('800'),
-                }}
-              >
-                On garde un œil sur vos listes d’attente.
-              </Text>
-              <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
-                Les places se libèrent au fil des réponses des autres candidats, surtout les premiers jours. On vous prévient dès que votre
-                dossier change.
-              </Text>
-            </>
-          )}
-        </View>
-      </Cible>
-
-      {prochaine && classementOuvert && ca && (
-        <Cible id="accueil-classement">
-          <View
-            style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.accent }}
-          >
-            <Text style={{ color: t.accent, fontSize: 12.5, letterSpacing: 0.4, textTransform: 'uppercase', ...police('700') }}>
-              Aussi à faire
-            </Text>
-            <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Classer vos vœux en attente</Text>
-            <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
-              Avant le {echeance(ca.fin)} ({resteAvant(new Date(ca.fin), maintenant)}), indiquez sur le site l’ordre de préférence de vos{' '}
-              {attente.length} vœux en attente. Quelques minutes suffisent.
-            </Text>
-            <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="secondary" />
-          </View>
+      {dossier.resultatsAttendus ? (
+        <Cible id="accueil-carte">
+          <AttenteResultats />
         </Cible>
-      )}
-
-      {sansProposition && (
-        <View
-          style={{ backgroundColor: t.surface, borderRadius: 20, padding: 18, gap: 10, borderLeftWidth: 4, borderLeftColor: t.warningDot }}
-        >
-          <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Des solutions existent</Text>
-          <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
-            {situationDifficile
-              ? 'Vos listes d’attente sont encore loin des rangs appelés l’an dernier. Rien n’est joué, mais vous pouvez préparer d’autres pistes :'
-              : 'Pas encore de proposition : c’est fréquent, et vos listes d’attente avancent. En parallèle, vous pouvez préparer d’autres pistes :'}
-          </Text>
-          <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 22, ...police('400') }}>
-            • <Text style={police('700')}>La phase complémentaire</Text> ouvre le jeudi 10 juin : jusqu’à 10 nouveaux vœux dans les
-            formations qui ont encore des places.
-            {'\n'}• <Text style={police('700')}>Votre professeur principal</Text> ou un psychologue de l’Éducation nationale peut vous aider
-            à choisir.
-            {'\n'}• Après la phase principale, <Text style={police('700')}>la commission d’accès à l’enseignement supérieur</Text> de votre
-            académie accompagne les candidats sans proposition.
-          </Text>
-        </View>
-      )}
-
-      {/* Compteurs */}
-      <Cible id="accueil-compteurs">
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Tuile
-            nombre={nbPropositions}
-            libelle={nbPropositions > 1 ? 'Propositions' : 'Proposition'}
-            detail={acceptee ? (aRepondre.length > 0 ? `dont 1 acceptée` : 'acceptée') : aRepondre.length > 0 ? 'à répondre' : undefined}
-            point={t.successDot}
-            onPress={() => p.onVoirVoeux('propositions')}
-          />
-          <Tuile nombre={attente.length} libelle="En attente" point={t.warningDot} onPress={() => p.onVoirVoeux('attente')} />
-          <Tuile
-            nombre={nbRefusees}
-            libelle={nbRefusees > 1 ? 'Refusées' : 'Refusée'}
-            point={t.neutralDot}
-            onPress={() => p.onVoirVoeux('refusees')}
-          />
-        </View>
-      </Cible>
-
-      {/* Listes d'attente */}
-      {attente.length > 0 && (
+      ) : (
         <>
-          <TitreSection titre="Listes d’attente" aDroite="Mises à jour chaque matin" />
-          <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, paddingHorizontal: 4, marginTop: -6, ...police('400') }}>
-            Inutile de guetter : elles avancent une fois par jour, le matin, surtout les premiers jours de la phase.
-          </Text>
-          {attente.map((v, i) => {
-            const d = variationVeille(v);
-            return (
-              <Cible key={v.id} id={`accueil-attente-${i}`}>
-                <Card onPress={() => p.onOuvrir(v)} style={{ gap: 10 }}>
-                  <View style={{ flexDirection: 'row', gap: 12 }}>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text
-                        style={{
-                          color: t.text,
-                          fontSize: 16.5,
-                          ...police('700'),
-                        }}
-                      >
-                        {v.formation}
-                      </Text>
-                      <Text
-                        style={{
-                          color: t.textMuted,
-                          fontSize: 13.5,
-                          ...police('400'),
-                        }}
-                      >
-                        {v.etablissement}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={{ color: t.textMuted, fontSize: 11.5, ...police('600') }}>Votre place</Text>
-                      <Text
-                        style={{
-                          color: t.text,
-                          fontSize: 22,
-                          ...police('800'),
-                        }}
-                      >
-                        {ordinal(v.rang!)}
-                      </Text>
-                      {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
-                    </View>
-                  </View>
-                  {/* Le chemin parcouru vers la 1re place, et combien de candidats restent devant */}
-                  {v.totalEnAttente != null && (
-                    <Jauge rang={v.rang!} total={v.totalEnAttente} zone={v.rang!} couleurZone={COULEUR_DEVANT} />
-                  )}
-                  <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('400') }}>
-                    <Text style={{ color: t.text, ...police('700') }}>{nombre(Math.max(0, v.rang! - 1))}</Text>{' '}
-                    {v.rang! - 1 === 1 ? 'candidat devant vous' : 'candidats devant vous'}
-                    {v.totalEnAttente != null ? `, sur ${nombre(v.totalEnAttente)} en attente` : ''}
-                  </Text>
-                </Card>
-              </Cible>
-            );
-          })}
-        </>
-      )}
-
-      {/* Bon à savoir */}
-      <TitreSection titre="Bon à savoir" />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 10, paddingRight: 16 }}
-        style={{ marginHorizontal: -16, paddingLeft: 16 }}
-      >
-        {BON_A_SAVOIR.filter((b) => b.pour == null || (b.pour === 'proposition' ? nbPropositions > 0 : attente.length > 0)).map((b) => (
-          <View
-            key={b.titre}
-            style={{
-              width: 230,
-              backgroundColor: t.info,
-              borderRadius: 20,
-              padding: 16,
-              gap: 6,
-            }}
-          >
-            <Text style={{ color: t.text, fontSize: 15.5, ...police('700') }}>{b.titre}</Text>
-            <Text
+          {/* Carte principale */}
+          <Cible id="accueil-carte">
+            <View
               style={{
-                color: t.textMuted,
-                fontSize: 14,
-                lineHeight: 20,
-                ...police('400'),
+                backgroundColor: t.primaryDark,
+                borderRadius: 24,
+                padding: 22,
+                gap: 14,
               }}
             >
-              {b.texte}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
+              {prochaine ? (
+                <>
+                  <Etiquette
+                    texte={
+                      aRepondre.length === 1
+                        ? 'À faire : répondre à 1 proposition'
+                        : `À faire : répondre à ${aRepondre.length} propositions`
+                    }
+                  />
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: 27,
+                      lineHeight: 31,
+                      ...police('800'),
+                    }}
+                  >
+                    {aRepondre.length === 1 ? 'Une formation vous dit oui.' : `${aRepondre.length} formations vous disent oui.`}
+                  </Text>
+                  <Text
+                    style={{
+                      color: 'rgba(255,255,255,0.88)',
+                      fontSize: 15.5,
+                      lineHeight: 22,
+                      ...police('400'),
+                    }}
+                  >
+                    Prenez le temps d’en parler autour de vous. La réponse se fait sur le site, et vos listes d’attente continuent d’avancer
+                    de leur côté.
+                  </Text>
+                  <Cible id="accueil-echeance">
+                    <Pastille
+                      texte={`Avant le ${echeance(prochaine.dateLimiteReponse!)}`}
+                      detail={resteAvant(new Date(prochaine.dateLimiteReponse!), maintenant)}
+                    />
+                  </Cible>
+                  <BoutonClair
+                    label={aRepondre.length === 1 ? 'Voir ma proposition' : 'Voir mes propositions'}
+                    onPress={() => p.onVoirVoeux('propositions')}
+                  />
+                </>
+              ) : classementOuvert && ca ? (
+                <>
+                  <Etiquette texte="À faire : classer vos vœux en attente" />
+                  <Text style={{ color: '#FFFFFF', fontSize: 25, lineHeight: 30, ...police('800') }}>Classez vos vœux en attente.</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+                    Indiquez sur le site l’ordre de préférence de vos {attente.length} vœux en attente. Quelques minutes suffisent.
+                  </Text>
+                  <Pastille texte={`Avant le ${echeance(ca.fin)}`} detail={resteAvant(new Date(ca.fin), maintenant)} />
+                  <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="clair" />
+                </>
+              ) : acceptee ? (
+                <>
+                  <Etiquette texte="Rien à faire aujourd’hui" />
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: 25,
+                      lineHeight: 30,
+                      ...police('800'),
+                    }}
+                  >
+                    Votre place en {acceptee.formation} est assurée.
+                  </Text>
+                  <Text
+                    style={{
+                      color: 'rgba(255,255,255,0.88)',
+                      fontSize: 15.5,
+                      lineHeight: 22,
+                      ...police('400'),
+                    }}
+                  >
+                    Vos vœux en attente continuent d’avancer. On vous prévient si une place se libère.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Etiquette texte="Rien à faire aujourd’hui" />
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: 25,
+                      lineHeight: 30,
+                      ...police('800'),
+                    }}
+                  >
+                    On garde un œil sur vos listes d’attente.
+                  </Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+                    Les places se libèrent au fil des réponses des autres candidats, surtout les premiers jours. On vous prévient dès que
+                    votre dossier change.
+                  </Text>
+                </>
+              )}
+            </View>
+          </Cible>
+
+          {prochaine && classementOuvert && ca && (
+            <Cible id="accueil-classement">
+              <View
+                style={{
+                  backgroundColor: t.surface,
+                  borderRadius: 20,
+                  padding: 18,
+                  gap: 10,
+                  borderLeftWidth: 4,
+                  borderLeftColor: t.accent,
+                }}
+              >
+                <Text style={{ color: t.accent, fontSize: 12.5, letterSpacing: 0.4, textTransform: 'uppercase', ...police('700') }}>
+                  Aussi à faire
+                </Text>
+                <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Classer vos vœux en attente</Text>
+                <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+                  Avant le {echeance(ca.fin)} ({resteAvant(new Date(ca.fin), maintenant)}), indiquez sur le site l’ordre de préférence de
+                  vos {attente.length} vœux en attente. Quelques minutes suffisent.
+                </Text>
+                <LienExterne url={URL_PARCOURSUP} label="Le faire sur Parcoursup ↗" variant="secondary" />
+              </View>
+            </Cible>
+          )}
+
+          {sansProposition && (
+            <View
+              style={{
+                backgroundColor: t.surface,
+                borderRadius: 20,
+                padding: 18,
+                gap: 10,
+                borderLeftWidth: 4,
+                borderLeftColor: t.warningDot,
+              }}
+            >
+              <Text style={{ color: t.text, fontSize: 17, ...police('800') }}>Des solutions existent</Text>
+              <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+                {situationDifficile
+                  ? 'Vos listes d’attente sont encore loin des rangs appelés l’an dernier. Rien n’est joué, mais vous pouvez préparer d’autres pistes :'
+                  : 'Pas encore de proposition : c’est fréquent, et vos listes d’attente avancent. En parallèle, vous pouvez préparer d’autres pistes :'}
+              </Text>
+              <Text style={{ color: t.text, fontSize: 14.5, lineHeight: 22, ...police('400') }}>
+                • <Text style={police('700')}>La phase complémentaire</Text> ouvre le jeudi 10 juin : jusqu’à 10 nouveaux vœux dans les
+                formations qui ont encore des places.
+                {'\n'}• <Text style={police('700')}>Votre professeur principal</Text> ou un psychologue de l’Éducation nationale peut vous
+                aider à choisir.
+                {'\n'}• Après la phase principale, <Text style={police('700')}>la commission d’accès à l’enseignement supérieur</Text> de
+                votre académie accompagne les candidats sans proposition.
+              </Text>
+            </View>
+          )}
+
+          {/* Compteurs */}
+          <Cible id="accueil-compteurs">
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Tuile
+                nombre={nbPropositions}
+                libelle={nbPropositions > 1 ? 'Propositions' : 'Proposition'}
+                detail={
+                  acceptee ? (aRepondre.length > 0 ? `dont 1 acceptée` : 'acceptée') : aRepondre.length > 0 ? 'à répondre' : undefined
+                }
+                point={t.successDot}
+                onPress={() => p.onVoirVoeux('propositions')}
+              />
+              <Tuile nombre={attente.length} libelle="En attente" point={t.warningDot} onPress={() => p.onVoirVoeux('attente')} />
+              <Tuile
+                nombre={nbRefusees}
+                libelle={nbRefusees > 1 ? 'Refusées' : 'Refusée'}
+                point={t.neutralDot}
+                onPress={() => p.onVoirVoeux('refusees')}
+              />
+            </View>
+          </Cible>
+
+          {/* Listes d'attente */}
+          {attente.length > 0 && (
+            <>
+              <TitreSection titre="Listes d’attente" aDroite="Mises à jour chaque matin" />
+              <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, paddingHorizontal: 4, marginTop: -6, ...police('400') }}>
+                Inutile de guetter : elles avancent une fois par jour, le matin, surtout les premiers jours de la phase.
+              </Text>
+              {attente.map((v, i) => {
+                const d = variationVeille(v);
+                return (
+                  <Cible key={v.id} id={`accueil-attente-${i}`}>
+                    <Card onPress={() => p.onOuvrir(v)} style={{ gap: 10 }}>
+                      <View style={{ flexDirection: 'row', gap: 12 }}>
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text
+                            style={{
+                              color: t.text,
+                              fontSize: 16.5,
+                              ...police('700'),
+                            }}
+                          >
+                            {v.formation}
+                          </Text>
+                          <Text
+                            style={{
+                              color: t.textMuted,
+                              fontSize: 13.5,
+                              ...police('400'),
+                            }}
+                          >
+                            {v.etablissement}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          <Text style={{ color: t.textMuted, fontSize: 11.5, ...police('600') }}>Votre place</Text>
+                          <Text
+                            style={{
+                              color: t.text,
+                              fontSize: 22,
+                              ...police('800'),
+                            }}
+                          >
+                            {ordinal(v.rang!)}
+                          </Text>
+                          {d != null && <Variation valeur={d} suffixe="hier" fond={false} />}
+                        </View>
+                      </View>
+                      {/* Le chemin parcouru vers la 1re place, et combien de candidats restent devant */}
+                      {v.totalEnAttente != null && (
+                        <Jauge rang={v.rang!} total={v.totalEnAttente} zone={v.rang!} couleurZone={COULEUR_DEVANT} />
+                      )}
+                      <Text style={{ color: t.textMuted, fontSize: 13.5, ...police('400') }}>
+                        <Text style={{ color: t.text, ...police('700') }}>{nombre(Math.max(0, v.rang! - 1))}</Text>{' '}
+                        {v.rang! - 1 === 1 ? 'candidat devant vous' : 'candidats devant vous'}
+                        {v.totalEnAttente != null ? `, sur ${nombre(v.totalEnAttente)} en attente` : ''}
+                      </Text>
+                    </Card>
+                  </Cible>
+                );
+              })}
+            </>
+          )}
+
+          {/* Bon à savoir */}
+          <TitreSection titre="Bon à savoir" />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 10, paddingRight: 16 }}
+            style={{ marginHorizontal: -16, paddingLeft: 16 }}
+          >
+            {BON_A_SAVOIR.filter((b) => b.pour == null || (b.pour === 'proposition' ? nbPropositions > 0 : attente.length > 0)).map((b) => (
+              <View
+                key={b.titre}
+                style={{
+                  width: 230,
+                  backgroundColor: t.info,
+                  borderRadius: 20,
+                  padding: 16,
+                  gap: 6,
+                }}
+              >
+                <Text style={{ color: t.text, fontSize: 15.5, ...police('700') }}>{b.titre}</Text>
+                <Text
+                  style={{
+                    color: t.textMuted,
+                    fontSize: 14,
+                    lineHeight: 20,
+                    ...police('400'),
+                  }}
+                >
+                  {b.texte}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </>
+      )}
 
       {/* Prochaines dates */}
       {dates.length > 0 && (
@@ -566,7 +592,9 @@ export function AccueilScreen(p: Props) {
               opacity: pressed ? 0.7 : 1,
             })}
           >
-            <Text style={{ color: t.text, ...police('700') }}>Passer au lendemain matin</Text>
+            <Text style={{ color: t.text, ...police('700') }}>
+              {dossier.resultatsAttendus ? 'Simuler l’ouverture des résultats' : 'Passer au lendemain matin'}
+            </Text>
           </Pressable>
           {p.onAffluence && (
             <Pressable
@@ -707,6 +735,27 @@ function Pastille({ texte, detail }: { texte: string; detail: string }) {
       <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: t.accent }} />
       <Text style={{ color: t.text, fontSize: 14.5, flex: 1, ...police('400') }}>
         <Text style={police('700')}>{texte}</Text> · {detail}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * Premier jour, avant l'ouverture des résultats par le SCN : l'appli ne montre rien
+ * avant le site, et le dit simplement.
+ */
+function AttenteResultats() {
+  const t = useTheme();
+  return (
+    <View style={{ backgroundColor: t.primaryDark, borderRadius: 24, padding: 22, gap: 14 }}>
+      <Etiquette texte="Aujourd’hui" />
+      <Text style={{ color: '#FFFFFF', fontSize: 27, lineHeight: 31, ...police('800') }}>Vos résultats arrivent aujourd’hui.</Text>
+      <Text style={{ color: 'rgba(255,255,255,0.88)', fontSize: 15.5, lineHeight: 22, ...police('400') }}>
+        Ils s’afficheront ici dès l’ouverture du site Parcoursup, en même temps que sur le site. Une notification vous préviendra : inutile
+        de guetter.
+      </Text>
+      <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13.5, lineHeight: 19, ...police('400') }}>
+        L’ouverture se fait progressivement : certains voient leurs résultats quelques minutes avant d’autres. Cela ne dit rien des vôtres.
       </Text>
     </View>
   );

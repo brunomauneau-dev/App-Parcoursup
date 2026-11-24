@@ -28,7 +28,11 @@ export function rappelClassement(dossier: Dossier, maintenant: Date): string | n
   return null;
 }
 
-/** Notification envoyée après la mise à jour du matin. */
-export function messageDuMatin(dossier: Dossier, maintenant: Date): string {
+/** Premier jour, à l'ouverture des résultats (par vagues, au rythme fixé par le SCN). */
+export const MESSAGE_OUVERTURE = 'Les résultats de la phase d’admission sont disponibles. Ouvrez l’application pour les consulter.';
+
+/** Notification envoyée après la mise à jour du matin (ou, le premier jour, à l'ouverture des résultats). */
+export function messageDuMatin(dossier: Dossier, maintenant: Date, ouverture = false): string {
+  if (ouverture) return MESSAGE_OUVERTURE;
   return rappelClassement(dossier, maintenant) ?? MESSAGE_MISE_A_JOUR;
 }

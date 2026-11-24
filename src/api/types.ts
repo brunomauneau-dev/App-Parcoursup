@@ -54,6 +54,12 @@ export interface Dossier {
    */
   dateServeur: string;
   voeux: Voeu[];
+  /**
+   * Premier jour de la phase : vrai tant que le SCN n'a pas ouvert la publication des
+   * résultats. L'API ne renvoie alors aucun vœu ni message : l'application ne montre
+   * jamais un résultat avant le site.
+   */
+  resultatsAttendus?: boolean;
   /** Messages du dossier, du plus récent au plus ancien */
   messages: Message[];
   /** Dates générales de la phase d'admission (identiques pour tous les candidats) */
@@ -103,7 +109,10 @@ export interface DossierApi {
   getDossier(): Promise<Dossier>;
   /** Démonstration uniquement : simule la mise à jour de la nuit suivante. */
   simulerNuit?(): Promise<boolean>;
-  /** Démonstration uniquement : place le dossier à un jour donné de la phase simulée. */
+  /**
+   * Démonstration uniquement : place le dossier à un jour donné de la phase simulée.
+   * Un jour négatif : premier matin, avant l'ouverture des résultats.
+   */
   definirJour?(jour: number): Promise<void>;
   /** Démonstration uniquement : choisit le dossier fictif affiché. */
   definirProfil?(id: string): Promise<void>;

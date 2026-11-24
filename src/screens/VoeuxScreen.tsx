@@ -182,7 +182,9 @@ export function VoeuxScreen({
             ...police('400'),
           }}
         >
-          Aucun vœu dans cette catégorie.
+          {dossier.resultatsAttendus
+            ? 'Vos résultats arrivent aujourd’hui, à l’ouverture du site. Une notification vous préviendra.'
+            : 'Aucun vœu dans cette catégorie.'}
         </Text>
       )}
     </ScrollView>

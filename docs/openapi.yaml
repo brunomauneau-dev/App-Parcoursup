@@ -199,6 +199,11 @@ components:
         voeux:
           type: array
           items: { $ref: '#/components/schemas/Voeu' }
+        resultatsAttendus:
+          type: boolean
+          description: |
+            Premier jour de la phase : vrai tant que le SCN n'a pas ouvert la publication des résultats.
+            `voeux` est alors vide : l'application ne montre jamais un résultat avant le site.
         coordonnees:
           type: object
           description: Coordonnées où Parcoursup envoie ses alertes, masquées (le candidat vérifie qu'elles sont justes).

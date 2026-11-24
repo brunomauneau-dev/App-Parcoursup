@@ -6,6 +6,7 @@ import { apiSimulee } from '../api';
 import { AVIS_ACTIF } from '../config';
 import { useSession } from '../session/SessionProvider';
 import { MENTION_DROITS } from '../components/Droits';
+import { MESSAGE_OUVERTURE } from '../notifications/messages';
 import { police } from '../theme';
 
 /**
@@ -40,8 +41,8 @@ interface Etape {
   legende: string;
   /** Au passage à l'étape suivante : montrer un toucher sur la cible */
   toucher?: boolean;
-  /** Afficher la notification « dossier mis à jour » */
-  notification?: boolean;
+  /** Afficher la notification imitée : true = « dossier mis à jour », ou le texte voulu */
+  notification?: boolean | string;
 }
 
 const VOEUX_PROPOSITIONS: Route = { pathname: '/dossier/voeux', params: { filtre: 'propositions' } };
@@ -55,11 +56,24 @@ const ETAPES: Etape[] = [
     toucher: true,
   },
   {
+    jour: -1,
+    route: '/dossier',
+    cible: 'accueil-carte',
+    legende:
+      'Mardi 1er juin, premier jour des résultats. Le matin, le site n’a pas encore ouvert : l’appli ne montre rien avant lui, et elle le dit simplement.',
+  },
+  {
+    jour: 0,
+    route: '/dossier',
+    cible: 'notification',
+    notification: MESSAGE_OUVERTURE,
+    legende: 'Les résultats sont ouverts : une notif la prévient. Pas besoin de rafraîchir la page toute la matinée.',
+  },
+  {
     jour: 0,
     route: '/dossier',
     cible: 'accueil-echeance',
-    legende:
-      'Mardi 1er juin, premier jour des réponses. Dès qu’elle ouvre l’appli : deux propositions l’attendent, avec le temps qu’il lui reste pour répondre.',
+    legende: 'Elle ouvre l’appli : deux propositions l’attendent, avec le temps qu’il lui reste pour répondre.',
   },
   {
     jour: 0,
@@ -337,7 +351,8 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
       r.navigate(e.route);
       etat.route = route;
     }
-    if (e.notification) s.montrerNotification();
+    if (e.notification) s.montrerNotification(typeof e.notification === 'string' ? e.notification : undefined);
+    else s.fermerNotification();
     return change;
   }, []);
 
