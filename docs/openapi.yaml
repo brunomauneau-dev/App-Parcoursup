@@ -199,6 +199,12 @@ components:
         voeux:
           type: array
           items: { $ref: '#/components/schemas/Voeu' }
+        coordonnees:
+          type: object
+          description: Coordonnées où Parcoursup envoie ses alertes, masquées (le candidat vérifie qu'elles sont justes).
+          properties:
+            mail: { type: string, example: 'c•••@exemple.fr' }
+            telephone: { type: string, example: '06 •• •• •• 12' }
         classementAttente:
           type: object
           description: Période où le candidat doit classer ses vœux en attente sur le site (calendrier 2027 du 4 au 7 juin).

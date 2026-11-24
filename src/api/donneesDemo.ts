@@ -333,6 +333,8 @@ interface ProfilDemo {
   prenom: string;
   presentation: string;
   numero: string;
+  /** Coordonnées fictives, déjà masquées comme les renverrait l'API */
+  coordonnees: { mail: string; telephone: string };
   voeux: VoeuSource[];
   /** Message d'un établissement, propre au profil */
   messageEtablissement?: { jour: number; titre: string };
@@ -344,6 +346,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     prenom: 'Camille',
     presentation: 'Camille, terminale générale, Nantes',
     numero: '1000001',
+    coordonnees: { mail: 'c•••@exemple.fr', telephone: '06 •• •• •• 12' },
     voeux: VOEUX_CAMILLE,
     messageEtablissement: { jour: 4, titre: 'IUT de Nantes : journée découverte le 19 juin' },
   },
@@ -352,6 +355,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     prenom: 'Yanis',
     presentation: 'Yanis, terminale bac pro, vise un BTS, Bordeaux',
     numero: '1000002',
+    coordonnees: { mail: 'y•••@exemple.fr', telephone: '07 •• •• •• 48' },
     voeux: VOEUX_YANIS,
     messageEtablissement: { jour: 3, titre: 'Lycée (fictif) Gustave Eiffel : réunion d’information le 15 juin' },
   },
@@ -360,6 +364,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     prenom: 'Inès',
     presentation: 'Inès, étudiante en réorientation, Tours',
     numero: '1000003',
+    coordonnees: { mail: 'i•••@exemple.fr', telephone: '06 •• •• •• 73' },
     voeux: VOEUX_INES,
     messageEtablissement: { jour: 2, titre: 'IUT (fictif) de Tours : inscription administrative à partir du 1er juillet' },
   },
@@ -368,6 +373,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     prenom: 'Lucas',
     presentation: 'Lucas, terminale technologique STMG, Lille',
     numero: '1000004',
+    coordonnees: { mail: 'l•••@exemple.fr', telephone: '07 •• •• •• 05' },
     voeux: VOEUX_LUCAS,
   },
 ];
@@ -425,6 +431,7 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
   const profil = profilDemo(idProfil);
   return {
     prenom: profil.prenom,
+    coordonnees: profil.coordonnees,
     numeroDossier: `${numeroDossier ?? profil.numero} (fictif)`,
     derniereMiseAJour: dateDuJour(jour, HEURE_MAJ.h, HEURE_MAJ.m).toISOString(),
     dateServeur: maintenantSimule(jour, debut).toISOString(),

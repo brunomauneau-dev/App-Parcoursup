@@ -68,6 +68,11 @@ export interface Dossier {
     /** Vrai si le candidat a déjà classé ses vœux : on ne lui envoie plus de rappel. */
     fait?: boolean;
   };
+  /**
+   * Coordonnées où Parcoursup envoie ses alertes (SMS, mail), MASQUÉES par l'API
+   * (ex. « c•••@exemple.fr », « 06 •• •• •• 12 ») : le candidat vérifie qu'elles sont justes.
+   */
+  coordonnees?: { mail: string; telephone: string };
   /** Démonstration uniquement : profil fictif affiché. Absent de l'API réelle. */
   profilDemo?: { id: string; presentation: string };
 }

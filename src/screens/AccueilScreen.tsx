@@ -566,7 +566,7 @@ export function AccueilScreen(p: Props) {
         </View>
       )}
 
-      <Reglages onDeconnexion={p.onDeconnexion} />
+      <Reglages onDeconnexion={p.onDeconnexion} coordonnees={dossier.coordonnees} />
 
       <View style={{ marginTop: 8 }}>
         <Droits />

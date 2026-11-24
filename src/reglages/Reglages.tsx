@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Linking, Platform, Pressable, Switch, Text, View } from 'react-native';
-import { TitreSection } from '../components/ui';
+import { LienExterne, TitreSection, URL_PARCOURSUP } from '../components/ui';
 import { demanderAutorisation, etatAutorisation } from '../notifications/notificationDemo';
 import { definirNotifications, useNotificationsActives } from '../notifications/preference';
 import { ReglageVerrou } from '../securite/Verrou';
@@ -10,7 +10,13 @@ import { Confirmation } from './Confirmation';
 type Fenetre = null | 'desactiver-notifications' | 'notifications-bloquees' | 'deconnexion';
 
 /** Réglages en bas de l'accueil : notifications, verrouillage, déconnexion (qui retire l'accès de l'application). */
-export function Reglages({ onDeconnexion }: { onDeconnexion: () => Promise<void> }) {
+export function Reglages({
+  onDeconnexion,
+  coordonnees,
+}: {
+  onDeconnexion: () => Promise<void>;
+  coordonnees?: { mail: string; telephone: string };
+}) {
   const t = useTheme();
   const notifications = useNotificationsActives();
   const [fenetre, setFenetre] = useState<Fenetre>(null);
@@ -52,6 +58,23 @@ export function Reglages({ onDeconnexion }: { onDeconnexion: () => Promise<void>
         </View>
         <Switch value={notifications} onValueChange={() => void basculerNotifications()} trackColor={{ true: t.primary }} />
       </Pressable>
+
+      {/* Les alertes SMS et mail de Parcoursup dépendent des coordonnées saisies à l'inscription :
+          une erreur, et elles se perdent sans que personne ne s'en aperçoive. */}
+      {coordonnees && (
+        <View style={{ ...ligne, flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+          <Text style={{ color: t.text, fontSize: 15, ...police('700') }}>Vos alertes Parcoursup</Text>
+          <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, ...police('400') }}>
+            Les SMS et mails de Parcoursup arrivent sur :{'\n'}
+            <Text style={{ color: t.text, ...police('600') }}>{coordonnees.mail}</Text> ·{' '}
+            <Text style={{ color: t.text, ...police('600') }}>{coordonnees.telephone}</Text>
+          </Text>
+          <Text style={{ color: t.textMuted, fontSize: 13.5, lineHeight: 19, ...police('400') }}>
+            Si c’est faux, corrigez-les sur le site. Vous pouvez aussi y ajouter un proche, pour qu’il soit prévenu lui aussi.
+          </Text>
+          <LienExterne url={URL_PARCOURSUP} label="Vérifier sur Parcoursup ↗" variant="secondary" />
+        </View>
+      )}
 
       <ReglageVerrou />
 
