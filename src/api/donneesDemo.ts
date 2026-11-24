@@ -463,7 +463,11 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
     voeux: profil.voeux.map((s) => construireVoeu(s, jour)),
     messages: construireMessages(profil, jour),
     calendrier: [
-      { date: dateDuJour(3, 0).toISOString(), libelle: 'Du vendredi 4 au lundi 7 juin : classer vos vœux en attente (sur le site)' },
+      {
+        date: dateDuJour(3, 0).toISOString(),
+        fin: dateDuJour(6, 23, 59).toISOString(),
+        libelle: 'Du vendredi 4 au lundi 7 juin : classer vos vœux en attente (sur le site)',
+      },
       { date: dateDuJour(9, 9).toISOString(), libelle: 'Début de la phase complémentaire : jusqu’à 10 nouveaux vœux' },
       { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale' },
     ],

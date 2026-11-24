@@ -91,6 +91,8 @@ export interface Dossier {
 export interface EtapeCalendrier {
   date: string;
   libelle: string;
+  /** Fin de la période, pour une étape qui dure plusieurs jours (reste affichée jusque-là) */
+  fin?: string;
 }
 
 export interface Message {

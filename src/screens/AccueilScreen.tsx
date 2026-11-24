@@ -1,5 +1,5 @@
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
-import type { Dossier, Voeu } from '../api/types';
+import type { Dossier, EtapeCalendrier, Voeu } from '../api/types';
 import { Cible } from '../demo/DemoAuto';
 import { BoutonAvis, Card, IconeOnglet, LienExterne, Logo, TitreSection, URL_PARCOURSUP, Variation } from '../components/ui';
 import { AVIS_ACTIF } from '../config';
@@ -87,14 +87,21 @@ export function AccueilScreen(p: Props) {
         v.rangClassement > 1.5 * v.rangDernierAppeleAnneePrecedente,
     );
 
-  const dates = [
-    ...aRepondre.map((v) => ({
-      date: v.dateLimiteReponse!,
-      libelle: `Date limite de réponse : ${v.formation}`,
-    })),
-    ...dossier.calendrier,
-  ]
-    .filter((d) => new Date(d.date) > maintenant)
+  const dates = (
+    [
+      ...aRepondre.map((v) => ({
+        date: v.dateLimiteReponse!,
+        libelle: `Date limite de réponse : ${v.formation}`,
+      })),
+      // Une étape sur plusieurs jours reste affichée jusqu'à sa fin, datée de son dernier jour une fois commencée
+      ...dossier.calendrier.map((e) => {
+        if (!e.fin || new Date(e.date) > maintenant) return e;
+        const fait = ca?.fait && e.fin === ca.fin;
+        return { date: e.fin, fin: e.fin, libelle: `${e.libelle} · ${fait ? 'fait ✓' : 'en cours'}` };
+      }),
+    ] as EtapeCalendrier[]
+  )
+    .filter((d) => new Date(d.fin ?? d.date) > maintenant)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
