@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import { Button, Logo } from '../components/ui';
@@ -26,6 +26,17 @@ export function ConnexionSimuleeScreen() {
   const { connexion, definirJour } = useSession();
   const [etape, setEtape] = useState<Etape>(0);
   const [code, setCode] = useState('');
+  // Visite guidée : l'étape à montrer est passée dans l'adresse (?etape=1)
+  const { etape: etapeDemandee } = useLocalSearchParams<{ etape?: string }>();
+  const [etapeSuivie, setEtapeSuivie] = useState<string | undefined>(undefined);
+  if (etapeDemandee !== etapeSuivie) {
+    setEtapeSuivie(etapeDemandee);
+    const n = Number(etapeDemandee);
+    if (n >= 0 && n <= 4) {
+      setEtape(n as Etape);
+      setCode(n >= 3 ? CODE : '');
+    }
+  }
   const [chargement, setChargement] = useState(false);
   const [volet] = useState(() => new Animated.Value(0));
 
@@ -125,100 +136,106 @@ export function ConnexionSimuleeScreen() {
           transform: [{ translateY: volet.interpolate({ inputRange: [0, 1], outputRange: [900, 0] }) }],
         }}
       >
-        {/* Barre du navigateur */}
-        <View style={{ backgroundColor: '#F1F3F4', paddingTop: 8, paddingBottom: 10, paddingHorizontal: 14, gap: 8 }}>
-          <View style={{ alignSelf: 'center', width: 38, height: 5, borderRadius: 3, backgroundColor: '#C9CDD2' }} />
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Pressable onPress={() => setEtape(0)} accessibilityRole="button" hitSlop={8}>
-              <Text style={{ color: '#1A73E8', fontSize: 15, ...police('600') }}>Fermer</Text>
-            </Pressable>
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-                backgroundColor: '#FFFFFF',
-                borderRadius: 999,
-                paddingHorizontal: 12,
-                paddingVertical: 7,
-              }}
-            >
-              <Text style={{ fontSize: 12 }}>🔒</Text>
-              <Text numberOfLines={1} style={{ flex: 1, color: '#3C4043', fontSize: 13, ...police('500') }}>
-                Site officiel Parcoursup (simulation)
-              </Text>
-            </View>
-          </View>
-          <Text style={{ color: '#5F6368', fontSize: 11.5, textAlign: 'center', ...police('500') }}>
-            Navigateur du téléphone · vous n’êtes plus dans l’application
-          </Text>
-        </View>
-
-        <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
-          {etape === 1 && (
-            <>
-              <Titre t={t}>Connexion à votre dossier</Titre>
-              <Champ t={t} libelle="Numéro de dossier" valeur="1234567" />
-              <Champ t={t} libelle="Mot de passe" valeur="••••••••••" />
-              <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('400') }}>
-                Démonstration : identifiants fictifs déjà remplis.
-              </Text>
-              <Button label="Continuer" onPress={() => setEtape(2)} />
-            </>
-          )}
-
-          {etape === 2 && (
-            <>
-              <Titre t={t}>Code de vérification</Titre>
-              <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
-                Un code à 6 chiffres vient d’être envoyé à l’adresse mail de votre dossier.
-              </Text>
-              <Pressable
-                onPress={() => setCode(CODE)}
-                accessibilityRole="button"
-                accessibilityLabel={`Mail reçu : code ${CODE}. Toucher pour le recopier.`}
-                style={{ backgroundColor: t.info, borderRadius: 14, padding: 12, gap: 2 }}
-              >
-                <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>✉️ MAIL REÇU (FICTIF) · touchez pour recopier</Text>
-                <Text style={{ color: t.text, ...police('500') }}>
-                  Votre code de vérification : <Text style={police('800')}>482 913</Text>
-                </Text>
+        <Cible id="liaison-page" style={{ flex: 1 }}>
+          {/* Barre du navigateur */}
+          <View style={{ backgroundColor: '#F1F3F4', paddingTop: 8, paddingBottom: 10, paddingHorizontal: 14, gap: 8 }}>
+            <View style={{ alignSelf: 'center', width: 38, height: 5, borderRadius: 3, backgroundColor: '#C9CDD2' }} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Pressable onPress={() => setEtape(0)} accessibilityRole="button" hitSlop={8}>
+                <Text style={{ color: '#1A73E8', fontSize: 15, ...police('600') }}>Fermer</Text>
               </Pressable>
-              <Champ t={t} libelle="Code reçu par mail" valeur={code ? '482 913' : ''} indication="Touchez le mail ci-dessus" />
-              <Button label="Valider" onPress={() => setEtape(3)} disabled={code !== CODE} />
-            </>
-          )}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: 999,
+                  paddingHorizontal: 12,
+                  paddingVertical: 7,
+                }}
+              >
+                <Text style={{ fontSize: 12 }}>🔒</Text>
+                <Text numberOfLines={1} style={{ flex: 1, color: '#3C4043', fontSize: 13, ...police('500') }}>
+                  Site officiel Parcoursup (simulation)
+                </Text>
+              </View>
+            </View>
+            <Text style={{ color: '#5F6368', fontSize: 11.5, textAlign: 'center', ...police('500') }}>
+              Navigateur du téléphone · vous n’êtes plus dans l’application
+            </Text>
+          </View>
 
-          {etape === 3 && (
-            <>
-              <Titre t={t}>Autoriser l’application</Titre>
-              <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
-                L’application Parcours’app demande à consulter votre dossier.
-              </Text>
-              <Liste
-                t={t}
-                titre="Elle pourra voir"
-                signe="✓"
-                couleur={t.successDot}
-                elements={['vos vœux et leur statut', 'vos propositions et leurs dates limites', 'votre position en liste d’attente']}
-              />
-              <Liste
-                t={t}
-                titre="Elle ne pourra pas"
-                signe="✕"
-                couleur={t.danger}
-                elements={['répondre à une proposition ou modifier vos vœux', 'voir vos notes, bulletins ou données sensibles']}
-              />
-              <Button label="Autoriser la consultation" onPress={() => setEtape(4)} />
-              <Button label="Refuser" variant="secondary" onPress={() => setEtape(0)} />
-            </>
-          )}
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <View style={{ gap: 12 }}>
+              {etape === 1 && (
+                <>
+                  <Titre t={t}>Connexion à votre dossier</Titre>
+                  <Champ t={t} libelle="Numéro de dossier" valeur="1234567" />
+                  <Champ t={t} libelle="Mot de passe" valeur="••••••••••" />
+                  <Text style={{ color: t.textMuted, fontSize: 12.5, ...police('400') }}>
+                    Démonstration : identifiants fictifs déjà remplis.
+                  </Text>
+                  <Button label="Continuer" onPress={() => setEtape(2)} />
+                </>
+              )}
 
-          {navigateurOuvert && (
-            <Text style={{ color: t.textMuted, fontSize: 12.5, textAlign: 'center', ...police('400') }}>Étape {etape} sur 3</Text>
-          )}
-        </ScrollView>
+              {etape === 2 && (
+                <>
+                  <Titre t={t}>Code de vérification</Titre>
+                  <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
+                    Un code à 6 chiffres vient d’être envoyé à l’adresse mail de votre dossier.
+                  </Text>
+                  <Pressable
+                    onPress={() => setCode(CODE)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Mail reçu : code ${CODE}. Toucher pour le recopier.`}
+                    style={{ backgroundColor: t.info, borderRadius: 14, padding: 12, gap: 2 }}
+                  >
+                    <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>
+                      ✉️ MAIL REÇU (FICTIF) · touchez pour recopier
+                    </Text>
+                    <Text style={{ color: t.text, ...police('500') }}>
+                      Votre code de vérification : <Text style={police('800')}>482 913</Text>
+                    </Text>
+                  </Pressable>
+                  <Champ t={t} libelle="Code reçu par mail" valeur={code ? '482 913' : ''} indication="Touchez le mail ci-dessus" />
+                  <Button label="Valider" onPress={() => setEtape(3)} disabled={code !== CODE} />
+                </>
+              )}
+
+              {etape === 3 && (
+                <>
+                  <Titre t={t}>Autoriser l’application</Titre>
+                  <Text style={{ color: t.textMuted, lineHeight: 20, ...police('400') }}>
+                    L’application Parcours’app demande à consulter votre dossier.
+                  </Text>
+                  <Liste
+                    t={t}
+                    titre="Elle pourra voir"
+                    signe="✓"
+                    couleur={t.successDot}
+                    elements={['vos vœux et leur statut', 'vos propositions et leurs dates limites', 'votre position en liste d’attente']}
+                  />
+                  <Liste
+                    t={t}
+                    titre="Elle ne pourra pas"
+                    signe="✕"
+                    couleur={t.danger}
+                    elements={['répondre à une proposition ou modifier vos vœux', 'voir vos notes, bulletins ou données sensibles']}
+                  />
+                  <Button label="Autoriser la consultation" onPress={() => setEtape(4)} />
+                  <Button label="Refuser" variant="secondary" onPress={() => setEtape(0)} />
+                </>
+              )}
+
+              {navigateurOuvert && (
+                <Text style={{ color: t.textMuted, fontSize: 12.5, textAlign: 'center', ...police('400') }}>Étape {etape} sur 3</Text>
+              )}
+            </View>
+          </ScrollView>
+        </Cible>
       </Animated.View>
     </View>
   );

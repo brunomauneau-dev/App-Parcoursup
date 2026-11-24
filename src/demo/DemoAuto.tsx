@@ -51,8 +51,20 @@ const ETAPES: Etape[] = [
     route: '/connexion-simulee',
     cible: 'liaison-compte',
     legende:
-      'Voici Camille, en terminale comme toi. Mi-mai, elle télécharge l’appli et lie son compte Parcoursup : une seule fois, sur le site officiel. Suis-la !',
+      'Voici Camille, en terminale comme toi. Mi-mai, elle télécharge l’appli. Premier geste, une seule fois : lier son compte Parcoursup. Suis-la !',
     toucher: true,
+  },
+  {
+    route: { pathname: '/connexion-simulee', params: { etape: '1' } },
+    cible: 'liaison-page',
+    legende:
+      'Le navigateur du téléphone s’ouvre sur le site officiel. Elle y tape ses identifiants, puis le code reçu par mail, comme d’habitude. L’appli ne voit jamais son mot de passe.',
+  },
+  {
+    route: { pathname: '/connexion-simulee', params: { etape: '3' } },
+    cible: 'liaison-page',
+    legende:
+      'Dernière étape : elle voit ce que l’appli pourra consulter, et ce qu’elle ne pourra jamais faire. Elle autorise, et c’est fini.',
   },
   {
     jour: -2,
