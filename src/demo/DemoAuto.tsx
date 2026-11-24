@@ -45,10 +45,8 @@ interface Etape {
   notification?: boolean | string;
 }
 
-const VOEUX_PROPOSITIONS: Route = { pathname: '/dossier/voeux', params: { filtre: 'propositions' } };
-
 const ETAPES: Etape[] = [
-  // 1. Ouvrir l'application (dimanche)
+  // 1. En mai : lier son compte, puis rien à faire
   {
     route: '/connexion-simulee',
     cible: 'liaison-compte',
@@ -62,6 +60,7 @@ const ETAPES: Etape[] = [
     cible: 'accueil-carte',
     legende: 'C’est fait, en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille et la préviendra le jour J.',
   },
+  // 2. Le 1er juin : rien avant le site, puis une notification
   {
     jour: -1,
     route: '/dossier',
@@ -82,19 +81,7 @@ const ETAPES: Etape[] = [
     cible: 'accueil-echeance',
     legende: 'Elle ouvre l’appli : deux propositions l’attendent, avec le temps qu’il lui reste pour répondre.',
   },
-  {
-    jour: 0,
-    route: '/dossier',
-    cible: 'accueil-compteurs',
-    legende: 'Tout son dossier en trois chiffres : ses propositions, ses listes d’attente et ses refus.',
-  },
-  {
-    jour: 1,
-    route: '/dossier',
-    cible: 'accueil-compteurs',
-    legende:
-      'Le lendemain, elle a répondu sur le site : elle accepte la licence de maths, garde ses vœux en attente, et renonce au BTS. L’appli suit.',
-  },
+  // 3. Ne rien rater, et comprendre sa liste d'attente
   {
     jour: 4,
     route: '/dossier',
@@ -102,73 +89,28 @@ const ETAPES: Etape[] = [
     legende:
       'Samedi 5 juin. Le classement des vœux en attente est ouvert : jusqu’à lundi, elle doit les classer sur le site. L’appli le lui rappelle, avec un lien direct.',
   },
-  // 2. Comprendre sa liste d'attente
-  {
-    jour: 4,
-    route: '/dossier',
-    cible: 'accueil-attente-0',
-    legende: 'Son vœu de cœur, le BUT GEII ? En liste d’attente, 9e… et 12 places gagnées depuis hier. Ça avance !',
-    toucher: true,
-  },
   {
     jour: 4,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-jauge',
     legende:
-      'Ici, sa place : 9e. Plus que 8 candidats devant elle, et déjà 59 places gagnées depuis le début. La barre montre le chemin jusqu’à la 1re place.',
+      'Son vœu de cœur, le BUT GEII : 9e en liste d’attente. Plus que 8 candidats devant elle, et 12 places gagnées depuis hier. La barre montre le chemin jusqu’à la 1re place.',
   },
-  {
-    jour: 4,
-    route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
-    cible: 'detail-classement',
-    legende: 'Et là, son rang de classement : 240e. En 2026, le dernier appelé était 215e. Ça donne une idée, pas une promesse.',
-  },
-  // 3. Être prévenue (dimanche)
-  {
-    jour: 5,
-    route: '/dossier',
-    cible: 'notification',
-    notification: true,
-    legende: 'Dimanche matin, son dossier a été mis à jour : une notif la prévient, sans rien afficher de perso sur l’écran verrouillé.',
-  },
+  // 4. Être prévenue, puis répondre sur le site
   {
     jour: 5,
     route: '/dossier',
     cible: 'accueil-carte',
+    notification: true,
     legende:
-      'Bonne nouvelle : des places se sont libérées en BUT GEII ! Avec la prépa MPSI arrivée vendredi, deux nouvelles propositions l’attendent.',
-  },
-  // 4. Décider sereinement
-  {
-    jour: 5,
-    route: '/dossier',
-    cible: { onglet: 1 },
-    legende: 'Direction « Mes vœux » pour retrouver toutes ses propositions.',
-    toucher: true,
-  },
-  {
-    jour: 5,
-    route: VOEUX_PROPOSITIONS,
-    cible: 'voeu-v4',
-    legende: 'Pour chacune, la date limite est bien en vue. Difficile de passer à côté.',
-    toucher: true,
+      'Dimanche matin, une notif : des places se sont libérées en BUT GEII ! Elle avait accepté la licence de maths en gardant ses vœux en attente, et ça paie.',
   },
   {
     jour: 5,
     route: { pathname: '/dossier/[id]', params: { id: 'v4' } },
     cible: 'detail-repondre',
-    legende: 'Pour accepter ou refuser, elle passe par le site officiel : l’appli sert à consulter, donc zéro fausse manip possible.',
-  },
-  {
-    jour: 5,
-    route: '/dossier/messages',
-    cible: 'messages-0',
-    legende: 'Et tous les messages de son dossier au même endroit, les nouveaux marqués d’un point orange.',
-  },
-  {
-    jour: 5,
-    route: '/dossier',
-    legende: 'C’est tout ! À toi d’explorer, ou de recommencer la visite.',
+    legende:
+      'Pour accepter ou refuser, direction le site officiel : l’appli sert à consulter, donc zéro fausse manip. C’est tout ! À toi d’explorer, ou de recommencer.',
   },
 ];
 
