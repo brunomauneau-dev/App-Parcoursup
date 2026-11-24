@@ -50,9 +50,10 @@ const VOEUX_PROPOSITIONS: Route = { pathname: '/dossier/voeux', params: { filtre
 const ETAPES: Etape[] = [
   // 1. Ouvrir l'application (dimanche)
   {
-    route: '/connexion',
-    cible: 'connexion-demo',
-    legende: 'Voici Camille, en terminale comme toi. Elle suit son dossier Parcoursup depuis son téléphone. Suis-la !',
+    route: '/connexion-simulee',
+    cible: 'liaison-compte',
+    legende:
+      'Voici Camille, en terminale comme toi. Mi-mai, elle télécharge l’appli et lie son compte Parcoursup : une seule fois, sur le site officiel. Suis-la !',
     toucher: true,
   },
   {
@@ -60,7 +61,7 @@ const ETAPES: Etape[] = [
     route: '/dossier',
     cible: 'accueil-carte',
     legende:
-      'Mi-mai, elle a téléchargé l’appli et lié son compte en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille.',
+      'C’est fait, en une minute. Jusqu’au 1er juin, rien à faire : l’appli reste en veille et la préviendra le jour J.',
   },
   {
     jour: -1,
@@ -332,9 +333,9 @@ export function DemoAutoProvider({ children }: { children: ReactNode }) {
     const { router: r, session: s } = ctx.current;
     const etat = etatPrepare.current;
     if (e.jour == null) {
-      etatPrepare.current = {};
       await s.deconnexion();
-      r.replace('/connexion');
+      r.replace(e.route);
+      etatPrepare.current = { route: JSON.stringify(e.route) };
       return true;
     }
     if (s.statut !== 'connecte') {

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import { Button, Logo } from '../components/ui';
+import { Cible } from '../demo/DemoAuto';
 import { useSession } from '../session/SessionProvider';
 import { police, Theme, useTheme } from '../theme';
 
@@ -59,7 +60,9 @@ export function ConnexionSimuleeScreen() {
               Une seule fois · 1 minute · 3 étapes. Le navigateur de votre téléphone s’ouvre sur le site officiel de Parcoursup, puis vous
               revenez ici tout seul.
             </Text>
-            <Button label="Lier mon compte Parcoursup" onPress={() => setEtape(1)} />
+            <Cible id="liaison-compte">
+              <Button label="Lier mon compte Parcoursup" onPress={() => setEtape(1)} />
+            </Cible>
             <Pressable onPress={fermer} accessibilityRole="button" style={{ alignSelf: 'center', padding: 8 }}>
               <Text style={{ color: t.primary, fontSize: 14, ...police('600') }}>Annuler</Text>
             </Pressable>
