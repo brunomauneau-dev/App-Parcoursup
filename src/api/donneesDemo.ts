@@ -65,13 +65,17 @@ const VOEUX_CAMILLE: VoeuSource[] = [
     },
     rangs: [52, 31, 14, null, null, null, null, null],
     jourProposition: 3,
-    delaiReponse: 4,
+    delaiReponse: 3,
+    // Lundi 7 juin : elle choisit le BUT GEII et refuse la prépa
+    refuseeLeJour: 6,
   },
   {
     base: { id: 'v2', categorie: 'Licence', formation: 'Licence Mathématiques', etablissement: 'Université de Nantes', ville: 'Nantes' },
     jourProposition: 0,
     delaiReponse: 3,
     accepteeLeJour: 1,
+    // En acceptant le BUT GEII, elle renonce à la licence acceptée jusque-là
+    refuseeLeJour: 6,
   },
   {
     base: {
@@ -101,7 +105,8 @@ const VOEUX_CAMILLE: VoeuSource[] = [
     },
     rangs: [68, 49, 33, 21, 9, null, null, null],
     jourProposition: 5,
-    delaiReponse: 2,
+    delaiReponse: 3,
+    accepteeLeJour: 6,
   },
   {
     base: {
@@ -346,6 +351,8 @@ interface ProfilDemo {
   /** Coordonnées fictives, déjà masquées comme les renverrait l'API */
   coordonnees: { mail: string; telephone: string };
   voeux: VoeuSource[];
+  /** Jour où le candidat classe ses vœux en attente sur le site (plus de rappel ensuite) */
+  classementFaitLeJour?: number;
   /** Message d'un établissement, propre au profil */
   messageEtablissement?: { jour: number; titre: string };
 }
@@ -359,6 +366,7 @@ export const PROFILS_DEMO: ProfilDemo[] = [
     coordonnees: { mail: 'c•••@exemple.fr', telephone: '06 •• •• •• 12' },
     voeux: VOEUX_CAMILLE,
     messageEtablissement: { jour: 4, titre: 'IUT de Nantes : journée découverte le 19 juin' },
+    classementFaitLeJour: 6,
   },
   {
     id: 'yanis',
@@ -409,11 +417,12 @@ function construireVoeu(src: VoeuSource, jour: number): Voeu {
     if (r != null) v.rang = r;
   }
   if (src.jourProposition != null && jour >= src.jourProposition) {
+    // La réponse la plus récente l'emporte (une proposition acceptée puis lâchée pour une autre est refusée)
     v.statut =
-      src.accepteeLeJour != null && jour >= src.accepteeLeJour
-        ? 'proposition_acceptee'
-        : src.refuseeLeJour != null && jour >= src.refuseeLeJour
-          ? 'refusee_par_candidat'
+      src.refuseeLeJour != null && jour >= src.refuseeLeJour
+        ? 'refusee_par_candidat'
+        : src.accepteeLeJour != null && jour >= src.accepteeLeJour
+          ? 'proposition_acceptee'
           : 'proposition';
     v.dateProposition = dateDuJour(src.jourProposition, HEURE_MAJ.h, HEURE_MAJ.m).toISOString();
     v.dateLimiteReponse = dateDuJour(src.jourProposition + (src.delaiReponse ?? 2), 23, 59).toISOString();
@@ -430,6 +439,9 @@ function construireMessages(profil: ProfilDemo, jour: number): Message[] {
   for (const src of profil.voeux) {
     if (src.jourProposition != null) {
       ajouter(src.jourProposition, `m-prop-${src.base.id}`, 'proposition', `Proposition d’admission : ${src.base.formation}`);
+    }
+    if (src.accepteeLeJour != null) {
+      ajouter(src.accepteeLeJour, `m-acc-${src.base.id}`, 'admission', `Vous avez accepté : ${src.base.formation}`);
     }
   }
   if (profil.messageEtablissement) ajouter(profil.messageEtablissement.jour, 'm-etab', 'etablissement', profil.messageEtablissement.titre);
@@ -453,7 +465,11 @@ export function construireDossier(jour: number, debut: number, numeroDossier?: s
       { date: dateDuJour(39, 23, 59).toISOString(), libelle: 'Fin de la phase principale' },
     ],
     // Calendrier officiel 2027 : classement des vœux en attente du vendredi 4 au lundi 7 juin inclus
-    classementAttente: { debut: dateDuJour(3, 0).toISOString(), fin: dateDuJour(6, 23, 59).toISOString(), fait: false },
+    classementAttente: {
+      debut: dateDuJour(3, 0).toISOString(),
+      fin: dateDuJour(6, 23, 59).toISOString(),
+      fait: profil.classementFaitLeJour != null && jour >= profil.classementFaitLeJour,
+    },
     profilDemo: { id: profil.id, presentation: profil.presentation },
   };
 }

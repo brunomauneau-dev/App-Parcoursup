@@ -72,7 +72,8 @@ export function AccueilScreen(p: Props) {
   const prochaine = aRepondre[0];
   // Classement des vœux en attente (calendrier 2027 : du 4 au 7 juin), à faire sur le site
   const ca = dossier.classementAttente;
-  const classementOuvert = ca != null && attente.length > 0 && maintenant >= new Date(ca.debut) && maintenant <= new Date(ca.fin);
+  const classementOuvert =
+    ca != null && !ca.fait && attente.length > 0 && maintenant >= new Date(ca.debut) && maintenant <= new Date(ca.fin);
   // Aucune proposition (ni en attente de réponse, ni acceptée) : on présente les autres pistes
   const sansProposition = nbPropositions === 0;
   // ... et des listes d'attente bien au-delà du dernier appelé de l'an dernier : message adapté
