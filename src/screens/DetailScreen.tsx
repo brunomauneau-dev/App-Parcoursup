@@ -274,7 +274,8 @@ function ExplicationOuiSi({ accompagnement }: { accompagnement: string }) {
     <Card style={{ gap: 8, padding: 18 }}>
       <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>« Oui-si », ça veut dire quoi ?</Text>
       <Text style={{ color: t.text, fontSize: 15, lineHeight: 22, ...police('400') }}>
-        La formation vous accepte, avec un accompagnement pour vous aider à réussir : {accompagnement}.
+        La formation vous accepte, avec un accompagnement pour vous aider à réussir. Selon les formations, c’est par exemple une remise à
+        niveau, du tutorat ou une année aménagée. Pour vous : {accompagnement}.
       </Text>
       <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
         C’est une vraie proposition : vous y répondez comme aux autres, dans les mêmes délais. En l’acceptant, vous acceptez aussi

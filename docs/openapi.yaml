@@ -259,7 +259,7 @@ components:
           type: object
           description: Réponse « Oui-si » (surtout en licence) : admission avec un accompagnement pour réussir.
           properties:
-            accompagnement: { type: string, example: 'une première année en deux ans, avec des cours de remise à niveau' }
+            accompagnement: { type: string, example: 'une première année aménagée sur deux ans' }
         dateProposition: { type: string, format: date-time }
         dateLimiteReponse:
           type: string
