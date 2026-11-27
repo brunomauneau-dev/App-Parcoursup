@@ -257,7 +257,7 @@ components:
               rang: { type: [integer, 'null'] }
         ouiSi:
           type: boolean
-          description: Réponse « Oui-si » (surtout en licence) : admission avec un accompagnement pour réussir. Le détail reste sur le site.
+          description: Réponse « Oui-si » (surtout en licence) : admission avec un accompagnement pour réussir. Le détail de l'accompagnement est décrit dans la fiche de la formation.
         dateProposition: { type: string, format: date-time }
         dateLimiteReponse:
           type: string

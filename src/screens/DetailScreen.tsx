@@ -88,8 +88,8 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
           </Text>
           {voeu.ouiSi && (
             <Text style={corps}>
-              C’est un « Oui-si » : l’établissement vous précisera l’organisation de votre accompagnement. Le détail figure dans la
-              proposition, sur le site.
+              C’est un « Oui-si » : votre accompagnement est décrit dans la fiche de la formation, sur Parcoursup. L’établissement vous en
+              précisera l’organisation à l’inscription.
             </Text>
           )}
           <Text style={corps}>Pensez à consulter les modalités d’inscription administrative de l’établissement.</Text>
@@ -276,7 +276,7 @@ function ExplicationOuiSi() {
       <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>« Oui-si », ça veut dire quoi ?</Text>
       <Text style={{ color: t.text, fontSize: 15, lineHeight: 22, ...police('400') }}>
         La formation vous accepte, avec un accompagnement pour vous aider à réussir : par exemple une remise à niveau, du tutorat ou une
-        année aménagée. Le vôtre est précisé dans la proposition, sur le site.
+        année aménagée. Le vôtre est décrit dans la fiche de la formation, sur Parcoursup.
       </Text>
       <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
         C’est une vraie proposition : vous y répondez comme aux autres, dans les mêmes délais. En l’acceptant, vous acceptez aussi

@@ -41,7 +41,7 @@ export interface Voeu {
   /**
    * Réponse « Oui-si » (surtout en licence) : la formation accepte le candidat à condition qu'il
    * suive un accompagnement pour réussir (remise à niveau, parcours aménagé, tutorat…).
-   * Simple indicateur : le détail de l'accompagnement reste sur le site.
+   * Simple indicateur : le détail de l'accompagnement est décrit dans la fiche de la formation.
    */
   ouiSi?: boolean;
   /** Propositions */
