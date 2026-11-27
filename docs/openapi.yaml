@@ -256,10 +256,8 @@ components:
               date: { type: string, format: date-time }
               rang: { type: [integer, 'null'] }
         ouiSi:
-          type: object
-          description: Réponse « Oui-si » (surtout en licence) : admission avec un accompagnement pour réussir.
-          properties:
-            accompagnement: { type: string, example: 'une première année aménagée sur deux ans' }
+          type: boolean
+          description: Réponse « Oui-si » (surtout en licence) : admission avec un accompagnement pour réussir. Le détail reste sur le site.
         dateProposition: { type: string, format: date-time }
         dateLimiteReponse:
           type: string

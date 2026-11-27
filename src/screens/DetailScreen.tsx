@@ -59,7 +59,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
         </Text>
         <Text style={{ color: t.textMuted, fontSize: 16, ...police('400') }}>{voeu.etablissement}</Text>
         <View style={{ marginTop: 6 }}>
-          <StatutBadge statut={voeu.statut} ouiSi={voeu.ouiSi != null} />
+          <StatutBadge statut={voeu.statut} ouiSi={voeu.ouiSi === true} />
         </View>
       </View>
 
@@ -71,7 +71,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
             {voeu.etablissement} vous fait une proposition d’admission. Vous pouvez l’accepter tout en gardant vos vœux en attente : rien ne
             presse avant la date limite.
           </Text>
-          {voeu.ouiSi && <ExplicationOuiSi accompagnement={voeu.ouiSi.accompagnement} />}
+          {voeu.ouiSi && <ExplicationOuiSi />}
           <Echeance limite={voeu.dateLimiteReponse} maintenant={maintenant} />
           <Mention />
           <Cible id="detail-repondre">
@@ -88,7 +88,8 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
           </Text>
           {voeu.ouiSi && (
             <Text style={corps}>
-              Votre accompagnement : {voeu.ouiSi.accompagnement}. L’établissement vous en précisera l’organisation à l’inscription.
+              C’est un « Oui-si » : l’établissement vous précisera l’organisation de votre accompagnement. Le détail figure dans la
+              proposition, sur le site.
             </Text>
           )}
           <Text style={corps}>Pensez à consulter les modalités d’inscription administrative de l’établissement.</Text>
@@ -268,14 +269,14 @@ function Mention({ acceptee = false }: { acceptee?: boolean }) {
 }
 
 /** « Oui-si » : une vraie proposition, avec un accompagnement pour réussir. Expliqué sans jugement. */
-function ExplicationOuiSi({ accompagnement }: { accompagnement: string }) {
+function ExplicationOuiSi() {
   const t = useTheme();
   return (
     <Card style={{ gap: 8, padding: 18 }}>
       <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>« Oui-si », ça veut dire quoi ?</Text>
       <Text style={{ color: t.text, fontSize: 15, lineHeight: 22, ...police('400') }}>
-        La formation vous accepte, avec un accompagnement pour vous aider à réussir. Selon les formations, c’est par exemple une remise à
-        niveau, du tutorat ou une année aménagée. Pour vous : {accompagnement}.
+        La formation vous accepte, avec un accompagnement pour vous aider à réussir : par exemple une remise à niveau, du tutorat ou une
+        année aménagée. Le vôtre est précisé dans la proposition, sur le site.
       </Text>
       <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
         C’est une vraie proposition : vous y répondez comme aux autres, dans les mêmes délais. En l’acceptant, vous acceptez aussi

@@ -124,7 +124,7 @@ export function VoeuxScreen({
                   alignItems: 'center',
                 }}
               >
-                <StatutBadge statut={v.statut} ouiSi={v.ouiSi != null} />
+                <StatutBadge statut={v.statut} ouiSi={v.ouiSi === true} />
                 {v.statut === 'en_attente' && v.rang != null && (
                   <Text style={{ color: t.text, fontSize: 18, ...police('800') }}>
                     <Text style={{ color: t.textMuted, fontSize: 12, ...police('600') }}>Votre place </Text>

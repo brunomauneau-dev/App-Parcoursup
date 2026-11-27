@@ -237,7 +237,7 @@ const VOEUX_YANIS: VoeuSource[] = [
       formation: 'Licence Économie et gestion',
       etablissement: 'Université (fictive) de Bordeaux',
       ville: 'Bordeaux',
-      ouiSi: { accompagnement: 'une première année aménagée sur deux ans' },
+      ouiSi: true,
     },
     jourProposition: 0,
     delaiReponse: 3,
