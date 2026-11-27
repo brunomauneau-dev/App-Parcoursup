@@ -38,6 +38,11 @@ export interface Voeu {
   /** Rang de classement du dernier candidat ayant reçu une proposition lors de la session précédente */
   rangDernierAppeleAnneePrecedente?: number;
   historique?: PointHistorique[];
+  /**
+   * Réponse « Oui-si » (surtout en licence) : la formation accepte le candidat à condition qu'il
+   * suive un accompagnement pour réussir (remise à niveau, parcours aménagé, tutorat…).
+   */
+  ouiSi?: { accompagnement: string };
   /** Propositions */
   dateProposition?: string;
   dateLimiteReponse?: string;

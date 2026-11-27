@@ -59,7 +59,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
         </Text>
         <Text style={{ color: t.textMuted, fontSize: 16, ...police('400') }}>{voeu.etablissement}</Text>
         <View style={{ marginTop: 6 }}>
-          <StatutBadge statut={voeu.statut} />
+          <StatutBadge statut={voeu.statut} ouiSi={voeu.ouiSi != null} />
         </View>
       </View>
 
@@ -71,6 +71,7 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
             {voeu.etablissement} vous fait une proposition d’admission. Vous pouvez l’accepter tout en gardant vos vœux en attente : rien ne
             presse avant la date limite.
           </Text>
+          {voeu.ouiSi && <ExplicationOuiSi accompagnement={voeu.ouiSi.accompagnement} />}
           <Echeance limite={voeu.dateLimiteReponse} maintenant={maintenant} />
           <Mention />
           <Cible id="detail-repondre">
@@ -85,6 +86,11 @@ export function DetailScreen({ voeu, maintenant, onRetour }: { voeu: Voeu; maint
             Vous avez accepté cette proposition : votre place est réservée. Si vous acceptez une autre proposition plus tard, celle-ci sera
             libérée.
           </Text>
+          {voeu.ouiSi && (
+            <Text style={corps}>
+              Votre accompagnement : {voeu.ouiSi.accompagnement}. L’établissement vous en précisera l’organisation à l’inscription.
+            </Text>
+          )}
           <Text style={corps}>Pensez à consulter les modalités d’inscription administrative de l’établissement.</Text>
           <Mention acceptee />
           <BoutonRepondre label="Gérer ce vœu sur Parcoursup ↗" />
@@ -258,5 +264,22 @@ function Mention({ acceptee = false }: { acceptee?: boolean }) {
       titre="Pour répondre, direction le site officiel"
       texte="L’application sert à consulter. Accepter ou refuser se fait sur Parcoursup : le bouton ci-dessous vous y emmène."
     />
+  );
+}
+
+/** « Oui-si » : une vraie proposition, avec un accompagnement pour réussir. Expliqué sans jugement. */
+function ExplicationOuiSi({ accompagnement }: { accompagnement: string }) {
+  const t = useTheme();
+  return (
+    <Card style={{ gap: 8, padding: 18 }}>
+      <Text style={{ color: t.text, fontSize: 16, ...police('700') }}>« Oui-si », ça veut dire quoi ?</Text>
+      <Text style={{ color: t.text, fontSize: 15, lineHeight: 22, ...police('400') }}>
+        La formation vous accepte, avec un accompagnement pour vous aider à réussir : {accompagnement}.
+      </Text>
+      <Text style={{ color: t.textMuted, fontSize: 14.5, lineHeight: 21, ...police('400') }}>
+        C’est une vraie proposition : vous y répondez comme aux autres, dans les mêmes délais. En l’acceptant, vous acceptez aussi
+        l’accompagnement. Il est là pour vous aider, pas pour vous juger.
+      </Text>
+    </Card>
   );
 }

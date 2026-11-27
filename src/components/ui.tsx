@@ -85,7 +85,7 @@ export function couleursStatut(t: ReturnType<typeof useTheme>, statut: StatutVoe
   }[statut];
 }
 
-export function StatutBadge({ statut }: { statut: StatutVoeu }) {
+export function StatutBadge({ statut, ouiSi = false }: { statut: StatutVoeu; ouiSi?: boolean }) {
   const t = useTheme();
   const c = couleursStatut(t, statut);
   return (
@@ -98,7 +98,13 @@ export function StatutBadge({ statut }: { statut: StatutVoeu }) {
         paddingVertical: 4,
       }}
     >
-      <Text style={{ color: c.texte, fontSize: 12.5, ...police('700') }}>{LIBELLES[statut]}</Text>
+      <Text style={{ color: c.texte, fontSize: 12.5, ...police('700') }}>
+        {ouiSi && statut === 'proposition'
+          ? 'Proposition « Oui-si »'
+          : ouiSi && statut === 'proposition_acceptee'
+            ? 'Acceptée (Oui-si)'
+            : LIBELLES[statut]}
+      </Text>
     </View>
   );
 }

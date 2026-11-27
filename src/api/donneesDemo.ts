@@ -230,6 +230,20 @@ const VOEUX_YANIS: VoeuSource[] = [
     },
     refuse: true,
   },
+  {
+    base: {
+      id: 'y6',
+      categorie: 'Licence',
+      formation: 'Licence Économie et gestion',
+      etablissement: 'Université (fictive) de Bordeaux',
+      ville: 'Bordeaux',
+      ouiSi: { accompagnement: 'une première année en deux ans, avec des cours de remise à niveau et un tuteur' },
+    },
+    jourProposition: 0,
+    delaiReponse: 3,
+    // Il accepte le « Oui-si » en gardant ses BTS en attente
+    accepteeLeJour: 1,
+  },
 ];
 
 /** Inès : étudiante en réorientation. Une place déjà acceptée, un vœu encore en attente. */
